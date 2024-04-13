@@ -10,7 +10,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $DIR
 
-DATE=`date +%Y%m%d -d $1" day ago"`
+DATE=`date +%Y%m%d -d $2" day ago"`
 
 while [ $(cat lock.txt) != "FREE" ]
 do
