@@ -1,8 +1,14 @@
 ## R
 
+```bash
+sudo pacman -S r gcc-fortran
+```
+
 ```R
 install.packages(c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "rNOMADS", "assertthat"))
 ```
+
+Install locally for a specific user
 
 ## Bash
 
@@ -14,13 +20,22 @@ Use bash not zsh
 
 ## Wget
 
+## wgrib
+
 ## wgrib2
 
 ## Crontab
 
 Make a crontab !
+Run for a specific user (same as the one who installed R libs)
 
-## Tor
+## Torsocks
+
+```bash
+sudo pacman -S torsocks
+sudo systemctl enable tor.service
+sudo systemctl start tor.service
+```
 
 ## MKDIR DATA
 
