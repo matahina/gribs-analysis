@@ -1,7 +1,7 @@
 ## R
 
 ```bash
-sudo pacman -S r gcc-fortran gdal
+sudo pacman -S r gcc-fortran gdal pandoc-cli
 ```
 
 ```R
