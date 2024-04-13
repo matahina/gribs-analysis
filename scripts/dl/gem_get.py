@@ -15,7 +15,7 @@ if os.path.exists("name.txt"):
     os.remove("name.txt")
 
 f = open("dl.txt","w+")
-ff = open("dl.txt","w+")
+ff = open("name.txt","w+")
 
 for sc in range(1,21):
     for ech in range(0,385,6):
