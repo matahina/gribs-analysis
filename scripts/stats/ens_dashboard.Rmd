@@ -1,0 +1,1613 @@
+---
+title: 'Ensembles `r format(Sys.time(),"%Y-%m-%d %H:%M:%S")`'
+output: 
+  flexdashboard::flex_dashboard:
+    vertical_layout: fill
+    lightbox: true
+    theme: united
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+```
+
+```{r}
+library(lubridate)
+library(DescTools)
+library(spatstat.utils)
+library(scales)
+library(ggplot2)
+
+library(TSrepr)
+library(data.table)
+library(cluster)
+library(clusterCrit)
+library(zoo)
+library(RColorBrewer)
+
+library(stringr)
+library(reshape)
+library(ggpubr)
+library(gridExtra)
+
+library(attempt)
+
+norm <- read.csv("../../assets/norms/norm.csv", header=FALSE)
+norm_ncep <- read.csv("../../assets/norms/norm_ncep.csv")
+
+norms <- data.frame(
+  DATE = c(format(as.POSIXlt(norm_ncep$DATE, format= "%d/%m"), paste0(as.character(as.integer(substr(Sys.Date(),1,4))-1),"-%m-%d %H:%M:%S")),
+           format(as.POSIXlt(norm_ncep$DATE, format= "%d/%m"), paste0(as.character(as.integer(substr(Sys.Date(),1,4))+0),"-%m-%d %H:%M:%S"))),
+  Z500 = c(norm_ncep$Z500,norm_ncep$Z500),
+  T850 = c(norm_ncep$T850,norm_ncep$T850)
+)
+
+leaap = FALSE
+
+if (leap_year(as.integer(substr(Sys.Date(),1,4))-1)) {
+leaap = TRUE
+  nnorms <- rbind(norms[1:59,],c(format(as.POSIXlt("29/02", format= "%d/%m"), paste0(as.character(as.integer(substr(Sys.Date(),1,4))-1),"-%m-%d %H:%M:%S")),mean(as.numeric(nnorms[c(59:60),2])),mean(as.numeric(nnorms[c(59:60),3]))),norms[60:nrow(norms),])
+}
+if (leap_year(as.integer(substr(Sys.Date(),1,4))+0)) {
+leaap = TRUE
+  nnorms <- rbind(norms[1:424,],c(format(as.POSIXlt("29/02", format= "%d/%m"), paste0(as.character(as.integer(substr(Sys.Date(),1,4))+0),"-%m-%d %H:%M:%S")),mean(as.numeric(norms[c(424:425),2])),mean(as.numeric(norms[c(424:425),3]))),norms[425:nrow(norms),])
+}
+
+if (leaap == TRUE) {
+norms <- data.frame(
+  DATE = nnorms[,1],
+  Z500 = as.numeric(nnorms[,2]),
+  T850 = as.numeric(nnorms[,3])
+)
+}
+
+z500_cols <- read.csv("../../assets/norms/dam.csv", quote="'")
+
+t850_cols <- read.csv("../../assets/norms/temp.csv", quote="'")
+
+t2m_cols <- read.csv("../../assets/norms/t2m.csv", quote="'")
+
+pp_cols <- read.csv("../../assets/norms/pp.csv", quote="'")
+names(pp_cols) <- gsub('X', '', names(pp_cols))
+
+trans_axes <- function(orig) {
+  new <- (orig * 7 /3) -30
+  return(new)
+}
+
+trans_axes_tsol <- function(orig) {
+  new <- (orig * 7 /3) -20
+  return(new)
+}
+
+Modes <- function(x) {
+   x <- x[!is.na(x)]
+   ux <- unique(x)
+   tab <- tabulate(match(x, ux))
+   ux[tab == max(tab)]
+}
+
+mModes <- function(x) {
+   mean(Modes(x))
+}
+
+barwidth = 9
+
+get_data <- function(date, model) {
+  
+  if (file.exists(sprintf("../../data/%s/%s-%s.csv", model, model, date))) {
+    thetable <- read.csv(sprintf("../../data/%s/%s-%s.csv", model, model, date))
+  } else {
+    thetable <- as.data.frame(t(c(NA,NA,NA,NA,NA,NA)))
+  }
+    
+  names(thetable) <- c("runs","dates","geop","tempalt","tempsol","precs")
+  thetable$runs <- paste(toupper(model), thetable$runs)
+  return(thetable)
+}
+
+date_var <- Sys.Date() - 1
+```
+
+
+
+
+
+
+```{r}
+allruns <- get_data(str_replace_all(date_var, "-", ""),"gefs")
+allruns <- rbind(allruns, get_data(str_replace_all(date_var, "-", ""),"gem"))
+allruns <- rbind(allruns, get_data(str_replace_all(date_var, "-", ""),"fnmoc"))
+# GEFS.00z.z500 <- get_data("Data/%s/GEFS-00z-z500.csv.gz", yesterday)
+# GEFS.06z.z500 <- get_data("Data/%s/GEFS-06z-z500.csv.gz", yesterday)
+# GEFS.12z.z500 <- get_data("Data/%s/GEFS-12z-z500.csv.gz", yesterday)
+# GEFS.18z.z500 <- get_data("Data/%s/GEFS-18z-z500.csv.gz", yesterday)
+# GEM.00z.z500 <- get_data("Data/%s/GEM-00z-z500.csv.gz", yesterday)
+# GEM.12z.z500 <- get_data("Data/%s/GEM-12z-z500.csv.gz", yesterday)
+# NOGAPS.00z.z500 <- get_data("Data/%s/NOGAPS-00z-z500.csv.gz", yesterday)
+# NOGAPS.12z.z500 <- get_data("Data/%s/NOGAPS-12z-z500.csv.gz", yesterday)
+# 
+# z500_unif <- rbind(GEFS.00z.z500,GEFS.06z.z500,GEFS.12z.z500,GEFS.18z.z500,
+#               GEM.00z.z500,GEM.12z.z500,
+#               NOGAPS.00z.z500,NOGAPS.12z.z500)
+# 
+# z500_unif <- z500_unif[rowSums(is.na(z500_unif)) != ncol(z500_unif), ]
+# z500_unif <- z500_unif[which(z500_unif$variable>toString(format(sysdate,"%Y-%m-%d"))),]
+# 
+# GEFS.00z.t850 <- get_data("Data/%s/GEFS-00z-t850.csv.gz", yesterday)
+# GEFS.06z.t850 <- get_data("Data/%s/GEFS-06z-t850.csv.gz", yesterday)
+# GEFS.12z.t850 <- get_data("Data/%s/GEFS-12z-t850.csv.gz", yesterday)
+# GEFS.18z.t850 <- get_data("Data/%s/GEFS-18z-t850.csv.gz", yesterday)
+# GEM.00z.t850 <- get_data("Data/%s/GEM-00z-t850.csv.gz", yesterday)
+# GEM.12z.t850 <- get_data("Data/%s/GEM-12z-t850.csv.gz", yesterday)
+# NOGAPS.00z.t850 <- get_data("Data/%s/NOGAPS-00z-t850.csv.gz", yesterday)
+# NOGAPS.12z.t850 <- get_data("Data/%s/NOGAPS-12z-t850.csv.gz", yesterday)
+# 
+# t850_unif <- rbind(GEFS.00z.t850,GEFS.06z.t850,GEFS.12z.t850,GEFS.18z.t850,
+#               GEM.00z.t850,GEM.12z.t850,
+#               NOGAPS.00z.t850,NOGAPS.12z.t850)
+# 
+# t850_unif <- t850_unif[rowSums(is.na(t850_unif)) != ncol(t850_unif), ]
+# t850_unif <- t850_unif[which(t850_unif$variable>toString(format(sysdate,"%Y-%m-%d"))),]
+# 
+# GEFS.00z.pp <- get_data("Data/%s/GEFS-00z-pp.csv.gz", yesterday)
+# GEFS.06z.pp <- get_data("Data/%s/GEFS-06z-pp.csv.gz", yesterday)
+# GEFS.12z.pp <- get_data("Data/%s/GEFS-12z-pp.csv.gz", yesterday)
+# GEFS.18z.pp <- get_data("Data/%s/GEFS-18z-pp.csv.gz", yesterday)
+# GEM.00z.pp <- get_data("Data/%s/GEM-00z-pp.csv.gz", yesterday)
+# GEM.12z.pp <- get_data("Data/%s/GEM-12z-pp.csv.gz", yesterday)
+# NOGAPS.00z.pp <- get_data("Data/%s/NOGAPS-00z-pp.csv.gz", yesterday)
+# NOGAPS.12z.pp <- get_data("Data/%s/NOGAPS-12z-pp.csv.gz", yesterday)
+# 
+# 
+# pp_unif <- rbind(GEFS.00z.pp,GEFS.06z.pp,GEFS.12z.pp,GEFS.18z.pp,
+#               GEM.00z.pp,GEM.12z.pp,
+#               NOGAPS.00z.pp,NOGAPS.12z.pp)
+# 
+# pp_unif <- pp_unif[rowSums(is.na(pp_unif)) != ncol(pp_unif), ]
+# pp_unif <- pp_unif[which(pp_unif$variable>toString(format(sysdate,"%Y-%m-%d"))),]
+# 
+# 
+if (length(allruns[is.na(allruns)]) != 0) {
+  allruns <- allruns[complete.cases(allruns[,-5]),]
+}
+
+allruns <- allruns[order(allruns$dates),]
+
+# the_dates <- sort(unique(c(z500_unif$variable,t850_unif$variable,pp_unif$variable)))
+# 
+# the_dates <- the_dates[(the_dates>toString(format(sysdate,"%Y-%m-%d")))]
+
+the_dates <- sort(unique(allruns$dates))
+
+the_dates <- the_dates[(the_dates>toString(format(date_var+1,"%Y-%m-%d")))]
+```
+
+
+
+
+
+
+
+```{r}
+library(dplyr)
+pp_unif <- allruns[,c(1,2,6)]
+names(pp_unif) <- c("runs","variable","value")
+
+maps_limits <- c(as.character(seq(0,0.9,0.1)), as.character(seq(1,100)))
+
+pp_unif$value[which(pp_unif$value < 1)] <- round(pp_unif$value[which(pp_unif$value < 1)],1)
+pp_unif$value[which(pp_unif$value > 1)] <- round_any(pp_unif$value[which(pp_unif$value > 1)],1)
+pp_unif$value[which(pp_unif$value > 30)] <- 30
+
+# pp_unif$value[which(pp_unif$value <= 0.1)] <- 0
+# pp_unif$value[which(pp_unif$value < 0.2 & pp_unif$value >= 0.1)] <- 0.1
+# pp_unif$value[which(pp_unif$value < 0.5 & pp_unif$value >= 0.2)] <- 0.2
+# pp_unif$value[which(pp_unif$value < 1 & pp_unif$value >= 0.5)] <- 0.5
+# pp_unif$value[which(pp_unif$value < 2 & pp_unif$value >= 1)] <- 1
+# pp_unif$value[which(pp_unif$value < 5 & pp_unif$value >= 2)] <- 2
+# pp_unif$value[which(pp_unif$value < 10 & pp_unif$value >= 5)] <- 5
+# pp_unif$value[which(pp_unif$value < 12 & pp_unif$value >= 10)] <- 10
+# pp_unif$value[which(pp_unif$value < 20 & pp_unif$value >= 12)] <- 12
+# pp_unif$value[which(pp_unif$value < 25 & pp_unif$value >= 20)] <- 20
+# pp_unif$value[which(pp_unif$value < 30 & pp_unif$value >= 25)] <- 25
+# pp_unif$value[which(pp_unif$value < 35 & pp_unif$value >= 30)] <- 30
+# pp_unif$value[which(pp_unif$value < 40 & pp_unif$value >= 35)] <- 35
+# pp_unif$value[which(pp_unif$value < 45 & pp_unif$value >= 40)] <- 40
+# pp_unif$value[which(pp_unif$value < 50 & pp_unif$value >= 45)] <- 45
+# pp_unif$value[which(pp_unif$value < 55 & pp_unif$value >= 50)] <- 50
+# pp_unif$value[which(pp_unif$value >= 55)] <- 55
+
+pp_props_all <- prop.table(table( pp_unif[,"variable"], pp_unif[,"value"]), margin =1)
+manquants <- maps_limits[which(is.na(match(maps_limits, colnames(pp_props_all))))]
+if (length( manquants  > 0 )) {
+  for (var in manquants) {
+    pp_props_all <- cbind(pp_props_all,rep(0,nrow(pp_props_all)))
+    colnames(pp_props_all)[length(colnames(pp_props_all))] <- var
+  }  
+  
+}
+pp_props_all <- pp_props_all[,as.character(maps_limits)]
+pp_probs_all = t(apply(pp_props_all, 1, revcumsum))
+colnames(pp_probs_all) <- colnames(pp_props_all)
+pp_probs_all <- as.data.frame.matrix(pp_probs_all)
+pp_probs_all[,1] <- row.names(pp_probs_all)
+pp_probs_all <- pp_probs_all[,as.character(maps_limits)]
+names(pp_probs_all) <- paste(rep("V",110),seq(1,110),sep="")
+# pp_probs_all[pp_probs_all < 0.05] <- 0
+
+
+
+
+pp_props_gefs <- prop.table(table( pp_unif[which(grepl("GEFS",pp_unif$runs)),"variable"], pp_unif[which(grepl("GEFS",pp_unif$runs)),"value"]), margin =1)
+
+########## ????????????? ############
+pp_props_gefs[which(is.na(pp_props_gefs))] = 0
+
+manquants <- maps_limits[which(is.na(match(maps_limits, colnames(pp_props_gefs))))]
+if (length( manquants  > 0 )) {
+  for (var in manquants) {
+    pp_props_gefs <- cbind(pp_props_gefs,rep(0,nrow(pp_props_gefs)))
+    colnames(pp_props_gefs)[length(colnames(pp_props_gefs))] <- var
+  }  
+  
+}
+pp_props_gefs <- pp_props_gefs[,as.character(maps_limits)]
+
+
+pp_probs_gefs = t(apply(pp_props_gefs, 1, revcumsum))
+colnames(pp_probs_gefs) <- colnames(pp_props_gefs)
+pp_probs_gefs <- as.data.frame.matrix(pp_probs_gefs)
+
+
+
+
+if (length(the_dates) != length(pp_props_gefs[,1])) {
+  
+pp_probs_gefs[,1] <-   sort(unique(c(pp_unif$variable[grepl("GEFS",pp_unif$runs)])))
+} else {
+pp_probs_gefs[,1] <- the_dates
+}
+# pp_probs_gefs[pp_probs_gefs < 0.05] <- 0
+
+pp_probs_gefs <- pp_probs_gefs[,as.character(maps_limits)]
+names(pp_probs_gefs) <- paste(rep("V",110),seq(1,110),sep="")
+
+
+```
+
+
+
+
+```{r}
+
+plotruns <- allruns[,c(1,2,3,4,5)]
+plotruns$geop <- round_any(plotruns$geop,0.1)
+plotruns$tempalt <- round_any(plotruns$tempalt,0.1)
+plotruns$tempsol <- round_any(plotruns$tempsol,0.1)
+
+
+plotruns <- plotruns[which(plotruns$dates >= the_dates[1]),]
+plotruns <- plotruns[which(plotruns$dates <= tail(the_dates[which(the_dates < as.POSIXct(the_dates[1])+days(14))],1)),]
+
+pp_probs_all <- pp_probs_all[which(row.names(pp_probs_all) >= the_dates[1]),]
+pp_probs_all <- pp_probs_all[which(row.names(pp_probs_all) <= tail(the_dates[which(the_dates < as.POSIXct(the_dates[1])+days(14))],1)),]
+
+
+pp_probs_gefs <- pp_probs_gefs[which(row.names(pp_probs_gefs) >= the_dates[1]),]
+pp_probs_gefs <- pp_probs_gefs[which(row.names(pp_probs_gefs) <= tail(the_dates[which(the_dates < as.POSIXct(the_dates[1])+days(14))],1)),]
+
+
+## Z500
+
+
+plot_z500all <- ggplot(plotruns, aes(dates, geop)) + geom_count(aes(size = ..prop.., alpha = ..prop.., colour = geop)) +
+          scale_colour_gradientn(colours = unname(unlist(z500_cols)), limits=c(492,608)) +
+  # scale_size_area(max_size = 3.5, limits = c(0.125,1))+
+  scale_alpha() + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
+  scale_y_continuous(expand = c(0, 0),breaks = seq(480,620,20), labels = seq(480,620,20), limits =c(480,620)
+                     ,sec.axis = sec_axis(~ . ,breaks = seq(480,620,20), labels = seq(480,620,20))
+                     ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",Sys.Date()-1)) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=Z500, group=1), color="gray")
+
+
+plot_z500gefs <- ggplot(plotruns[which(grepl("GEFS",plotruns$runs)),], aes(dates, geop)) + geom_count(aes(size = ..prop.., alpha = ..prop.., colour = geop)) +
+          scale_colour_gradientn(colours = unname(unlist(z500_cols)), limits=c(492,608)) +
+  # scale_size_area(max_size = 3.5, limits = c(0.125,1))+
+  scale_alpha() + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
+  scale_y_continuous(expand = c(0, 0),breaks = seq(480,620,20), labels = seq(480,620,20), limits =c(480,620)
+                     ,sec.axis = sec_axis(~ . ,breaks = seq(480,620,20), labels = seq(480,620,20))
+                     ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z  %s",Sys.Date()-1)) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=Z500, group=1), color="gray")
+
+
+
+## T850 + PP
+
+plot_t850all <- ggplot(plotruns, aes(dates, tempalt)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
+  scale_y_continuous(expand = c(0, 0),breaks = seq(-30,40,10), labels = seq(-30,40,10), limits= c(-30,40)
+                     ,sec.axis = sec_axis(~ +(.+30)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
+                     ) + ggtitle(sprintf("T850 + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",Sys.Date()-1)) 
+idx <- 110
+for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+  plot_t850all <- plot_t850all +
+    geom_segment(data = pp_probs_all, aes_string(x="V1", y=trans_axes(precip), xend = "V1", yend = -30), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
+  idx <- idx -1
+}
+plot_t850all <- plot_t850all +
+geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempalt)) +
+          scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits=c(-26,32)) +
+  # scale_size_area(max_size = 3.5, limits = c(0.175,1))+
+  scale_alpha() + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=T850, group=1), color="gray") 
+
+
+plot_t850gefs <- ggplot(plotruns[which(grepl("GEFS",plotruns$runs)),], aes(dates, tempalt)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
+  scale_y_continuous(expand = c(0, 0),breaks = seq(-30,40,10), labels = seq(-30,40,10), limits= c(-30,40)
+                     ,sec.axis = sec_axis(~ +(.+30)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
+                     ) + ggtitle(sprintf("T850 + PP _ ENS GEFS 00z06z12z18z  %s",Sys.Date()-1))
+                     
+    idx <- 110
+for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+  plot_t850gefs <- plot_t850gefs +
+    geom_segment(data = pp_probs_gefs, aes_string(x="V1", y=trans_axes(precip), xend = "V1", yend = -30), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
+  idx <- idx -1
+}
+plot_t850gefs <- plot_t850gefs +  
+geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempalt)) +
+          scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits=c(-26,32)) +
+  # scale_size_area(max_size = 3.5, limits = c(0.175,1))+
+  scale_alpha() +  geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=T850, group=1), color="gray")
+```
+
+```{r}
+
+norms_tsol <- data.frame(date = as.POSIXlt(c(norm$V1,norm$V3), format="%d/%m %H:%M"), tsol = c(norm$V2,norm$V4))
+norms_tsol_data <- norms_tsol[which(norms_tsol$date > the_dates[1]),][which(norms_tsol[which(norms_tsol$date > the_dates[1]),"date"] < as.POSIXct(the_dates[1])+days(14)),]
+
+norms_tsol_data$date <- str_replace_all( format(norms_tsol_data$date, "%Y-%m-%d %H:%M:%S"), "07:00", "06:00")
+
+norms_tsol_data$date <- str_replace_all(norms_tsol_data$date, "15:00", "18:00")
+
+## T2M + PP
+
+plot_t2mall <- ggplot(plotruns, aes(dates, tempsol)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
+  scale_y_continuous(expand = c(0, 0),breaks = seq(-20,50,10), labels = seq(-20,50,10), limits= c(-20,50)
+                     ,sec.axis = sec_axis(~ +(.+20)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
+                     ) + ggtitle(sprintf("T2M + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",Sys.Date()-1)) 
+idx <- 110
+for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+  plot_t2mall <- plot_t2mall +
+    geom_segment(data = pp_probs_all, aes_string(x="V1", y=trans_axes_tsol(precip), xend = "V1", yend = -20), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
+  idx <- idx -1
+}
+plot_t2mall <- plot_t2mall  + geom_hline(yintercept=0, linetype="dotted", color = "#3c3c3c")  + geom_hline(yintercept=30, linetype="dotted", color = "#3c3c3c")+
+geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempsol)) +
+          scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits=c(-16,50)) +
+  # scale_size_area(max_size = 3.5, limits = c(0.175,1))+
+  scale_alpha() + geom_line(data=norms_tsol_data,
+                             aes(x=date, y=tsol, group=1), color="gray")
+
+
+
+
+
+
+plot_t2mgefs <- ggplot(plotruns[which(grepl("GEFS",plotruns$runs)),], aes(dates, tempsol)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
+  scale_y_continuous(expand = c(0, 0),breaks = seq(-20,50,10), labels = seq(-20,50,10), limits= c(-20,50)
+                     ,sec.axis = sec_axis(~ +(.+20)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
+                     ) + ggtitle(sprintf("T2M + PP _ ENS GEFS 00z06z12z18z  %s",Sys.Date()-1))
+                     
+    idx <- 110
+for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+  plot_t2mgefs <- plot_t2mgefs +
+    geom_segment(data = pp_probs_gefs, aes_string(x="V1", y=trans_axes_tsol(precip), xend = "V1", yend = -20), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
+  idx <- idx -1
+}
+    
+
+plot_t2mgefs <- plot_t2mgefs  + geom_hline(yintercept=0, linetype="dotted", color = "#3c3c3c")  + geom_hline(yintercept=30, linetype="dotted", color = "#3c3c3c")+  
+geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempsol)) +
+          scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits=c(-16,50)) +
+  scale_alpha() +  geom_line(data=norms_tsol_data,
+                             aes(x=date, y=tsol, group=1), color="gray")
+```
+
+# z500/t850 {data-navmenu="Diagrammes Probabilistes"}
+
+## GEFS - GEM - FNMOC 
+
+### GEFS - GEM - FNMOC > z500
+
+```{r fig.width=10, fig.height=5}
+
+plot_z500all
+```
+
+### GEFS - GEM - FNMOC > t850 + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t850all
+```
+
+## GEFS
+
+### GEFS > z500
+
+```{r fig.width=10, fig.height=5}
+
+plot_z500gefs
+```
+
+
+
+### GEFS > t850 + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t850gefs
+```
+
+
+
+# t850/t2m {data-navmenu="Diagrammes Probabilistes"}
+
+## GEFS - GEM - FNMOC 
+
+### GEFS - GEM - FNMOC > t850 + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t850all
+```
+
+### GEFS - GEM - FNMOC > t2m + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t2mall
+```
+
+## GEFS
+
+### GEFS > t850 + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t850gefs
+```
+
+
+
+### GEFS > t2m + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t2mgefs
+```
+
+
+1
+
+
+
+
+# z500/t2m {data-navmenu="Diagrammes Probabilistes"}
+
+## GEFS - GEM - FNMOC 
+
+### GEFS - GEM - FNMOC > z500
+
+```{r fig.width=10, fig.height=5}
+
+plot_z500all
+```
+
+### GEFS - GEM - FNMOC > t2m + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t2mall
+```
+
+## GEFS
+
+### GEFS > z500
+
+```{r fig.width=10, fig.height=5}
+
+plot_z500gefs
+```
+
+
+
+### GEFS > t2m + PP
+
+```{r fig.width=10, fig.height=5}
+
+plot_t2mgefs
+```
+
+
+
+
+
+
+
+
+
+```{r, echo=F, warning=F, error=F, message=F, results="hide"}
+pdf(sprintf("../../data/gefs/ens_unif-%s.pdf",str_replace_all(date_var, "-", "")),height=18,width=16)
+grid.arrange(plot_z500all,plot_z500gefs,plot_t850all,plot_t850gefs,plot_t2mall,plot_t2mgefs)
+dev.off()
+```
+
+
+
+# Clusters z500
+
+```{r}
+z500_unif <- allruns[,c(1:3)]
+z500_unif <- z500_unif[which(z500_unif$dates >= the_dates[1]),]
+
+z500_scens <- cast(na.omit(z500_unif), runs ~ dates)
+
+rownames(z500_scens) <- z500_scens$runs
+
+for (row in 1:nrow(z500_scens)) {
+  z500_scens[row,2:(ncol(z500_scens)-3)] <- na.approx(unlist(z500_scens[row,2:(ncol(z500_scens)-3)]), na.rm = FALSE)
+}
+
+
+limit <- 0
+
+if (length(  which(is.na(z500_scens[2]))  ) > 0) {
+  z500_scens <- z500_scens[-c(    which(is.na(z500_scens[2]))     ),]
+}
+
+if (length(which(rowSums(is.na(z500_scens[,2:ncol(z500_scens)])) == ncol(z500_scens)-1)) > 0) {
+  z500_scens <- z500_scens[-c(    which(rowSums(is.na(z500_scens[,2:ncol(z500_scens)])) == ncol(z500_scens)-1)     ),]
+}
+
+ if ( length(which(rowSums(is.na(z500_scens[,2:(ncol(z500_scens)-3)])) > 2 )) > 0) {
+   if (nrow(z500_scens[,2:(ncol(z500_scens)-3)]) != nrow(z500_scens[-c(which(rowSums(is.na(z500_scens[,2:(ncol(z500_scens)-3)])) > 2 )),2:(ncol(z500_scens)-3)])) {
+     z500_scens <- z500_scens[-c(which(rowSums(is.na(z500_scens[,2:(ncol(z500_scens)-3)])) > 2 )),]
+   } else {
+  z500_scens[,2:(ncol(z500_scens)-3)] <-
+    z500_scens[-c(which(rowSums(is.na(z500_scens[,2:(ncol(z500_scens)-3)])) > 2 )),2:(ncol(z500_scens)-3)]
+   }
+ }
+
+for (i in seq(ncol(z500_scens) - 1,1) ) {
+  if ( length( which(rowSums(is.na(z500_scens[,seq(i,ncol(z500_scens))])*1) == ncol(z500_scens)-i+1) ) == 0 ) {
+  limit <- i
+  break
+  }
+}
+
+z500_scens <- na.omit(z500_scens[,1:limit])
+
+```
+
+
+
+
+```{r}
+
+
+  z500x <- repr_matrix(z500_scens[,-c(1)], func = repr_featrend,
+                       args = list(func=maxC, pieces = 8, order = 12),
+                       normalise = TRUE, func_norm = norm_z)
+
+
+
+
+
+
+    clusterings <- lapply(c(2:8), function(x)
+    clara(z500x, x))
+
+     DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(z500x, as.integer(clusterings[[x]]$clustering),
+                    c("Davies_Bouldin")))
+
+
+  criteriaDB <- unlist(unname(DB_values))
+  names(criteriaDB) <- seq(1, length(criteriaDB))
+
+       DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(z500x, as.integer(clusterings[[x]]$clustering),
+                    c("Dunn")))
+
+
+  criteriaD <- unlist(unname(DB_values))
+  names(criteriaD) <- seq(1, length(criteriaD))
+
+       DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(z500x, as.integer(clusterings[[x]]$clustering),
+                    c("Calinski_Harabasz")))
+
+
+  criteriaCH <- unlist(unname(DB_values))
+  names(criteriaCH) <- seq(1, length(criteriaCH))
+
+  # names(sort(criteriaDB)) ; names(sort(criteriaCH, decreasing = T)) ; names(sort(criteriaD , decreasing = T))
+
+  score <- rep(0,length(criteriaDB))
+  score[as.integer(names(sort(criteriaDB)))] <- score + seq(length(criteriaDB),1)
+  score[as.integer(names(sort(criteriaCH, decreasing = T)))] <- score + seq(length(criteriaDB),1)
+  score[as.integer(names(sort(criteriaD, decreasing = T)))] <- score + seq(length(criteriaDB),1)
+  names(score) <- seq(2, length(criteriaCH)+1)
+
+#   not_found <- TRUE
+#   fall <- FALSE
+#   i <- 1
+#   numb <- length(criteria)
+#   while (not_found & i<length(criteria))
+#   {
+#     if (criteria[i]-criteria[i+1]>0.03)
+#     {
+#       fall <- TRUE
+#     }
+#     # else if (fall & (criteria[i]-min(criteria)) > ((max(criteria) - min(criteria)) / 4))
+#     #   {
+#     #       fall <- FALSE
+#     #   }
+#     else if (fall)
+#     {
+#       numb <- i+1
+#       not_found <- FALSE
+#     }
+#     else if (i == 1)
+#     {
+#       numb <- i+1
+#       not_found <- FALSE
+#     }
+#     i <- i + 1
+#   }
+#
+#   if (!is.na(which(criteria==0)[1]) && not_found) {
+#     numb <- which(criteria==0)[1]
+#   }
+#
+#   diffs <- (c(NA,criteria)-criteria[1]) /(seq(1:(length(criteria)+1))^2)
+#   diffs[which(abs(diffs) < 0.01  & diffs != 0)] <- NA
+#   numb <- which.min(diffs)
+# numb <- 4
+
+  numb <- as.numeric(names(sort(score, decreasing = T)))[1]
+```
+
+
+
+
+```{r}
+
+
+  myplots_za <- list()
+
+  ordre <- clusterings[[numb-1]]$clusinfo[,1]
+  names(ordre) <- seq(1,length(ordre))
+
+  for (clust in seq(1,8)) {
+    myplots_za[[clust]] <- ggplot()
+if (clust <= numb) {
+
+
+      elems <- which(clusterings[[numb-1]]$clustering == as.integer(names(sort(ordre, decreasing = T))[clust]))
+
+
+     the_data <- melt(as.data.frame(z500_scens[elems,]), id = c("runs"))
+
+     the_data$ID<- the_data$runs
+
+
+
+     stats <- data.frame(
+       DATE = unique(the_data$variable),
+     #   q25 = unname(unlist(lapply(z500_scens[elems,-c(1,2)],quantile,probs = 1/4))),
+     # med = unname(unlist(lapply(z500_scens[elems,-c(1,2)],median))),
+     # q75 = unname(unlist(lapply(z500_scens[elems,-c(1,2)],quantile,probs = 3/4)))
+       q25 = unname(unlist(lapply(z500_scens[elems,-c(1)],mean))) - unname(unlist(lapply(z500_scens[elems,-c(1)],sd))),
+     med = unname(unlist(lapply(z500_scens[elems,-c(1)],mean))),
+     q75 = unname(unlist(lapply(z500_scens[elems,-c(1)],mean))) + unname(unlist(lapply(z500_scens[elems,-c(1)],sd)))
+     )
+
+ myplots_za[[clust]] <-   ggplot(stats, aes(x=DATE)) +
+        geom_line(data = the_data, aes(x=variable, y=value,group = ID),alpha = 0.80, size = 0.8 , color="grey30") +
+  geom_ribbon(aes(ymin = q25, ymax = q75, group=1),alpha = 0.60, fill = "grey70") +
+       geom_line(aes(y=med,group = 1),alpha = 0.80, size = 0.8, color="red") +
+       theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates),4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates),4)]),"%d %b")) + scale_y_continuous(expand = c(0, 0),breaks = seq(480,620,20), labels = seq(480,620,20), limits =c(480,620)) +
+       ggtitle(sprintf("Cluster %s (%s scénarios sur %s)", clust, length(elems), nrow(z500_scens))) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+15),], aes(x=DATE, y=Z500, group=1), color="white",linetype = "dashed")
+
+}
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+## Col1
+
+### z500 > Cluster 1
+
+```{r}
+ myplots_za[[1]]
+```
+
+
+### z500 > Cluster 2
+
+```{r}
+ myplots_za[[2]]
+```
+
+## Col2
+
+### z500 > Cluster 3
+
+```{r}
+ myplots_za[[3]]
+```
+
+
+
+
+### z500 > Cluster 4
+
+```{r}
+ myplots_za[[4]]
+```
+
+## Col3
+
+
+### z500 > Cluster 5
+
+```{r}
+ myplots_za[[5]]
+```
+
+
+### z500 > Cluster 6
+
+```{r}
+ myplots_za[[6]]
+```
+
+
+
+## Col4
+
+### z500 > Cluster 7
+
+```{r}
+ myplots_za[[7]]
+```
+
+
+### z500 > Cluster 8
+
+```{r}
+ myplots_za[[8]]
+```
+
+
+
+## Col5
+
+### HeatMap
+
+```{r}
+ze <- c(
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep="")
+)
+ze_s <- c(
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("06z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  rep("",20*2),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("18z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  rep("",20*2)
+)
+
+cl <- rep(NA,20*8+30*4)
+
+for (clust in seq(1,numb)) {
+  elems <- which(clusterings[[numb-1]]$clustering == as.integer(names(sort(ordre, decreasing = T))[clust]))
+  cl[match(row.names(z500_scens[elems,]),ze)] <- clust
+}
+
+map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
+
+a <- ggplot( map[which(str_detect(map[,1], "GEFS")),], aes(x=1, y=rev(SCENS)) ) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "GEFS"))])) + ggtitle("GEFS")
+
+b <- ggplot( map[which(str_detect(map[,1], "GEM")),], aes(x=1, y=rev(SCENS))) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "GEM"))])) + ggtitle("GEM")
+
+c <- ggplot( map[which(str_detect(map[,1], "FNMOC")),], aes(x=1, y=rev(SCENS))) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "FNMOC"))])) + ggtitle("FNMOC")
+
+
+myplots_za[[9]] <- ggarrange(a,b,c, ncol=3,common.legend = TRUE, legend="bottom")
+myplots_za[[9]]
+```
+
+### Tracé d'effondrement
+
+```{r}
+myplots_za[[10]] <- ggplot(data.table(Clusters = 2:8, Scores = -unlist(score)),
+       aes(Clusters, Scores)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  theme_bw() + scale_x_continuous(breaks=seq(2,8)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold")) + ggtitle("z500")
+myplots_za[[10]]
+```
+
+
+
+# Clusters t850
+
+
+```{r}
+
+t850_unif <- allruns[,c(1,2,4)]
+t850_unif <- t850_unif[which(t850_unif$dates >= the_dates[1]),]
+
+t850_scens <- cast(na.omit(t850_unif), runs ~ dates)
+
+rownames(t850_scens) <- t850_scens$runs
+
+for (row in 1:nrow(t850_scens)) {
+  t850_scens[row,2:(ncol(t850_scens)-3)] <- na.approx(unlist(t850_scens[row,2:(ncol(t850_scens)-3)]), na.rm = FALSE)
+}
+
+
+limit <- 0
+
+if (length(  which(is.na(t850_scens[2]))  ) > 0) {
+  t850_scens <- t850_scens[-c(    which(is.na(t850_scens[2]))     ),]
+}
+
+if (length(which(rowSums(is.na(t850_scens[,2:ncol(t850_scens)])) == ncol(t850_scens)-1)) > 0) {
+  t850_scens <- t850_scens[-c(    which(rowSums(is.na(t850_scens[,2:ncol(t850_scens)])) == ncol(t850_scens)-1)     ),]
+}
+
+ if ( length(which(rowSums(is.na(t850_scens[,2:(ncol(t850_scens)-3)])) > 2 )) > 0) {
+   if (nrow(t850_scens[,2:(ncol(t850_scens)-3)]) != nrow(t850_scens[-c(which(rowSums(is.na(t850_scens[,2:(ncol(t850_scens)-3)])) > 2 )),2:(ncol(t850_scens)-3)])) {
+     t850_scens <- t850_scens[-c(which(rowSums(is.na(t850_scens[,2:(ncol(t850_scens)-3)])) > 2 )),]
+   } else {
+  t850_scens[,2:(ncol(t850_scens)-3)] <-
+    t850_scens[-c(which(rowSums(is.na(t850_scens[,2:(ncol(t850_scens)-3)])) > 2 )),2:(ncol(t850_scens)-3)]
+   }
+ }
+
+for (i in seq(ncol(t850_scens) - 1,1) ) {
+  if ( length( which(rowSums(is.na(t850_scens[,seq(i,ncol(t850_scens))])*1) == ncol(t850_scens)-i+1) ) == 0 ) {
+  limit <- i
+  break
+  }
+}
+
+t850_scens <- na.omit(t850_scens[,1:limit])
+
+
+
+
+```
+
+
+
+
+```{r}
+
+
+
+
+
+  t850x <- repr_matrix(t850_scens[,-c(1)],func = repr_featrend,
+                       args = list(func=maxC, pieces = 8, order = 12),
+                       normalise = TRUE, func_norm = norm_z)
+
+
+
+
+
+
+    clusterings <- lapply(c(2:8), function(x)
+    clara(t850x, x))
+
+     DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(t850x, as.integer(clusterings[[x]]$clustering),
+                    c("Davies_Bouldin")))
+
+
+  criteriaDB <- unlist(unname(DB_values))
+  names(criteriaDB) <- seq(1, length(criteriaDB))
+
+       DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(t850x, as.integer(clusterings[[x]]$clustering),
+                    c("Dunn")))
+
+
+  criteriaD <- unlist(unname(DB_values))
+  names(criteriaD) <- seq(1, length(criteriaD))
+
+       DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(t850x, as.integer(clusterings[[x]]$clustering),
+                    c("Calinski_Harabasz")))
+
+
+  criteriaCH <- unlist(unname(DB_values))
+  names(criteriaCH) <- seq(1, length(criteriaCH))
+
+  # names(sort(criteriaDB)) ; names(sort(criteriaCH, decreasing = T)) ; names(sort(criteriaD , decreasing = T))
+
+  score <- rep(0,length(criteriaDB))
+  score[as.integer(names(sort(criteriaDB)))] <- score + seq(length(criteriaDB),1)
+  score[as.integer(names(sort(criteriaCH, decreasing = T)))] <- score + seq(length(criteriaDB),1)
+  score[as.integer(names(sort(criteriaD, decreasing = T)))] <- score + seq(length(criteriaDB),1)
+  names(score) <- seq(2, length(criteriaCH)+1)
+
+#   not_found <- TRUE
+#   fall <- FALSE
+#   i <- 1
+#   numb <- length(criteria)
+#   while (not_found & i<length(criteria))
+#   {
+#     if (criteria[i]-criteria[i+1]>0.03)
+#     {
+#       fall <- TRUE
+#     }
+#     # else if (fall & (criteria[i]-min(criteria)) > ((max(criteria) - min(criteria)) / 4))
+#     #   {
+#     #       fall <- FALSE
+#     #   }
+#     else if (fall)
+#     {
+#       numb <- i+1
+#       not_found <- FALSE
+#     }
+#     else if (i == 1)
+#     {
+#       numb <- i+1
+#       not_found <- FALSE
+#     }
+#     i <- i + 1
+#   }
+#
+#   if (!is.na(which(criteria==0)[1]) && not_found) {
+#     numb <- which(criteria==0)[1]
+#   }
+#
+#   diffs <- (c(NA,criteria)-criteria[1]) /(seq(1:(length(criteria)+1))^2)
+#   diffs[which(abs(diffs) < 0.01  & diffs != 0)] <- NA
+#   numb <- which.min(diffs)
+
+
+  numb <- as.numeric(names(sort(score, decreasing = T)))[1]
+```
+
+```{r}
+
+  myplots_ta <- list()
+
+ ordre <- clusterings[[numb-1]]$clusinfo[,1]
+  names(ordre) <- seq(1,length(ordre))
+
+  for (clust in seq(1,8)) {
+    myplots_ta[[clust]] <- ggplot()
+if (clust <= numb) {
+
+
+       elems <- which(clusterings[[numb-1]]$clustering == as.integer(names(sort(ordre, decreasing = T))[clust]))
+
+
+     the_data <- melt(as.data.frame(t850_scens[elems,]), id = c("runs"))
+
+     the_data$ID<- the_data$runs
+
+          stats <- data.frame(
+       DATE = unique(the_data$variable),
+     #   q25 = unname(unlist(lapply(t850_scens[elems,-c(1,2)],quantile,probs = 1/4))),
+     # med = unname(unlist(lapply(t850_scens[elems,-c(1,2)],median))),
+     # q75 = unname(unlist(lapply(t850_scens[elems,-c(1,2)],quantile,probs = 3/4)))
+       q25 = unname(unlist(lapply(t850_scens[elems,-c(1)],mean))) - unname(unlist(lapply(t850_scens[elems,-c(1)],sd))),
+     med = unname(unlist(lapply(t850_scens[elems,-c(1)],mean))),
+     q75 = unname(unlist(lapply(t850_scens[elems,-c(1)],mean))) + unname(unlist(lapply(t850_scens[elems,-c(1)],sd)))
+     )
+
+
+ myplots_ta[[clust]] <-    ggplot(stats, aes(x=DATE)) +
+        geom_line(data = the_data, aes(x=variable, y=value,group = ID),alpha = 0.80, size = 0.8 , color="grey30") +
+  geom_ribbon(aes(ymin = q25, ymax = q75, group=1),alpha = 0.60, fill = "grey70") +
+       geom_line(aes(y=med,group = 1),alpha = 0.80, size = 0.8, color="red") +
+       theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates),4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates),4)]),"%d %b")) +
+       scale_y_continuous(expand = c(0, 0),breaks = seq(-30,40,10), labels = seq(-30,40,10), limits= c(-30,40)) +
+       ggtitle(sprintf("Cluster %s (%s scénarios sur %s)", clust, length(elems), nrow(t850_scens))) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+15),], aes(x=DATE, y=T850, group=1), color="white",linetype = "dashed")
+
+}
+  }
+
+
+
+```
+
+
+## Col1
+
+### t850 > Cluster 1
+
+```{r}
+ myplots_ta[[1]]
+```
+
+
+### t850 > Cluster 2
+
+```{r}
+ myplots_ta[[2]]
+```
+
+## Col2
+
+### t850 > Cluster 3
+
+```{r}
+ myplots_ta[[3]]
+```
+
+
+
+
+### t850 > Cluster 4
+
+```{r}
+ myplots_ta[[4]]
+```
+
+## Col3
+
+### t850 > Cluster 5
+
+```{r}
+ myplots_ta[[5]]
+```
+
+
+### t850 > Cluster 6
+
+```{r}
+ myplots_ta[[6]]
+```
+
+
+## Col4
+
+
+### t850 > Cluster 7
+
+```{r}
+ myplots_ta[[7]]
+```
+
+
+### t850 > Cluster 8
+
+```{r}
+ myplots_ta[[8]]
+```
+
+
+
+
+## Col5
+
+
+### HeatMap
+
+```{r}
+ze <- c(
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep="")
+)
+ze_s <- c(
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("06z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  rep("",20*2),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("18z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  rep("",20*2)
+)
+
+cl <- rep(NA,20*8+30*4)
+
+for (clust in seq(1,numb)) {
+  elems <- which(clusterings[[numb-1]]$clustering == as.integer(names(sort(ordre, decreasing = T))[clust]))
+  cl[match(row.names(t850_scens[elems,]),ze)] <- clust
+}
+
+map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
+
+a <- ggplot( map[which(str_detect(map[,1], "GEFS")),], aes(x=1, y=rev(SCENS)) ) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "GEFS"))])) + ggtitle("GEFS")
+
+b <- ggplot( map[which(str_detect(map[,1], "GEM")),], aes(x=1, y=rev(SCENS)) ) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "GEM"))])) + ggtitle("GEM")
+
+c <- ggplot( map[which(str_detect(map[,1], "FNMOC")),], aes(x=1, y=rev(SCENS)) ) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "FNMOC"))])) + ggtitle("FNMOC")
+
+
+myplots_ta[[9]] <- ggarrange(a,b,c, ncol=3,common.legend = TRUE, legend="bottom")
+myplots_ta[[9]]
+```
+
+### Tracé d'effondrement
+
+```{r}
+myplots_ta[[10]] <- ggplot(data.table(Clusters = 2:8, Scores = -unlist(score)),
+       aes(Clusters, Scores)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  theme_bw() + scale_x_continuous(breaks=seq(2,8)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold")) + ggtitle("t850")
+myplots_ta[[10]]
+```
+
+
+
+
+
+
+# Clusters PP
+
+
+```{r}
+
+pp_unif <- allruns[,c(1,2,6)]
+pp_unif <- pp_unif[which(pp_unif$dates >= the_dates[1]),]
+
+pp_scens <- cast(na.omit(pp_unif), runs ~ dates)
+
+rownames(pp_scens) <- pp_scens$runs
+
+for (row in 1:nrow(pp_scens)) {
+  pp_scens[row,2:(ncol(pp_scens)-3)] <- na.approx(unlist(pp_scens[row,2:(ncol(pp_scens)-3)]), na.rm = FALSE)
+}
+
+
+limit <- 0
+
+if (length(  which(is.na(pp_scens[2]))  ) > 0) {
+  pp_scens <- pp_scens[-c(    which(is.na(pp_scens[2]))     ),]
+}
+
+if (length(which(rowSums(is.na(pp_scens[,2:ncol(pp_scens)])) == ncol(pp_scens)-1)) > 0) {
+  pp_scens <- pp_scens[-c(    which(rowSums(is.na(pp_scens[,2:ncol(pp_scens)])) == ncol(pp_scens)-1)     ),]
+}
+
+if ( length(which(rowSums(is.na(pp_scens[,2:(ncol(pp_scens)-3)])) > 2 )) > 0) {
+  if (nrow(pp_scens[,2:(ncol(pp_scens)-3)]) != nrow(pp_scens[-c(which(rowSums(is.na(pp_scens[,2:(ncol(pp_scens)-3)])) > 2 )),2:(ncol(pp_scens)-3)])) {
+    pp_scens <- pp_scens[-c(which(rowSums(is.na(pp_scens[,2:(ncol(pp_scens)-3)])) > 2 )),]
+  } else {
+    pp_scens[,2:(ncol(pp_scens)-3)] <-
+      pp_scens[-c(which(rowSums(is.na(pp_scens[,2:(ncol(pp_scens)-3)])) > 2 )),2:(ncol(pp_scens)-3)]
+  }
+}
+
+for (i in seq(ncol(pp_scens) - 1,1) ) {
+  if ( length( which(rowSums(is.na(pp_scens[,seq(i,ncol(pp_scens))])*1) == ncol(pp_scens)-i+1) ) == 0 ) {
+  limit <- i
+  break
+  }
+}
+
+pp_scens <- na.omit(pp_scens[,1:limit])
+
+
+
+
+```
+
+
+
+
+```{r}
+
+
+
+
+
+  ppx <- repr_matrix(pp_scens[,-c(1)],func = repr_featrend,
+                       args = list(func=maxC, pieces = 8, order = 12),
+                       normalise = TRUE, func_norm = norm_z)
+
+
+
+
+
+
+    clusterings <- lapply(c(2:8), function(x)
+    clara(ppx, x))
+
+     DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(ppx, as.integer(clusterings[[x]]$clustering),
+                    c("Davies_Bouldin")))
+
+
+  criteriaDB <- unlist(unname(DB_values))
+  names(criteriaDB) <- seq(1, length(criteriaDB))
+
+       DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(ppx, as.integer(clusterings[[x]]$clustering),
+                    c("Dunn")))
+
+
+  criteriaD <- unlist(unname(DB_values))
+  names(criteriaD) <- seq(1, length(criteriaD))
+
+       DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(ppx, as.integer(clusterings[[x]]$clustering),
+                    c("Calinski_Harabasz")))
+
+
+  criteriaCH <- unlist(unname(DB_values))
+  names(criteriaCH) <- seq(1, length(criteriaCH))
+
+  # names(sort(criteriaDB)) ; names(sort(criteriaCH, decreasing = T)) ; names(sort(criteriaD , decreasing = T))
+
+  score <- rep(0,length(criteriaDB))
+  score[as.integer(names(sort(criteriaDB)))] <- score + seq(length(criteriaDB),1)
+  score[as.integer(names(sort(criteriaCH, decreasing = T)))] <- score + seq(length(criteriaDB),1)
+  score[as.integer(names(sort(criteriaD, decreasing = T)))] <- score + seq(length(criteriaDB),1)
+  names(score) <- seq(2, length(criteriaCH)+1)
+
+#   not_found <- TRUE
+#   fall <- FALSE
+#   i <- 1
+#   numb <- length(criteria)
+#   while (not_found & i<length(criteria))
+#   {
+#     if (criteria[i]-criteria[i+1]>0.03)
+#     {
+#       fall <- TRUE
+#     }
+#     # else if (fall & (criteria[i]-min(criteria)) > ((max(criteria) - min(criteria)) / 4))
+#     #   {
+#     #       fall <- FALSE
+#     #   }
+#     else if (fall)
+#     {
+#       numb <- i+1
+#       not_found <- FALSE
+#     }
+#     else if (i == 1)
+#     {
+#       numb <- i+1
+#       not_found <- FALSE
+#     }
+#     i <- i + 1
+#   }
+#
+#   if (!is.na(which(criteria==0)[1]) && not_found) {
+#     numb <- which(criteria==0)[1]
+#   }
+#
+#   diffs <- (c(NA,criteria)-criteria[1]) /(seq(1:(length(criteria)+1))^2)
+#   diffs[which(abs(diffs) < 0.01  & diffs != 0)] <- NA
+#   numb <- which.min(diffs)
+
+
+  numb <- as.numeric(names(sort(score, decreasing = T)))[1]
+```
+
+```{r}
+
+  myplots_pa <- list()
+
+ ordre <- clusterings[[numb-1]]$clusinfo[,1]
+  names(ordre) <- seq(1,length(ordre))
+
+  for (clust in seq(1,8)) {
+    myplots_pa[[clust]] <- ggplot()
+if (clust <= numb) {
+
+
+       elems <- which(clusterings[[numb-1]]$clustering == as.integer(names(sort(ordre, decreasing = T))[clust]))
+
+
+     the_data <- melt(as.data.frame(pp_scens[elems,]), id = c("runs"))
+
+     the_data$ID<- the_data$runs
+
+          stats <- data.frame(
+       DATE = unique(the_data$variable),
+     #   q25 = unname(unlist(lapply(pp_scens[elems,-c(1,2)],quantile,probs = 1/4))),
+     # med = unname(unlist(lapply(pp_scens[elems,-c(1,2)],median))),
+     # q75 = unname(unlist(lapply(pp_scens[elems,-c(1,2)],quantile,probs = 3/4)))
+       q25 = unname(unlist(lapply(pp_scens[elems,-c(1)],mean))) - unname(unlist(lapply(pp_scens[elems,-c(1)],sd))),
+     med = unname(unlist(lapply(pp_scens[elems,-c(1)],mean))),
+     q75 = unname(unlist(lapply(pp_scens[elems,-c(1)],mean))) + unname(unlist(lapply(pp_scens[elems,-c(1)],sd)))
+     )
+
+      stats [which(stats$q25 < 0),"q25"] <- 0
+      stats [which(stats$q25 > 29.9),"q25"] <- 29.9
+      stats [which(stats$med > 29.9),"med"] <- 29.9
+      stats [which(stats$q75 > 29.9),"q75"] <- 29.9
+      
+      
+      the_data [which(the_data$value > 29.9),"value"] <- 29.9
+      
+ myplots_pa[[clust]] <-    ggplot(stats, aes(x=DATE)) +
+        geom_line(data = the_data, aes(x=variable, y=value,group = ID),alpha = 0.80, size = 0.8 , color="grey30") +
+  geom_ribbon(aes(ymin = q25, ymax = q75, group=1),alpha = 0.60, fill = "grey70") +
+       geom_line(aes(y=med,group = 1),alpha = 0.80, size = 0.8, color="red") +
+       theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
+                                colour = "black",
+                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates),4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates),4)]),"%d %b")) +
+       scale_y_continuous(expand = c(0, 0),breaks =  c(seq(0,1,.5),seq(2,5,1),seq(10,30,5)), labels =  c(seq(0,1,.5),seq(2,5,1),seq(10,25,5),"30+"), limits= c(0,30)) +
+       ggtitle(sprintf("Cluster %s (%s scénarios sur %s)", clust, length(elems), nrow(pp_scens)))
+
+}
+  }
+
+
+
+```
+
+
+## Col1
+
+### pp > Cluster 1
+
+```{r}
+ myplots_pa[[1]]
+```
+
+
+### pp > Cluster 2
+
+```{r}
+ myplots_pa[[2]]
+```
+
+## Col2
+
+### pp > Cluster 3
+
+```{r}
+ myplots_pa[[3]]
+```
+
+
+
+
+### pp > Cluster 4
+
+```{r}
+ myplots_pa[[4]]
+```
+
+## Col3
+
+### pp > Cluster 5
+
+```{r}
+ myplots_pa[[5]]
+```
+
+
+### pp > Cluster 6
+
+```{r}
+ myplots_pa[[6]]
+```
+
+
+## Col4
+
+
+### pp > Cluster 7
+
+```{r}
+ myplots_pa[[7]]
+```
+
+
+### pp > Cluster 8
+
+```{r}
+ myplots_pa[[8]]
+```
+
+
+
+
+## Col5
+
+
+### HeatMap
+
+```{r}
+ze <- c(
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(0),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(6),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(12),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEFS %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,30), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("GEM %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep=""),
+  paste(rep(sprintf("FNMOC %s sc", format(date_var+hours(18),"%Y-%m-%d %H:%M:%S"))),str_pad(seq(1,20), 2, pad = "0"),sep="")
+)
+ze_s <- c(
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("00z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("06z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  rep("",20*2),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("12z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,20), 2, pad = "0"),sep=""),
+  paste("18z sc",str_pad(seq(1,1), 2, pad = "0"),sep=""),
+  paste(rep("    sc"),str_pad(seq(2,30), 2, pad = "0"),sep=""),
+  rep("",20*2)
+)
+
+cl <- rep(NA,20*8+30*4)
+
+for (clust in seq(1,numb)) {
+  elems <- which(clusterings[[numb-1]]$clustering == as.integer(names(sort(ordre, decreasing = T))[clust]))
+  cl[match(row.names(pp_scens[elems,]),ze)] <- clust
+}
+
+map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
+
+a <- ggplot( map[which(str_detect(map[,1], "GEFS")),], aes(x=1, y=rev(SCENS)) ) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "GEFS"))])) + ggtitle("GEFS")
+
+b <- ggplot( map[which(str_detect(map[,1], "GEM")),], aes(x=1, y=rev(SCENS)) ) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "GEM"))])) + ggtitle("GEM")
+
+c <- ggplot( map[which(str_detect(map[,1], "FNMOC")),], aes(x=1, y=rev(SCENS)) ) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(panel.grid.major = element_blank(), plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "right") +
+  scale_fill_manual(limits = c(1:numb), values=brewer.pal(n = 12, name = "Paired")[1:numb], name="Clusters") +scale_x_continuous(expand = c(0,0), breaks=c()) + scale_y_discrete(labels=rev(ze_s[which(str_detect(map[,1], "FNMOC"))])) + ggtitle("FNMOC")
+
+
+myplots_pa[[9]] <- ggarrange(a,b,c, ncol=3,common.legend = TRUE, legend="bottom")
+myplots_pa[[9]]
+```
+
+### Tracé d'effondrement
+
+```{r}
+myplots_pa[[10]] <- ggplot(data.table(Clusters = 2:8, Scores = -unlist(score)),
+       aes(Clusters, Scores)) +
+  geom_line(size = 1) +
+  geom_point(size = 3) +
+  theme_bw() + scale_x_continuous(breaks=seq(2,8)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold")) + ggtitle("pp")
+myplots_pa[[10]]
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r, echo=F, warning=F, error=F, message=F, results="hide"}
+pdf(sprintf("../../data/gefs/ens_cluster_unif-%s.pdf",str_replace_all(date_var, "-", "")),height=23,width=15)
+do.call(grid.arrange,c(myplots_za,ncol=2,nrow=5))
+do.call(grid.arrange,c(myplots_ta,ncol=2,nrow=5))
+do.call(grid.arrange,c(myplots_pa,ncol=2,nrow=5))
+dev.off()
+```
