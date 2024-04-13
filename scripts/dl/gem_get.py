@@ -19,7 +19,7 @@ ff = open("name.txt","w+")
 
 for sc in range(1,21):
     for ech in range(0,385,6):
-        f.write("https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl?dir=%2Fcmce."+model_date+"%2F"+model_run+"%2Fpgrb2ap5&file=cmc_gep"+"{:03d}".format(sc)+".t"+model_run+"z.pgrb2a.0p50.f"+"{:03d}".format(ech)+"&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48\n")
+        f.write("https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl?dir=%2Fcmce."+model_date+"%2F"+model_run+"%2Fpgrb2ap5&file=cmc_gep"+"{:02d}".format(sc)+".t"+model_run+"z.pgrb2a.0p50.f"+"{:03d}".format(ech)+"&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48\n")
         ff.write(model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+".grb2\n")
 
 f.close()
