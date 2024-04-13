@@ -2,8 +2,30 @@
 
 import glob, os, sys
 import subprocess
+import time
 
-os.chdir("../../data/gem/")
+model_date = str(sys.argv[1])
+model_run = str(sys.argv[2])
+
+os.chdir("../../data/fnmoc/")
+
+if os.path.exists("dl.txt"):
+    os.remove("dl.txt")
+
+if os.path.exists("name.txt"):
+    os.remove("name.txt")
+
+f = open("dl.txt","w+")
+ff = open("dl.txt","w+")
+
+for sc in range(1,21):
+    for ech in range(0,385,6):
+        f.write("https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl?dir=%2Ffens."+model_date+"%2F"+model_run+"%2Fpgrb2ap5&file=ENSEMBLE.halfDegree.MET.fcst_et"+"{:03d}".format(sc)+"."+"{:03d}".format(ech)+"."+model_date+model_run+"&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48"+"\n")
+        ff.write(model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+".grb2\n")
+
+f.close()
+ff.close()
+
 
 with open('dl.txt') as my_file:
     orig_names = my_file.readlines()
@@ -11,26 +33,36 @@ with open('dl.txt') as my_file:
 with open('name.txt') as my_file:
     new_names = my_file.readlines()
 
+
+os.system("cat dl.txt | xargs -n 1 -P 3 torsocks curl --connect-timeout 5 --max-time 10 --retry 10 --retry-delay 0 --retry-max-time 40 --retry-all-errors -O -J -L")
+
+
 gonnaloop = True
 
+
+numlines = 100
+timeout = 0
 while gonnaloop:
+    if numlines < 5 and timeout == 0:
+        timeout = time.time() + 60*5
+    if timeout > 0 and time.time() > timeout:
+        break
     gonnaloop = False
     if os.path.exists("dl2.txt"):
         os.remove("dl2.txt")
     f = open("dl2.txt","w+")
     for dlfile in orig_names:
-
-        origname = dlfile.replace("\n","").replace("https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl?dir=%2Fcmce."+sys.argv[1]+"%2F"+sys.argv[2]+"%2Fpgrb2ap5&file=","").replace("&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48","")
+        origname = dlfile.replace("\n","").replace("https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl?dir=%2Ffens."+model_date+"%2F"+model_run+"%2Fpgrb2ap5&file=","").replace("&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48","")
 
         if os.path.isfile(origname) and os.stat(origname).st_size > 0 :
             try:
                 output = subprocess.check_output( '/usr/bin/wgrib2 "'+origname+'"', shell=True)
             except:
-                f.write("https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl?dir=%2Fcmce."+sys.argv[1]+"%2F"+sys.argv[2]+"%2Fpgrb2ap5&file="+origname+"&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48"+"\n")
+                f.write("https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl?dir=%2Ffens."+model_date+"%2F"+model_run+"%2Fpgrb2ap5&file="+origname+"&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48"+"\n")
                 os.remove(origname)
                 gonnaloop = True
         else:
-            f.write("https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl?dir=%2Fcmce."+sys.argv[1]+"%2F"+sys.argv[2]+"%2Fpgrb2ap5&file="+origname+"&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48"+"\n")
+            f.write("https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl?dir=%2Ffens."+model_date+"%2F"+model_run+"%2Fpgrb2ap5&file="+origname+"&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48"+"\n")
             gonnaloop = True
             if os.path.isfile(origname):
                 os.remove(origname)
@@ -38,11 +70,13 @@ while gonnaloop:
     f.close()
     if gonnaloop:
         with open("dl2.txt") as file:
+            numlines = 0
             for item in file:
+                numlines = numlines + 1
                 print(item)
                 result = os.popen("torsocks curl "+'-w "%{filename_effective}"'+" --connect-timeout 5 --max-time 10 --retry 10 --retry-delay 0 --retry-max-time 40 --retry-all-errors -O -J -L "+'"'+item.replace("\n","")+'"').read()
                 print(result)
-                if result == "filter_cmcens.pl" and os.path.isfile(result):
+                if result == "filter_fens.pl" and os.path.isfile(result):
                     if 'Data file is not present' in open(result).read():
                         linenumber = -1
                         with open("dl.txt") as myFile:
@@ -77,12 +111,16 @@ while gonnaloop:
 
 
 for i in range(0,len(orig_names)):
-    origname = orig_names[i].replace("\n","").replace("https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl?dir=%2Fcmce."+sys.argv[1]+"%2F"+sys.argv[2]+"%2Fpgrb2ap5&file=","").replace("&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48","")
+    origname = orig_names[i].replace("\n","").replace("https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl?dir=%2Ffens."+model_date+"%2F"+model_run+"%2Fpgrb2ap5&file=","").replace("&lev_2_m_above_ground=on&lev_500_mb=on&lev_850_mb=on&lev_surface=on&var_APCP=on&var_HGT=on&var_TMP=on&subregion=&leftlon=5&rightlon=7&toplat=50&bottomlat=48","")
     newname = new_names[i].replace("\n","")
-    #print(origname, " --> ", newname)
     if os.path.exists(origname):
-        os.rename(origname, newname) 
+        os.rename(origname, newname)
 
 if os.path.exists("dl2.txt"):
     os.remove("dl2.txt")
 
+if os.path.exists("dl.txt"):
+    os.remove("dl.txt")
+
+if os.path.exists("name.txt"):
+    os.remove("name.txt")

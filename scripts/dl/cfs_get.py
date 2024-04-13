@@ -2,11 +2,29 @@
 
 import glob, os
 import subprocess
+import sys
+
+model_date = str(sys.argv[1])
+model_run = str(sys.argv[2])
 
 os.chdir("../../data/cfs/")
 
+if os.path.exists("dl.txt"):
+    os.remove("dl.txt")
+
+f = open("dl.txt","w+")
+
+for param in ["z500", "t850", "prate", "tmp2m"]:
+    for sc in range(1,5):
+        f.write("https://nomads.ncep.noaa.gov/pub/data/nccf/com/cfs/prod/cfs."+model_date+"/"+model_run+"/time_grib_"+"{:02d}".format(sc)+"/"+param+"."+"{:02d}".format(sc)+"."+model_date+""+model_run+".daily.grb2"+"\n")
+f.close()
+
+
 with open('dl.txt') as my_file:
     orig_names = my_file.readlines()
+
+os.system("cat dl.txt | xargs -n 1 -P 2 torsocks wget ")
+
 
 gonnaloop = True
 
@@ -37,3 +55,6 @@ while gonnaloop:
 
 if os.path.exists("dl2.txt"):
     os.remove("dl2.txt")
+
+if os.path.exists("dl.txt"):
+    os.remove("dl.txt")
