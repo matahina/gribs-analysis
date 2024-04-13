@@ -24,7 +24,7 @@ for (z in seq(0,18,6)) {
     
     for (ech in seq (0,384,6)) {
     
-    filename = sprintf("%s_%02d_%02d_%03d.grb2",extractdate,z,sc,ech)
+    filename = sprintf("%s_%02d_%03d_%03d.grb2",extractdate,z,sc,ech)
     
     geop <- c()
     dates <- c()
