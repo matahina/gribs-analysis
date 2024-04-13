@@ -1,7 +1,7 @@
 ## R
 
 ```bash
-sudo pacman -S r gcc-fortran
+sudo pacman -S r gcc-fortran gdal
 ```
 
 ```R
