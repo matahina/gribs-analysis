@@ -1,3 +1,4 @@
 /scripts/libs/publish_dashboards.sh
 data/
 /scripts/stats/.Rhistory
+/scripts/dl/.Rhistory

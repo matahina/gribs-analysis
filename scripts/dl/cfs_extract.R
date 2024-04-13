@@ -1,11 +1,13 @@
 #!/usr/bin/env Rscript
-# args = commandArgs(trailingOnly=TRUE)
+
+args = commandArgs(trailingOnly=TRUE)
 
 library(rNOMADS)
 library(stringr)
+library(assertthat)
 
 
-extractdate <- str_replace_all(Sys.Date() - 1, "-", "")
+extractdate <- str_replace_all(Sys.Date() - as.integer(args[1]), "-", "")
 
 donneescfs <- data.frame(dates=character(),
                          runs=character(),
