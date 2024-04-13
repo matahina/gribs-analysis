@@ -29,7 +29,11 @@ os.system("cat dl.txt | xargs -n 1 -P 2 torsocks wget ")
 gonnaloop = True
 
 for dlfile in orig_names:
-    os.system("wget --limit-rate=2500k -c '"+dlfile.replace("\n","")+"'")
+    res = 1
+    res = os.system("wget --limit-rate=2500k -c '"+dlfile.replace("\n","")+"'")
+    while (res != 0):
+        res = os.system("wget --limit-rate=2500k -c '"+dlfile.replace("\n","")+"'")
+        print(res)
 
 while gonnaloop:
     gonnaloop = False
