@@ -70,7 +70,7 @@ for (z in seq(0,18,6)) {
     
     tempsol <- c(tempsol, tadac$value - 273.15)
     
-    # tempsol <- c(tempsol,rep(NA,nrow(donneescfs)-length(tempsol)))
+    tempsol <- c(tempsol,rep(NA,nrow(donneescfs)-length(tempsol)))
     donneescfs$tempsol <- tempsol
     
     
@@ -85,7 +85,7 @@ for (z in seq(0,18,6)) {
     
     precs <- c(precs, tadad$value *3600*6)
     
-    # precs <- c(precs,rep(NA,nrow(donneescfs)-length(precs)))
+    precs <- c(precs,rep(NA,nrow(donneescfs)-length(precs)))
     donneescfs$precs <- precs
     
     
