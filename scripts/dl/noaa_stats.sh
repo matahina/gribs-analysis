@@ -19,6 +19,8 @@ done
 
 echo "BUSY" > lock.txt
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""R Analysis Start - "${1^^}" "$DATE"" >> ../../data/logs/"$DATE".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "R Analysis Start" "${1^^} $DATE"
+
 
 ######################################
 ## R Analysis
@@ -35,5 +37,6 @@ echo "FREE" > lock.txt
 python3 storage_clean.py
 
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""R Analysis Done - "${1^^}" "$DATE"" >> ../../data/logs/"$DATE".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "R Analysis Done" "${1^^} $DATE"
 echo "" >> ../../data/logs/"$DATE".log
 echo "" >> ../../data/logs/"$DATE".log

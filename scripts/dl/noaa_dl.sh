@@ -20,6 +20,7 @@ done
 
 echo "BUSY" > lock.txt
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 NOAA DL Start - "${1^^}" "$2"z "$DATE"" >> ../../data/logs/"$DATE".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "NOAA DL Start" "${1^^} $2z $DATE"
 
 ######################################
 ## GRIB2 Downloads
@@ -60,6 +61,7 @@ fi
 echo "FREE" > lock.txt
 
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 NOAA DL Done - "${1^^}" "$2"z "$DATE"" >> ../../data/logs/"$DATE".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "NOAA DL Done" "${1^^} $2z $DATE"
 echo "" >> ../../data/logs/"$DATE".log
 echo "" >> ../../data/logs/"$DATE".log
 
