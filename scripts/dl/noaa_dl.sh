@@ -50,7 +50,7 @@ fi
 if [ $EXTR == "Yes" ]
 then
     echo $EXTR
-    Rscript $1_extract.R $3
+    Rscript data_extract.R $3 $1
     rm my.inv
 fi
 

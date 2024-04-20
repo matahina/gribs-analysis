@@ -2,3 +2,5 @@
 data/
 /scripts/stats/.Rhistory
 /scripts/dl/.Rhistory
+/mount.sh
+/scripts/stats/ens_dashboard.html
