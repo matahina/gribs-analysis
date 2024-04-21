@@ -40,3 +40,5 @@ echo "["`date +"%Y-%m-%d %T %z"`"]     ""R Analysis Done - "${1^^}" "$DATE"" >> 
 test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "R Analysis Done" "${1^^} $DATE"
 echo "" >> ../../data/logs/"$DATE".log
 echo "" >> ../../data/logs/"$DATE".log
+
+test -f ../libs/publish_dashboards.sh && ../libs/publish_dashboards.sh
