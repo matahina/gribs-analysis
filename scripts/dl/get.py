@@ -63,11 +63,12 @@ if model_name != "cfs":
 
             postfields = urllib.parse.urlencode(post_body)
 
-            full_url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl' + '?' + postfields
+            full_url = url + '?' + postfields
 
             file_name = model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+".grb2"
 
             print(file_name)
+            print(full_url)
 
             try:
                 response = urllib.request.urlretrieve(
@@ -75,11 +76,11 @@ if model_name != "cfs":
                     file_name)
             except urllib.error.HTTPError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write('\n'+file_name+' Error code: '+e.code)
+                    errlog.write('\n'+file_name+' Error code: '+str(e.code))
                 print('Error code: ', e.code)
             except urllib.error.URLError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write('\n'+file_name+' Reason: '+ e.reason)
+                    errlog.write('\n'+file_name+' Reason: '+ str(e.reason))
                 print('Reason: ', e.reason)
 
 else:
@@ -90,16 +91,30 @@ else:
 
             file_name = param+"."+"{:02d}".format(sc)+"."+model_date+""+model_run+".daily.grb2"
             print(file_name)
+            import requests
 
             try:
+                server_size = requests.head(full_url).headers.get('content-length')
+
                 response = urllib.request.urlretrieve(
                     full_url,
                     file_name)
+
+                dl_size = os.stat(file_name).st_size
+                while dl_size != server_size:
+                    response = urllib.request.urlretrieve(
+                    full_url,
+                    file_name)
+
             except urllib.error.HTTPError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write('\n'+file_name+' Error code: '+e.code)
+                    errlog.write('\n'+file_name+' Error code: '+str(e.code))
                 print('Error code: ', e.code)
             except urllib.error.URLError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write('\n'+file_name+' Reason: '+ e.reason)
+                    errlog.write('\n'+file_name+' Reason: '+ str(e.reason))
                 print('Reason: ', e.reason)
+
+
+with open('../logs/'+model_date+'.log', 'a') as errlog:
+    errlog.write('\n')

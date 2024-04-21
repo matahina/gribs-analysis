@@ -6,3 +6,4 @@ data/
 /scripts/stats/ens_dashboard.html
 /scripts/libs/notify_ssh.sh
 /scripts/stats/cfs_dashboard.html
+/scripts/dl/lock.txt
