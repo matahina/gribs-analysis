@@ -1,3 +1,5 @@
+#! /usr/bin/python3
+
 import glob, os, sys
 import subprocess
 import time
@@ -23,7 +25,7 @@ else:
 
 if model_name != "cfs":
 
-    for sc in range(1,npert):
+    for sc in range(1,n_pert):
         for ech in list(range(0,193,3)) + list(range(198,385,6)):
 
             if model_name == "fnmoc":
