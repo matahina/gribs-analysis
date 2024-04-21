@@ -36,12 +36,12 @@ if model_name != "cfs":
                 body_file = 'ENSEMBLE.halfDegree.MET.fcst_et'+"{:03d}".format(sc)+'.'+"{:03d}".format(ech)+'.'+model_date+model_run
 
             if model_name == "gefs":
-                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl?'
+                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl'
                 body_dir = '/gefs.'+model_date+'/'+model_run+'/atmos/pgrb2ap5'
                 body_file = 'gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
 
             if model_name == "gem":
-                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl?'
+                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl'
                 body_dir = '/cmce.'+model_date+'/'+model_run+'/pgrb2ap5'
                 body_file = 'cmc_gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
 
@@ -115,7 +115,3 @@ else:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
                     errlog.write(file_name+' Reason: '+ str(e.reason)+'\n')
                 print('Reason: ', e.reason)
-
-
-with open('../logs/'+model_date+'.log', 'a') as errlog:
-    errlog.write('\n')
