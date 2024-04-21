@@ -1,7 +1,7 @@
 ## R
 
 ```bash
-sudo pacman -S r gcc-fortran gdal pandoc-cli
+sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3
 ```
 
 ```R

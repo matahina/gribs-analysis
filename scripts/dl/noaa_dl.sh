@@ -25,7 +25,7 @@ test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "NOAA DL Start" "${1^^}
 ######################################
 ## GRIB2 Downloads
 ######################################
-python3 $1_get.py $DATE $2
+python3 get.py $DATE $2 $1
 
 ######################################
 ## GRIB2 Extract Data
