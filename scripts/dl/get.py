@@ -7,6 +7,8 @@ import time
 import urllib.request
 import urllib.parse
 
+import requests
+
 model_date = str(sys.argv[1])
 model_run = str(sys.argv[2])
 model_name = str(sys.argv[3])
@@ -91,7 +93,6 @@ else:
 
             file_name = param+"."+"{:02d}".format(sc)+"."+model_date+""+model_run+".daily.grb2"
             print(file_name)
-            import requests
 
             try:
                 server_size = requests.head(full_url).headers.get('content-length')

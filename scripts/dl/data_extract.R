@@ -26,8 +26,7 @@ step_z = 12
 
 last_sc = 20
 
-last_ech = 384
-step_ech = 6
+the_range = c(seq(0,193,3) , seq(198,385,6))
 
 if ((args[2] == "gefs")) {
   last_z = 18
@@ -42,14 +41,13 @@ if ((args[2] == "cfs")) {
   
   last_sc = 4
   
-  last_ech = 0
-  step_ech = 0
+  the_range = c(0)
 }
 
 first_try <- TRUE
 for (z in seq(0, last_z, step_z)) {
   for (sc in seq (1, last_sc, 1)) {
-    for (ech in seq (0, last_ech, step_ech)) {
+    for (ech in the_range) {
       filename = sprintf("%s_%02d_%03d_%03d.grb2", extractdate, z, sc, ech)
       
       if (args[2] == "cfs") {
