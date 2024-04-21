@@ -103,6 +103,8 @@ else:
 
                 dl_size = os.stat(file_name).st_size
                 while dl_size != server_size:
+                    print(dl_size)
+                    print(server_size)
                     response = urllib.request.urlretrieve(
                     full_url,
                     file_name)
