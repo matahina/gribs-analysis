@@ -78,11 +78,11 @@ if model_name != "cfs":
                     file_name)
             except urllib.error.HTTPError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(file_name+' Error code: '+str(e.code)+'\n')
+                    errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
                 print('Error code: ', e.code)
             except urllib.error.URLError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(file_name+' Reason: '+ str(e.reason)+'\n')
+                    errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
                 print('Reason: ', e.reason)
 
 else:
@@ -111,9 +111,9 @@ else:
 
             except urllib.error.HTTPError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(file_name+' Error code: '+str(e.code)+'\n')
+                    errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
                 print('Error code: ', e.code)
             except urllib.error.URLError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(file_name+' Reason: '+ str(e.reason)+'\n')
+                    errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
                 print('Reason: ', e.reason)

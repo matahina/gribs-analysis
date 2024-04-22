@@ -91,7 +91,7 @@ mModes <- function(x) {
    mean(Modes(x))
 }
 
-barwidth = 9
+barwidth = c(rep(2,63),rep(4,24))
 
 get_data <- function(date, model) {
   
@@ -116,8 +116,25 @@ date_var <- Sys.Date() - 1
 
 ```{r}
 allruns <- get_data(str_replace_all(date_var, "-", ""),"gefs")
-allruns <- rbind(allruns, get_data(str_replace_all(date_var, "-", ""),"gem"))
-allruns <- rbind(allruns, get_data(str_replace_all(date_var, "-", ""),"fnmoc"))
+allruns <- 
+          merge(
+            allruns,
+            get_data(str_replace_all(date_var, "-", ""),"gem"),
+            # by = c("runs", "dates"),
+            all.x = TRUE,
+            all.y = TRUE
+          )
+allruns <- 
+          merge(
+            allruns,
+            get_data(str_replace_all(date_var, "-", ""),"fnmoc"),
+            # by = c("runs", "dates"),
+            all.x = TRUE,
+            all.y = TRUE
+          )
+# allruns <- rbind(allruns, get_data(str_replace_all(date_var, "-", ""),"gem"))
+# allruns <- rbind(allruns, get_data(str_replace_all(date_var, "-", ""),"fnmoc"))
+
 # GEFS.00z.z500 <- get_data("Data/%s/GEFS-00z-z500.csv.gz", yesterday)
 # GEFS.06z.z500 <- get_data("Data/%s/GEFS-06z-z500.csv.gz", yesterday)
 # GEFS.12z.z500 <- get_data("Data/%s/GEFS-12z-z500.csv.gz", yesterday)
@@ -168,9 +185,14 @@ allruns <- rbind(allruns, get_data(str_replace_all(date_var, "-", ""),"fnmoc"))
 # pp_unif <- pp_unif[which(pp_unif$variable>toString(format(sysdate,"%Y-%m-%d"))),]
 # 
 # 
-if (length(allruns[is.na(allruns)]) != 0) {
-  allruns <- allruns[complete.cases(allruns[,-5]),]
-}
+
+
+
+# if (length(allruns[is.na(allruns)]) != 0) {
+#   allruns <- allruns[complete.cases(allruns[,-5]),]
+# }
+
+
 
 allruns <- allruns[order(allruns$dates),]
 
@@ -192,6 +214,7 @@ the_dates <- the_dates[(the_dates>toString(format(date_var+1,"%Y-%m-%d")))]
 ```{r}
 library(dplyr)
 pp_unif <- allruns[,c(1,2,6)]
+pp_unif <- na.omit(pp_unif)
 names(pp_unif) <- c("runs","variable","value")
 
 maps_limits <- c(as.character(seq(0,0.9,0.1)), as.character(seq(1,100)))
@@ -298,71 +321,232 @@ pp_probs_gefs <- pp_probs_gefs[which(row.names(pp_probs_gefs) >= the_dates[1]),]
 pp_probs_gefs <- pp_probs_gefs[which(row.names(pp_probs_gefs) <= tail(the_dates[which(the_dates < as.POSIXct(the_dates[1])+days(14))],1)),]
 
 
+pp_probs_all$V1 <- as_datetime(pp_probs_all$V1)
+
+pp_probs_gefs$V1 <- as_datetime(pp_probs_gefs$V1)
+
+plotruns$dates <- as_datetime(plotruns$dates)
+
+norms$DATE <- as_datetime(norms$DATE)
+
+the_dates <- as_datetime(the_dates)
+
 ## Z500
 
 
-plot_z500all <- ggplot(plotruns, aes(dates, geop)) + geom_count(aes(size = ..prop.., alpha = ..prop.., colour = geop)) +
-          scale_colour_gradientn(colours = unname(unlist(z500_cols)), limits=c(492,608)) +
+
+plot_z500all <-
+  ggplot(plotruns, aes(dates, geop)) + geom_count(aes(
+    size = ..prop..,
+    alpha = ..prop..,
+    colour = geop
+  )) +
+  scale_colour_gradientn(colours = unname(unlist(z500_cols)), limits = c(492, 608)) +
   # scale_size_area(max_size = 3.5, limits = c(0.125,1))+
-  scale_alpha() + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
-  scale_y_continuous(expand = c(0, 0),breaks = seq(480,620,20), labels = seq(480,620,20), limits =c(480,620)
-                     ,sec.axis = sec_axis(~ . ,breaks = seq(480,620,20), labels = seq(480,620,20))
-                     ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",Sys.Date()-1)) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=Z500, group=1), color="gray")
+  scale_alpha() + theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) +
+  scale_x_datetime(expand = c(0, 0),
+                   date_breaks = "1 day",
+                   date_labels = "%d %b") +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(480, 620, 20),
+    labels = seq(480, 620, 20),
+    limits = c(480, 620)
+    ,
+    sec.axis = sec_axis(
+      ~ . ,
+      breaks = seq(480, 620, 20),
+      labels = seq(480, 620, 20)
+    )
+  ) + ggtitle(sprintf(
+    "Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
+    Sys.Date() - 1
+  )) +
+  geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
+                             which(norms$DATE == the_dates[1]) + 14),],
+            aes(x = DATE, y = Z500, group = 1),
+            color = "gray")
 
 
-plot_z500gefs <- ggplot(plotruns[which(grepl("GEFS",plotruns$runs)),], aes(dates, geop)) + geom_count(aes(size = ..prop.., alpha = ..prop.., colour = geop)) +
-          scale_colour_gradientn(colours = unname(unlist(z500_cols)), limits=c(492,608)) +
+plot_z500gefs <-
+  ggplot(plotruns[which(grepl("GEFS", plotruns$runs)), ], aes(dates, geop)) + geom_count(aes(
+    size = ..prop..,
+    alpha = ..prop..,
+    colour = geop
+  )) +
+  scale_colour_gradientn(colours = unname(unlist(z500_cols)), limits = c(492, 608)) +
   # scale_size_area(max_size = 3.5, limits = c(0.125,1))+
-  scale_alpha() + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
-  scale_y_continuous(expand = c(0, 0),breaks = seq(480,620,20), labels = seq(480,620,20), limits =c(480,620)
-                     ,sec.axis = sec_axis(~ . ,breaks = seq(480,620,20), labels = seq(480,620,20))
-                     ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z  %s",Sys.Date()-1)) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=Z500, group=1), color="gray")
+  scale_alpha() + theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) +
+  scale_x_datetime(expand = c(0, 0),
+                   date_breaks = "1 day",
+                   date_labels = "%d %b") +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(480, 620, 20),
+    labels = seq(480, 620, 20),
+    limits = c(480, 620)
+    ,
+    sec.axis = sec_axis(
+      ~ . ,
+      breaks = seq(480, 620, 20),
+      labels = seq(480, 620, 20)
+    )
+  ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z  %s", Sys.Date() - 1)) +
+  geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
+                             which(norms$DATE == the_dates[1]) + 14), ],
+            aes(x = DATE, y = Z500, group = 1),
+            color = "gray")
 
 
 
 ## T850 + PP
 
-plot_t850all <- ggplot(plotruns, aes(dates, tempalt)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
-  scale_y_continuous(expand = c(0, 0),breaks = seq(-30,40,10), labels = seq(-30,40,10), limits= c(-30,40)
-                     ,sec.axis = sec_axis(~ +(.+30)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
-                     ) + ggtitle(sprintf("T850 + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",Sys.Date()-1)) 
+
+
+
+plot_t850all <-
+  ggplot(plotruns, aes(dates, tempalt)) + theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) +
+  scale_x_datetime(expand = c(0, 0),
+                   date_breaks = "1 day",
+                   date_labels = "%d %b") +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(-30, 40, 10),
+    labels = seq(-30, 40, 10),
+    limits = c(-30, 40)
+    ,
+    sec.axis = sec_axis(
+      ~ +(. + 30) * 3 / 7,
+      breaks = as.numeric(names(pp_cols)),
+      labels = names(pp_cols)
+    )
+  ) + ggtitle(sprintf(
+    "T850 + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
+    Sys.Date() - 1
+  ))
 idx <- 110
-for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
   plot_t850all <- plot_t850all +
-    geom_segment(data = pp_probs_all, aes_string(x="V1", y=trans_axes(precip), xend = "V1", yend = -30), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
-  idx <- idx -1
+    geom_segment(
+      data = pp_probs_all,
+      aes_string(
+        x = "V1",
+        y = trans_axes(precip),
+        xend = "V1",
+        yend = -30
+      ),
+      size = barwidth,
+      color = MixColor("black", "cornflowerblue", 1 - pp_probs_all[, idx]),
+      lineend = "butt"
+    )
+  idx <- idx - 1
 }
+
 plot_t850all <- plot_t850all +
-geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempalt)) +
-          scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits=c(-26,32)) +
+  geom_count(aes(
+    size = ..prop..,
+    alpha = ..prop..,
+    colour = tempalt
+  )) +
+  scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits = c(-26, 32)) +
   # scale_size_area(max_size = 3.5, limits = c(0.175,1))+
-  scale_alpha() + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=T850, group=1), color="gray") 
+  scale_alpha() + geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
+                                             which(norms$DATE == the_dates[1]) + 14), ],
+                            aes(x = DATE, y = T850, group = 1),
+                            color = "gray") 
+plot_t850gefs <-
+  ggplot(plotruns[which(grepl("GEFS", plotruns$runs)),], aes(dates, tempalt)) + theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) +
+  scale_x_datetime(expand = c(0, 0),
+                   date_breaks = "1 day",
+                   date_labels = "%d %b") +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(-30, 40, 10),
+    labels = seq(-30, 40, 10),
+    limits = c(-30, 40)
+    ,
+    sec.axis = sec_axis(
+      ~ +(. + 30) * 3 / 7,
+      breaks = as.numeric(names(pp_cols)),
+      labels = names(pp_cols)
+    )
+  ) + ggtitle(sprintf("T850 + PP _ ENS GEFS 00z06z12z18z  %s", Sys.Date() -
+                        1))
 
-
-plot_t850gefs <- ggplot(plotruns[which(grepl("GEFS",plotruns$runs)),], aes(dates, tempalt)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
-  scale_y_continuous(expand = c(0, 0),breaks = seq(-30,40,10), labels = seq(-30,40,10), limits= c(-30,40)
-                     ,sec.axis = sec_axis(~ +(.+30)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
-                     ) + ggtitle(sprintf("T850 + PP _ ENS GEFS 00z06z12z18z  %s",Sys.Date()-1))
-                     
-    idx <- 110
-for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+idx <- 110
+for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
   plot_t850gefs <- plot_t850gefs +
-    geom_segment(data = pp_probs_gefs, aes_string(x="V1", y=trans_axes(precip), xend = "V1", yend = -30), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
-  idx <- idx -1
+    geom_segment(
+      data = pp_probs_gefs,
+      aes_string(
+        x = "V1",
+        y = trans_axes(precip),
+        xend = "V1",
+        yend = -30
+      ),
+      size = barwidth,
+      color = MixColor("black", "cornflowerblue", 1 - pp_probs_all[, idx]),
+      lineend = "butt"
+    )
+  idx <- idx - 1
 }
-plot_t850gefs <- plot_t850gefs +  
-geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempalt)) +
-          scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits=c(-26,32)) +
+plot_t850gefs <- plot_t850gefs +
+  geom_count(aes(
+    size = ..prop..,
+    alpha = ..prop..,
+    colour = tempalt
+  )) +
+  scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits = c(-26, 32)) +
   # scale_size_area(max_size = 3.5, limits = c(0.175,1))+
-  scale_alpha() +  geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+14),], aes(x=DATE, y=T850, group=1), color="gray")
+  scale_alpha() +  geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
+                                              which(norms$DATE == the_dates[1]) + 14),],
+                             aes(x = DATE, y = T850, group = 1),
+                             color = "gray")
+
 ```
 
 ```{r}
@@ -370,56 +554,144 @@ geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempalt)) +
 norms_tsol <- data.frame(date = as.POSIXlt(c(norm$V1,norm$V3), format="%d/%m %H:%M"), tsol = c(norm$V2,norm$V4))
 norms_tsol_data <- norms_tsol[which(norms_tsol$date > the_dates[1]),][which(norms_tsol[which(norms_tsol$date > the_dates[1]),"date"] < as.POSIXct(the_dates[1])+days(14)),]
 
-norms_tsol_data$date <- str_replace_all( format(norms_tsol_data$date, "%Y-%m-%d %H:%M:%S"), "07:00", "06:00")
+# norms_tsol_data$date <- str_replace_all( format(norms_tsol_data$date, "%Y-%m-%d %H:%M:%S"), "07:00", "06:00")
+# 
+# norms_tsol_data$date <- str_replace_all(norms_tsol_data$date, "15:00", "18:00")
 
-norms_tsol_data$date <- str_replace_all(norms_tsol_data$date, "15:00", "18:00")
+norms_tsol_data$date <- as_datetime(norms_tsol_data$date)
 
 ## T2M + PP
 
-plot_t2mall <- ggplot(plotruns, aes(dates, tempsol)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
-  scale_y_continuous(expand = c(0, 0),breaks = seq(-20,50,10), labels = seq(-20,50,10), limits= c(-20,50)
-                     ,sec.axis = sec_axis(~ +(.+20)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
-                     ) + ggtitle(sprintf("T2M + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",Sys.Date()-1)) 
+plot_t2mall <-
+  ggplot(plotruns, aes(dates, tempsol)) + theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) + 
+  scale_x_datetime(expand = c(0, 0),
+                   date_breaks = "1 day",
+                   date_labels = "%d %b") +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(-20, 50, 10),
+    labels = seq(-20, 50, 10),
+    limits = c(-20, 50)
+    ,
+    sec.axis = sec_axis(
+      ~ +(. + 20) * 3 / 7,
+      breaks = as.numeric(names(pp_cols)),
+      labels = names(pp_cols)
+    )
+  ) + ggtitle(sprintf(
+    "T2M + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
+    Sys.Date() - 1
+  ))
 idx <- 110
-for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
   plot_t2mall <- plot_t2mall +
-    geom_segment(data = pp_probs_all, aes_string(x="V1", y=trans_axes_tsol(precip), xend = "V1", yend = -20), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
-  idx <- idx -1
+    geom_segment(
+      data = pp_probs_all,
+      aes_string(
+        x = "V1",
+        y = trans_axes_tsol(precip),
+        xend = "V1",
+        yend = -20
+      ),
+      size = barwidth,
+      color = MixColor("black", "cornflowerblue", 1 - pp_probs_all[, idx]),
+      lineend = "butt"
+    )
+  idx <- idx - 1
 }
-plot_t2mall <- plot_t2mall  + geom_hline(yintercept=0, linetype="dotted", color = "#3c3c3c")  + geom_hline(yintercept=30, linetype="dotted", color = "#3c3c3c")+
-geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempsol)) +
-          scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits=c(-16,50)) +
+plot_t2mall <-
+  plot_t2mall  + geom_hline(yintercept = 0,
+                            linetype = "dotted",
+                            color = "#3c3c3c")  + geom_hline(yintercept = 30,
+                                                             linetype = "dotted",
+                                                             color = "#3c3c3c") +
+  geom_count(aes(
+    size = ..prop..,
+    alpha = ..prop..,
+    colour = tempsol
+  )) +
+  scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits = c(-16, 50)) +
   # scale_size_area(max_size = 3.5, limits = c(0.175,1))+
-  scale_alpha() + geom_line(data=norms_tsol_data,
-                             aes(x=date, y=tsol, group=1), color="gray")
+  scale_alpha() + geom_line(data = norms_tsol_data,
+                            aes(x = date, y = tsol, group = 1),
+                            color = "gray")
 
 
 
+plot_t2mgefs <-
+  ggplot(plotruns[which(grepl("GEFS", plotruns$runs)), ], aes(dates, tempsol)) + theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) + scale_x_datetime(expand = c(0, 0),
+                 date_breaks = "1 day",
+                 date_labels = "%d %b") +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(-20, 50, 10),
+    labels = seq(-20, 50, 10),
+    limits = c(-20, 50)
+    ,
+    sec.axis = sec_axis(
+      ~ +(. + 20) * 3 / 7,
+      breaks = as.numeric(names(pp_cols)),
+      labels = names(pp_cols)
+    )
+  ) + ggtitle(sprintf("T2M + PP _ ENS GEFS 00z06z12z18z  %s", Sys.Date() -
+                        1))
 
-
-
-plot_t2mgefs <- ggplot(plotruns[which(grepl("GEFS",plotruns$runs)),], aes(dates, tempsol)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates)-8,4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates)-8,4)]),"%d %b"))+
-  scale_y_continuous(expand = c(0, 0),breaks = seq(-20,50,10), labels = seq(-20,50,10), limits= c(-20,50)
-                     ,sec.axis = sec_axis(~ +(.+20)*3/7, breaks = as.numeric(names(pp_cols)), labels = names(pp_cols))
-                     ) + ggtitle(sprintf("T2M + PP _ ENS GEFS 00z06z12z18z  %s",Sys.Date()-1))
-                     
-    idx <- 110
-for (precip in rev(c(seq(0.1,0.9,0.1), seq(1,100)))) {
+idx <- 110
+for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
   plot_t2mgefs <- plot_t2mgefs +
-    geom_segment(data = pp_probs_gefs, aes_string(x="V1", y=trans_axes_tsol(precip), xend = "V1", yend = -20), size = barwidth,color = MixColor("black","cornflowerblue",1-pp_probs_all[,idx]), lineend = "butt")
-  idx <- idx -1
+    geom_segment(
+      data = pp_probs_gefs,
+      aes_string(
+        x = "V1",
+        y = trans_axes_tsol(precip),
+        xend = "V1",
+        yend = -20
+      ),
+      size = barwidth,
+      color = MixColor("black", "cornflowerblue", 1 - pp_probs_all[, idx]),
+      lineend = "butt"
+    )
+  idx <- idx - 1
 }
-    
 
-plot_t2mgefs <- plot_t2mgefs  + geom_hline(yintercept=0, linetype="dotted", color = "#3c3c3c")  + geom_hline(yintercept=30, linetype="dotted", color = "#3c3c3c")+  
-geom_count(aes(size = ..prop.., alpha = ..prop.., colour = tempsol)) +
-          scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits=c(-16,50)) +
-  scale_alpha() +  geom_line(data=norms_tsol_data,
-                             aes(x=date, y=tsol, group=1), color="gray")
+
+plot_t2mgefs <-
+  plot_t2mgefs  + geom_hline(yintercept = 0,
+                             linetype = "dotted",
+                             color = "#3c3c3c")  + geom_hline(yintercept = 30,
+                                                              linetype = "dotted",
+                                                              color = "#3c3c3c") +
+  geom_count(aes(
+    size = ..prop..,
+    alpha = ..prop..,
+    colour = tempsol
+  )) +
+  scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits = c(-16, 50)) +
+  scale_alpha() +  geom_line(data = norms_tsol_data,
+                             aes(x = date, y = tsol, group = 1),
+                             color = "gray")
 ```
 
 # z500/t850 {data-navmenu="Diagrammes Probabilistes"}
@@ -699,6 +971,7 @@ z500_scens <- na.omit(z500_scens[,1:limit])
   ordre <- clusterings[[numb-1]]$clusinfo[,1]
   names(ordre) <- seq(1,length(ordre))
 
+
   for (clust in seq(1,8)) {
     myplots_za[[clust]] <- ggplot()
 if (clust <= numb) {
@@ -722,15 +995,62 @@ if (clust <= numb) {
      med = unname(unlist(lapply(z500_scens[elems,-c(1)],mean))),
      q75 = unname(unlist(lapply(z500_scens[elems,-c(1)],mean))) + unname(unlist(lapply(z500_scens[elems,-c(1)],sd)))
      )
+the_data$variable <- as_datetime(the_data$variable)
+stats$DATE <- as_datetime(stats$DATE)
 
- myplots_za[[clust]] <-   ggplot(stats, aes(x=DATE)) +
-        geom_line(data = the_data, aes(x=variable, y=value,group = ID),alpha = 0.80, size = 0.8 , color="grey30") +
-  geom_ribbon(aes(ymin = q25, ymax = q75, group=1),alpha = 0.60, fill = "grey70") +
-       geom_line(aes(y=med,group = 1),alpha = 0.80, size = 0.8, color="red") +
-       theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates),4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates),4)]),"%d %b")) + scale_y_continuous(expand = c(0, 0),breaks = seq(480,620,20), labels = seq(480,620,20), limits =c(480,620)) +
-       ggtitle(sprintf("Cluster %s (%s scénarios sur %s)", clust, length(elems), nrow(z500_scens))) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+15),], aes(x=DATE, y=Z500, group=1), color="white",linetype = "dashed")
+ myplots_za[[clust]] <-  
+
+ggplot(stats, aes(x = DATE)) +
+  geom_line(
+    data = the_data,
+    aes(x = variable, y = value, group = ID),
+    alpha = 0.80,
+    size = 0.8 ,
+    color = "grey30"
+  ) +
+  geom_ribbon(aes(ymin = q25, ymax = q75, group = 1),
+              alpha = 0.60,
+              fill = "grey70") +
+  geom_line(
+    aes(y = med, group = 1),
+    alpha = 0.80,
+    size = 0.8,
+    color = "red"
+  ) +
+  theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) + 
+  scale_x_datetime(expand = c(0, 0),
+                   date_breaks = "1 day",
+                   date_labels = "%d %b"
+  ) + scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(480, 620, 20),
+    labels = seq(480, 620, 20),
+    limits = c(480, 620)
+  ) +
+  ggtitle(sprintf(
+    "Cluster %s (%s scénarios sur %s)",
+    clust,
+    length(elems),
+    nrow(z500_scens)
+  )) + geom_line(
+    data = norms[seq(which(norms$DATE == the_dates[1]),
+                     which(norms$DATE == the_dates[1]) + 15), ],
+    aes(x = DATE, y = Z500, group = 1),
+    color = "white",
+    linetype = "dashed"
+  )
+
 
 }
   }
@@ -1066,17 +1386,60 @@ if (clust <= numb) {
      med = unname(unlist(lapply(t850_scens[elems,-c(1)],mean))),
      q75 = unname(unlist(lapply(t850_scens[elems,-c(1)],mean))) + unname(unlist(lapply(t850_scens[elems,-c(1)],sd)))
      )
+the_data$variable <- as_datetime(the_data$variable)
+stats$DATE <- as_datetime(stats$DATE)
 
-
- myplots_ta[[clust]] <-    ggplot(stats, aes(x=DATE)) +
-        geom_line(data = the_data, aes(x=variable, y=value,group = ID),alpha = 0.80, size = 0.8 , color="grey30") +
-  geom_ribbon(aes(ymin = q25, ymax = q75, group=1),alpha = 0.60, fill = "grey70") +
-       geom_line(aes(y=med,group = 1),alpha = 0.80, size = 0.8, color="red") +
-       theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates),4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates),4)]),"%d %b")) +
-       scale_y_continuous(expand = c(0, 0),breaks = seq(-30,40,10), labels = seq(-30,40,10), limits= c(-30,40)) +
-       ggtitle(sprintf("Cluster %s (%s scénarios sur %s)", clust, length(elems), nrow(t850_scens))) + geom_line(data= norms[seq(which(norms$DATE == the_dates[1]),which(norms$DATE == the_dates[1])+15),], aes(x=DATE, y=T850, group=1), color="white",linetype = "dashed")
+ myplots_ta[[clust]] <-   
+ggplot(stats, aes(x = DATE)) +
+  geom_line(
+    data = the_data,
+    aes(x = variable, y = value, group = ID),
+    alpha = 0.80,
+    size = 0.8 ,
+    color = "grey30"
+  ) +
+  geom_ribbon(aes(ymin = q25, ymax = q75, group = 1),
+              alpha = 0.60,
+              fill = "grey70") +
+  geom_line(
+    aes(y = med, group = 1),
+    alpha = 0.80,
+    size = 0.8,
+    color = "red"
+  ) +
+  theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) + scale_x_datetime(expand = c(0, 0),
+                       date_breaks = "1 day",
+                       date_labels = "%d %b"
+  ) +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks = seq(-30, 40, 10),
+    labels = seq(-30, 40, 10),
+    limits = c(-30, 40)
+  ) +
+  ggtitle(sprintf(
+    "Cluster %s (%s scénarios sur %s)",
+    clust,
+    length(elems),
+    nrow(t850_scens)
+  )) + geom_line(
+    data = norms[seq(which(norms$DATE == the_dates[1]),
+                     which(norms$DATE == the_dates[1]) + 15), ],
+    aes(x = DATE, y = T850, group = 1),
+    color = "white",
+    linetype = "dashed"
+  )
 
 }
   }
@@ -1414,16 +1777,53 @@ if (clust <= numb) {
       
       
       the_data [which(the_data$value > 29.9),"value"] <- 29.9
-      
- myplots_pa[[clust]] <-    ggplot(stats, aes(x=DATE)) +
-        geom_line(data = the_data, aes(x=variable, y=value,group = ID),alpha = 0.80, size = 0.8 , color="grey30") +
-  geom_ribbon(aes(ymin = q25, ymax = q75, group=1),alpha = 0.60, fill = "grey70") +
-       geom_line(aes(y=med,group = 1),alpha = 0.80, size = 0.8, color="red") +
-       theme_linedraw() + theme(plot.title = element_text(hjust = 0.5,face = "bold"),axis.title = element_blank(), legend.position = "none",  panel.background = element_rect(fill = "black",
-                                colour = "black",
-                                size = 0, linetype = "solid"),axis.text.x = element_text(angle = 90)) + scale_x_discrete(expand = c(0, 0),breaks = the_dates[seq(1,length(the_dates),4)], labels = format(as.POSIXct(the_dates[seq(1,length(the_dates),4)]),"%d %b")) +
-       scale_y_continuous(expand = c(0, 0),breaks =  c(seq(0,1,.5),seq(2,5,1),seq(10,30,5)), labels =  c(seq(0,1,.5),seq(2,5,1),seq(10,25,5),"30+"), limits= c(0,30)) +
-       ggtitle(sprintf("Cluster %s (%s scénarios sur %s)", clust, length(elems), nrow(pp_scens)))
+      the_data$variable <- as_datetime(the_data$variable)
+stats$DATE <- as_datetime(stats$DATE)
+ myplots_pa[[clust]] <-   
+ggplot(stats, aes(x = DATE)) +
+  geom_line(
+    data = the_data,
+    aes(x = variable, y = value, group = ID),
+    alpha = 0.80,
+    size = 0.8 ,
+    color = "grey30"
+  ) +
+  geom_ribbon(aes(ymin = q25, ymax = q75, group = 1),
+              alpha = 0.60,
+              fill = "grey70") +
+  geom_line(
+    aes(y = med, group = 1),
+    alpha = 0.80,
+    size = 0.8,
+    color = "red"
+  ) +
+  theme_linedraw() + theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    ),
+    axis.text.x = element_text(angle = 90)
+  ) +   scale_x_datetime(expand = c(0, 0),
+                         date_breaks = "1 day",
+                         date_labels = "%d %b"
+  ) +
+  scale_y_continuous(
+    expand = c(0, 0),
+    breaks =  c(seq(0, 1, .5), seq(2, 5, 1), seq(10, 30, 5)),
+    labels =  c(seq(0, 1, .5), seq(2, 5, 1), seq(10, 25, 5), "30+"),
+    limits = c(0, 30)
+  ) +
+  ggtitle(sprintf(
+    "Cluster %s (%s scénarios sur %s)",
+    clust,
+    length(elems),
+    nrow(pp_scens)
+  ))
 
 }
   }
