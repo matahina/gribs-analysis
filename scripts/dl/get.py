@@ -140,8 +140,8 @@ else:
                         j = j +1
                         if j >100:
                             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                                errlog.write(model_name+"   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+'\n')
-                            print(' Expected: '+server_size+' Retrieved: '+str(dl_size))
+                                errlog.write(model_name+"   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+" WON'T RETRY!!\n")
+                            print(' Expected: '+server_size+' Retrieved: '+str(dl_size)+" WON'T RETRY!!")
                             do_loop = False
                             break
                     if j < 100:
@@ -156,6 +156,9 @@ else:
                         errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
                     print('Reason: ', e.reason)
                     if "incomplete" in e.reason:
+                        with open('../logs/'+model_date+'.log', 'a') as errlog:
+                            errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
+                        print(' Will retry')
                         do_loop = True
                     else:
                         do_loop = False
