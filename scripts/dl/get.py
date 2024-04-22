@@ -78,18 +78,30 @@ if model_name != "cfs":
             print(file_name)
             print(full_url)
 
-            try:
-                response = urllib.request.urlretrieve(
-                    full_url,
-                    file_name)
-            except urllib.error.HTTPError as e:
-                with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
-                print('Error code: ', e.code)
-            except urllib.error.URLError as e:
-                with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-                print('Reason: ', e.reason)
+            i = 0
+            do_loop = True
+            while do_loop:
+                i = i + 1
+                do_loop = False
+                try:
+                    response = urllib.request.urlretrieve(
+                        full_url,
+                        file_name)
+                except urllib.error.HTTPError as e:
+                    with open('../logs/'+model_date+'.log', 'a') as errlog:
+                        errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
+                    print('Error code: ', e.code)
+                except urllib.error.URLError as e:
+                    with open('../logs/'+model_date+'.log', 'a') as errlog:
+                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                    print('Reason: ', e.reason)
+                except http.client.RemoteDisconnected as e:
+                    with open('../logs/'+model_date+'.log', 'a') as errlog:
+                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                    print('Reason: ', e.reason)
+                    do_loop = True
+                if i > 100:
+                    break
 
 else:
     for sc in range(1,5):
@@ -121,8 +133,10 @@ else:
                         print(server_size)
 
                         j = j +1
-
+                        print(i)
+                        print(j)
                         if j >100:
+                            do_loop = False
                             break
                     if j < 100:
                         do_loop = False
