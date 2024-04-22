@@ -7,6 +7,8 @@ import time
 import urllib.request
 import urllib.parse
 
+import http
+
 import socket
 
 socket.setdefaulttimeout(60*5)
@@ -137,5 +139,10 @@ else:
                         do_loop = True
                     else:
                         do_loop = False
+                except http.client.RemoteDisconnected as e:
+                    with open('../logs/'+model_date+'.log', 'a') as errlog:
+                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                    print('Reason: ', e.reason)
+                    do_loop = True
                 if i > 100:
                     do_loop = False
