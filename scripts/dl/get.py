@@ -164,8 +164,8 @@ else:
                         do_loop = False
                 except http.client.RemoteDisconnected as e:
                     with open('../logs/'+model_date+'.log', 'a') as errlog:
-                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-                    print('Reason: ', e.reason)
+                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e)+'\n')
+                    print('Reason: ', e)
                     do_loop = True
                 if i > 100:
                     do_loop = False
