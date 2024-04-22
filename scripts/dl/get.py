@@ -122,6 +122,11 @@ else:
                     dl_size = 0
 
                     j = 0
+
+                    if server_size == "0":
+                        with open('../logs/'+model_date+'.log', 'a') as errlog:
+                            errlog.write(model_name+"   "+file_name+' Server size is null so file might not exist or access forbidden!')
+                        print('Server size is null so file might not exist or access forbidden!')
                     while str(dl_size) != server_size:
                         response = urllib.request.urlretrieve(
                         full_url,
@@ -133,8 +138,6 @@ else:
                         print(server_size)
 
                         j = j +1
-                        print(i)
-                        print(j)
                         if j >100:
                             do_loop = False
                             break
