@@ -7,6 +7,10 @@ import time
 import urllib.request
 import urllib.parse
 
+import socket
+
+socket.setdefaulttimeout(60*5)
+
 import requests
 
 model_date = str(sys.argv[1])
@@ -94,26 +98,44 @@ else:
             file_name = param+"."+"{:02d}".format(sc)+"."+model_date+""+model_run+".daily.grb2"
             print(file_name)
 
-            try:
-                server_size = requests.head(full_url).headers.get('content-length')
+            i = 0
+            do_loop = True
+            while do_loop:
+                i = i +1
+                try:
+                    server_size = requests.head(full_url).headers.get('content-length')
 
-                response = urllib.request.urlretrieve(
-                    full_url,
-                    file_name)
+                    dl_size = 0
 
-                dl_size = os.stat(file_name).st_size
-                while str(dl_size) != server_size:
-                    print(dl_size)
-                    print(server_size)
-                    response = urllib.request.urlretrieve(
-                    full_url,
-                    file_name)
+                    j = 0
+                    while str(dl_size) != server_size:
+                        response = urllib.request.urlretrieve(
+                        full_url,
+                        file_name)
 
-            except urllib.error.HTTPError as e:
-                with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
-                print('Error code: ', e.code)
-            except urllib.error.URLError as e:
-                with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-                print('Reason: ', e.reason)
+                        dl_size = os.stat(file_name).st_size
+
+                        print(dl_size)
+                        print(server_size)
+
+                        j = j +1
+
+                        if j >100:
+                            break
+                    if j < 100:
+                        do_loop = False
+                except urllib.error.HTTPError as e:
+                    with open('../logs/'+model_date+'.log', 'a') as errlog:
+                        errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
+                    print('Error code: ', e.code)
+                    do_loop = False
+                except urllib.error.URLError as e:
+                    with open('../logs/'+model_date+'.log', 'a') as errlog:
+                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                    print('Reason: ', e.reason)
+                    if "incomplete" in e.reason:
+                        do_loop = True
+                    else:
+                        do_loop = False
+                if i > 100:
+                    do_loop = False
