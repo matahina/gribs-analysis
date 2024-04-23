@@ -155,7 +155,7 @@ else:
                     with open('../logs/'+model_date+'.log', 'a') as errlog:
                         errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
                     print('Reason: ', e.reason)
-                    if "incomplete" in e.reason:
+                    if ("incomplete" in e.reason) or ("timed out" in e.reason):
                         with open('../logs/'+model_date+'.log', 'a') as errlog:
                             errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
                         print(' Will retry')
