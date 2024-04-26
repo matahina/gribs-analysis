@@ -66,7 +66,7 @@ first_try <- TRUE
 for (z in seq(0, last_z, step_z)) {
   for (sc in seq (1, last_sc, 1)) {
     for (ech in the_range) {
-      for (location in profiles[name]) {
+      for (location in profiles$name) {
       filename = sprintf("%s_%02d_%03d_%03d_%s.grb2", extractdate, z, sc, ech, location)
       
       if (args[2] == "cfs") {
