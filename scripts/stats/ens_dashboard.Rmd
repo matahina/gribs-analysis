@@ -1,5 +1,5 @@
 ---
-title: 'Ensembles `r format(Sys.time(),"%Y-%m-%d %H:%M:%S")`'
+title: 'Ensembles `r format(Sys.time(),"%Y-%m-%d %H:%M:%S") ; params$location`'
 output: 
   flexdashboard::flex_dashboard:
     vertical_layout: fill
@@ -31,6 +31,14 @@ library(ggpubr)
 library(gridExtra)
 
 library(attempt)
+
+
+
+
+
+prof_name = params$prof_name
+
+
 
 norm <- read.csv("../../assets/norms/norm.csv", header=FALSE)
 norm_ncep <- read.csv("../../assets/norms/norm_ncep.csv")
@@ -195,7 +203,7 @@ allruns <-
 
 
 allruns <- allruns[order(allruns$dates),]
-
+allruns <- allruns[which(allruns$profile == prof_name),]
 # the_dates <- sort(unique(c(z500_unif$variable,t850_unif$variable,pp_unif$variable)))
 # 
 # the_dates <- the_dates[(the_dates>toString(format(sysdate,"%Y-%m-%d")))]

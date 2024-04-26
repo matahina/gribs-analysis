@@ -7,3 +7,4 @@ data/
 /scripts/libs/notify_ssh.sh
 /scripts/stats/cfs_dashboard.html
 /scripts/dl/lock.txt
+/.Rhistory

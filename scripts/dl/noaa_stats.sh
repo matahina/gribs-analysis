@@ -2,6 +2,7 @@
 
 # $1 : Set
 # $2 : Day ago
+# $3 : Profile
 
 
 ######################################
@@ -20,25 +21,25 @@ done
 echo "BUSY" > lock.txt
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""R Analysis Start - "${1^^}" "$DATE"" >> ../../data/logs/"$DATE".log
 test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "R Analysis Start" "${1^^} $DATE"
-
+LOC=`sed -nr "/^\["$3"\]/ { :l /^name[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" ./magic_config.ini`
 
 ######################################
 ## R Analysis
 ######################################
 cd ../stats
-Rscript -e "rmarkdown::render('"$1"_dashboard.Rmd')" >> ../../data/logs/"$DATE".log
+Rscript -e "rmarkdown::render('"$1"_dashboard.Rmd',params= list( location= "$LOC", prof_name ="$3"))" >> ../../data/logs/"$DATE".log
 rm my.inv
 
 ######################################
 ## Clear files
 ######################################
 cd $DIR
-echo "FREE" > lock.txt
 python3 storage_clean.py
 
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""R Analysis Done - "${1^^}" "$DATE"" >> ../../data/logs/"$DATE".log
 test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "R Analysis Done" "${1^^} $DATE"
 echo "" >> ../../data/logs/"$DATE".log
 echo "" >> ../../data/logs/"$DATE".log
+echo "FREE" > lock.txt
 
 test -f ../libs/publish_dashboards.sh && ../libs/publish_dashboards.sh

@@ -1,5 +1,7 @@
 #! /usr/bin/python3
 
+import configparser
+
 import glob, os, sys
 import subprocess
 import time
@@ -15,6 +17,17 @@ socket.setdefaulttimeout(60*5)
 
 import requests
 
+config = configparser.ConfigParser()
+config.read('magic_config.ini')
+
+profiles = {}
+
+for i in config.sections():
+    if "Profile" in i:
+        if config[i]['use_it'] == "yes":
+            profiles[i] = [config[i]['lat'], config[i]['lon']]
+
+
 model_date = str(sys.argv[1])
 model_run = str(sys.argv[2])
 model_name = str(sys.argv[3])
@@ -24,7 +37,6 @@ model_name = str(sys.argv[3])
 # model_name = "cfs"
 
 os.chdir("../../data/"+model_name+"/")
-# os.chdir("/home/petite_fleur/Bureau/Test4/")
 
 if model_name == "gefs":
     n_pert = 31
@@ -35,73 +47,74 @@ if model_name != "cfs":
 
     for sc in range(1,n_pert):
         for ech in list(range(0,193,3)) + list(range(198,385,6)):
+            for prof_name, location in profiles.items():
 
-            if model_name == "fnmoc":
-                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl'
-                body_dir = '/fens.'+model_date+'/'+model_run+'/pgrb2ap5'
-                body_file = 'ENSEMBLE.halfDegree.MET.fcst_et'+"{:03d}".format(sc)+'.'+"{:03d}".format(ech)+'.'+model_date+model_run
+                if model_name == "fnmoc":
+                    url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl'
+                    body_dir = '/fens.'+model_date+'/'+model_run+'/pgrb2ap5'
+                    body_file = 'ENSEMBLE.halfDegree.MET.fcst_et'+"{:03d}".format(sc)+'.'+"{:03d}".format(ech)+'.'+model_date+model_run
 
-            if model_name == "gefs":
-                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl'
-                body_dir = '/gefs.'+model_date+'/'+model_run+'/atmos/pgrb2ap5'
-                body_file = 'gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
+                if model_name == "gefs":
+                    url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl'
+                    body_dir = '/gefs.'+model_date+'/'+model_run+'/atmos/pgrb2ap5'
+                    body_file = 'gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
 
-            if model_name == "gem":
-                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl'
-                body_dir = '/cmce.'+model_date+'/'+model_run+'/pgrb2ap5'
-                body_file = 'cmc_gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
+                if model_name == "gem":
+                    url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl'
+                    body_dir = '/cmce.'+model_date+'/'+model_run+'/pgrb2ap5'
+                    body_file = 'cmc_gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
 
-            ## Set the request's body.
-            post_body = {
-                'dir' : body_dir,
-                'file' : body_file,
-                'lev_2_m_above_ground' : 'on',
-                'lev_500_mb' : 'on',
-                'lev_850_mb' : 'on',
-                'lev_surface' : 'on',
-                'var_APCP' : 'on',
-                'var_HGT' : 'on',
-                'var_TMP' : 'on',
-                'subregion' : '',
-                'leftlon' : '5',
-                'rightlon' : '7',
-                'toplat' : '50',
-                'bottomlat' : '48'
-                    }
+                ## Set the request's body.
+                post_body = {
+                    'dir' : body_dir,
+                    'file' : body_file,
+                    'lev_2_m_above_ground' : 'on',
+                    'lev_500_mb' : 'on',
+                    'lev_850_mb' : 'on',
+                    'lev_surface' : 'on',
+                    'var_APCP' : 'on',
+                    'var_HGT' : 'on',
+                    'var_TMP' : 'on',
+                    'subregion' : '',
+                    'leftlon' : str((round(float(location[1]) * 2) / 2 )-0.5),
+                    'rightlon' : str((round(float(location[1]) * 2) / 2 )),
+                    'toplat' : str((round(float(location[0]) * 2) / 2 )),
+                    'bottomlat' : str((round(float(location[0]) * 2) / 2 )-0.5)
+                        }
 
-            postfields = urllib.parse.urlencode(post_body)
+                postfields = urllib.parse.urlencode(post_body)
 
-            full_url = url + '?' + postfields
+                full_url = url + '?' + postfields
 
-            file_name = model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+".grb2"
+                file_name = model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+"_"+prof_name+".grb2"
 
-            print(file_name)
-            print(full_url)
+                print(file_name)
+                print(full_url)
 
-            i = 0
-            do_loop = True
-            while do_loop:
-                i = i + 1
-                do_loop = False
-                try:
-                    response = urllib.request.urlretrieve(
-                        full_url,
-                        file_name)
-                except urllib.error.HTTPError as e:
-                    with open('../logs/'+model_date+'.log', 'a') as errlog:
-                        errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
-                    print('Error code: ', e.code)
-                except urllib.error.URLError as e:
-                    with open('../logs/'+model_date+'.log', 'a') as errlog:
-                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-                    print('Reason: ', e.reason)
-                except http.client.RemoteDisconnected as e:
-                    with open('../logs/'+model_date+'.log', 'a') as errlog:
-                        errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-                    print('Reason: ', e.reason)
-                    do_loop = True
-                if i > 100:
-                    break
+                i = 0
+                do_loop = True
+                while do_loop:
+                    i = i + 1
+                    do_loop = False
+                    try:
+                        response = urllib.request.urlretrieve(
+                            full_url,
+                            file_name)
+                    except urllib.error.HTTPError as e:
+                        with open('../logs/'+model_date+'.log', 'a') as errlog:
+                            errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
+                        print('Error code: ', e.code)
+                    except urllib.error.URLError as e:
+                        with open('../logs/'+model_date+'.log', 'a') as errlog:
+                            errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                        print('Reason: ', e.reason)
+                    except http.client.RemoteDisconnected as e:
+                        with open('../logs/'+model_date+'.log', 'a') as errlog:
+                            errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                        print('Reason: ', e.reason)
+                        do_loop = True
+                    if i > 100:
+                        break
 
 else:
     for sc in range(1,5):

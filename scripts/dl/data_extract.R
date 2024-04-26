@@ -8,17 +8,35 @@ args = commandArgs(trailingOnly = TRUE)
 library(rNOMADS)
 library(stringr)
 library(assertthat)
+library(ini)
+library(collapse)
 
+config <- read.ini("magic_config.ini")
+
+profiles <- data.frame(name = character(),
+                       lat = numeric(),
+                       lon = numeric(), 
+                       stringsAsFactors = FALSE)
+
+for (name in names(config)) {
+  if (grepl("Profile", name)) {
+    if (config[[name]]["use_it"] == "yes") {
+      profiles[nrow(profiles) + 1, ] <- unname(unlist(c(name,config[[name]]["lat"],config[[name]]["lon"])))
+    }
+  }
+}
 
 extractdate <-
   str_replace_all(Sys.Date() - as.integer(args[1]), "-", "")
 
 donneesrun <- data.frame(dates = character(),
                          runs = character(),
+                         profile = character(),
                          stringsAsFactors = FALSE)
 
 donneesjour <- data.frame(dates = character(),
                           runs = character(),
+                          profile = character(),
                           stringsAsFactors = FALSE)
 
 last_z = 12
@@ -48,7 +66,8 @@ first_try <- TRUE
 for (z in seq(0, last_z, step_z)) {
   for (sc in seq (1, last_sc, 1)) {
     for (ech in the_range) {
-      filename = sprintf("%s_%02d_%03d_%03d.grb2", extractdate, z, sc, ech)
+      for (location in profiles[name]) {
+      filename = sprintf("%s_%02d_%03d_%03d_%s.grb2", extractdate, z, sc, ech, location)
       
       if (args[2] == "cfs") {
         filename = sprintf(".%02d.%s%02d.daily.grb2", sc, extractdate, z)
@@ -57,53 +76,89 @@ for (z in seq(0, last_z, step_z)) {
           sprintf("../../data/cfs/z500%s", filename),
           '500 mb',
           'HGT',
-          domain = c(5.5, 6.5, 49.5, 48.5)
+          domain = c(floor(as.numeric(profiles[which(profiles$name == location),"lon"])-2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lon"])+2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lat"])+2),
+                     floor(as.numeric(profiles[which(profiles$name == location),"lat"])-2))
         )
         
         tadab <- ReadGrib(
           sprintf("../../data/cfs/t850%s", filename),
           '850 mb',
           'TMP',
-          domain = c(5.5, 6.5, 49.5, 48.5)
+          domain = c(floor(as.numeric(profiles[which(profiles$name == location),"lon"])-2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lon"])+2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lat"])+2),
+                     floor(as.numeric(profiles[which(profiles$name == location),"lat"])-2))
         )
         
         tadac <- ReadGrib(
           sprintf("../../data/cfs/tmp2m%s", filename),
           '2 m above ground',
           'TMP',
-          domain = c(6, 7, 49, 48)
+          domain = c(floor(as.numeric(profiles[which(profiles$name == location),"lon"])-2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lon"])+2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lat"])+2),
+                     floor(as.numeric(profiles[which(profiles$name == location),"lat"])-2))
         )
         
         tadad <- ReadGrib(
           sprintf("../../data/cfs/prate%s", filename),
           'surface',
           'PRATE',
-          domain = c(6, 7, 49, 48)
+          domain = c(floor(as.numeric(profiles[which(profiles$name == location),"lon"])-2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lon"])+2),
+                     ceiling(as.numeric(profiles[which(profiles$name == location),"lat"])+2),
+                     floor(as.numeric(profiles[which(profiles$name == location),"lat"])-2))
         )
         
+        extract_a <-
+          BuildProfile(tadaa, as.numeric(profiles[which(profiles$name == location),"lon"]),
+                       as.numeric(profiles[which(profiles$name == location),"lat"]), spatial.average = FALSE)
+        
+        extract_b <-
+          BuildProfile(tadab, as.numeric(profiles[which(profiles$name == location),"lon"]),
+                       as.numeric(profiles[which(profiles$name == location),"lat"]), spatial.average = FALSE)
+        
+        extract_c <-
+          BuildProfile(tadac, as.numeric(profiles[which(profiles$name == location),"lon"]),
+                       as.numeric(profiles[which(profiles$name == location),"lat"]), spatial.average = FALSE)
+        
+        extract_d <-
+          BuildProfile(tadad, as.numeric(profiles[which(profiles$name == location),"lon"]),
+                       as.numeric(profiles[which(profiles$name == location),"lat"]), spatial.average = FALSE)
+        
+        run_name <-
+          paste(
+            fmode(c(tadaa$model.run.date,tadab$model.run.date,tadac$model.run.date,tadad$model.run.date))
+            , sprintf("sc%02d", sc))
         
         tab_a = data.frame(
-          runs = paste(tadaa$model.run.date, sprintf("sc%02d", sc)),
-          dates = tadaa$forecast.date,
-          geop = tadaa$value / 10
+          runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
+          dates = extract_a[[1]]$forecast.date,
+          geop = unlist(unname(c(extract_a[[1]]$profile.data))) / 10,
+          profile = name
         )
         
         tab_b = data.frame(
-          runs = paste(tadab$model.run.date, sprintf("sc%02d", sc)),
-          dates = tadab$forecast.date,
-          tempalt = tadab$value - 273.15
+          runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
+          dates = extract_b[[1]]$forecast.date,
+          tempalt = unlist(unname(c(extract_b[[1]]$profile.data))) - 273.15,
+          profile = name
         )
         
         tab_c = data.frame(
-          runs = paste(tadac$model.run.date, sprintf("sc%02d", sc)),
-          dates = tadac$forecast.date,
-          tempsol = tadac$value - 273.15
+          runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
+          dates = extract_c[[1]]$forecast.date,
+          tempsol = unlist(unname(c(extract_c[[1]]$profile.data))) - 273.15,
+          profile = name
         )
         
         tab_d = data.frame(
-          runs = paste(tadad$model.run.date, sprintf("sc%02d", sc)),
-          dates = tadad$forecast.date,
-          precs = tadad$value * 3600 * 6
+          runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
+          dates = extract_d[[1]]$forecast.date,
+          precs = unlist(unname(c(extract_d[[1]]$profile.data))) * 3600 * 6,
+          profile = name
         )
         
         
@@ -112,7 +167,7 @@ for (z in seq(0, last_z, step_z)) {
           merge(
             tab_a,
             tab_b,
-            by = c("runs", "dates"),
+            by = c("runs", "dates", "profile"),
             all.x = TRUE,
             all.y = TRUE
           )
@@ -121,7 +176,7 @@ for (z in seq(0, last_z, step_z)) {
           merge(
             total,
             tab_c,
-            by = c("runs", "dates"),
+            by = c("runs", "dates", "profile"),
             all.x = TRUE,
             all.y = TRUE
           )
@@ -129,7 +184,7 @@ for (z in seq(0, last_z, step_z)) {
           merge(
             total,
             tab_d,
-            by = c("runs", "dates"),
+            by = c("runs", "dates", "profile"),
             all.x = TRUE,
             all.y = TRUE
           )
@@ -142,14 +197,20 @@ for (z in seq(0, last_z, step_z)) {
             sprintf("../../data/%s/%s", args[2], filename),
             c('500 mb', '850 mb', '2 m above ground', 'surface'),
             c('HGT', 'APCP', 'TMP'),
-            domain = c(5, 7, 50, 48)
+            domain = c(floor(as.numeric(profiles[which(profiles$name == location),"lon"])-2),
+                       ceiling(as.numeric(profiles[which(profiles$name == location),"lon"])+2),
+                       ceiling(as.numeric(profiles[which(profiles$name == location),"lat"])+2),
+                       floor(as.numeric(profiles[which(profiles$name == location),"lat"])-2))
           ))
         }, warning = function(war) {
           return(ReadGrib(
             sprintf("../../data/%s/%s", args[2], filename),
             c('500 mb', '850 mb', '2 m above ground', 'surface'),
             c('HGT', 'APCP', 'TMP'),
-            domain = c(5, 7, 50, 48)
+            domain = c(floor(as.numeric(profiles[which(profiles$name == location),"lon"])-2),
+                       ceiling(as.numeric(profiles[which(profiles$name == location),"lon"])+2),
+                       ceiling(as.numeric(profiles[which(profiles$name == location),"lat"])+2),
+                       floor(as.numeric(profiles[which(profiles$name == location),"lat"])-2))
           ))
         },
         error = function(e) {
@@ -162,6 +223,7 @@ for (z in seq(0, last_z, step_z)) {
         donneesrun <- data.frame(
           runs = character(),
           dates = character(),
+          profile = character(),
           geop = numeric(),
           tempalt = numeric(),
           tempsol = numeric(),
@@ -174,7 +236,8 @@ for (z in seq(0, last_z, step_z)) {
           print(dim(donneesjour))
           
           profile <-
-            BuildProfile(tout, 6.1727, 49.1191, spatial.average = FALSE)
+            BuildProfile(tout, as.numeric(profiles[which(profiles$name == location),"lon"]),
+                         as.numeric(profiles[which(profiles$name == location),"lat"]), spatial.average = FALSE)
           
           #Geop
           var_hgt <-
@@ -212,6 +275,7 @@ for (z in seq(0, last_z, step_z)) {
           
           donneesrun[nrow(donneesrun) + 1, ] <- c(runs,
                                                   dates,
+                                                  name,
                                                   var_hgt,
                                                   var_talt,
                                                   var_tsol,
@@ -232,7 +296,7 @@ for (z in seq(0, last_z, step_z)) {
       
       
       
-    }
+    }}
   }
   
 }
