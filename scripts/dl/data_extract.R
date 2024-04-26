@@ -137,28 +137,28 @@ for (z in seq(0, last_z, step_z)) {
           runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
           dates = extract_a[[1]]$forecast.date,
           geop = unlist(unname(c(extract_a[[1]]$profile.data))) / 10,
-          profile = name
+          profile = location
         )
         
         tab_b = data.frame(
           runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
           dates = extract_b[[1]]$forecast.date,
           tempalt = unlist(unname(c(extract_b[[1]]$profile.data))) - 273.15,
-          profile = name
+          profile = location
         )
         
         tab_c = data.frame(
           runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
           dates = extract_c[[1]]$forecast.date,
           tempsol = unlist(unname(c(extract_c[[1]]$profile.data))) - 273.15,
-          profile = name
+          profile = location
         )
         
         tab_d = data.frame(
           runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
           dates = extract_d[[1]]$forecast.date,
           precs = unlist(unname(c(extract_d[[1]]$profile.data))) * 3600 * 6,
-          profile = name
+          profile = location
         )
         
         
@@ -275,7 +275,7 @@ for (z in seq(0, last_z, step_z)) {
           
           donneesrun[nrow(donneesrun) + 1, ] <- c(runs,
                                                   dates,
-                                                  name,
+                                                  location,
                                                   var_hgt,
                                                   var_talt,
                                                   var_tsol,
