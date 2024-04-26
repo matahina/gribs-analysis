@@ -32,10 +32,6 @@ model_date = str(sys.argv[1])
 model_run = str(sys.argv[2])
 model_name = str(sys.argv[3])
 
-# model_date = "20240421"
-# model_run = "00"
-# model_name = "cfs"
-
 os.chdir("../../data/"+model_name+"/")
 
 if model_name == "gefs":

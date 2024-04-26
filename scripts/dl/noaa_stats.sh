@@ -27,7 +27,7 @@ LOC=`sed -nr "/^\["$3"\]/ { :l /^name[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" 
 ## R Analysis
 ######################################
 cd ../stats
-R -e "rmarkdown::render('"$1"_dashboard.Rmd', output_file = '"$1"_dashboard_"$3".html')" --args "$LOC" "$3" >> ../../data/logs/"$DATE".log
+R -e "rmarkdown::render('"$1"_dashboard.Rmd', output_file = '"$1"_dashboard_"$3".html')" --args "$LOC" "$3" "$2" >> ../../data/logs/"$DATE".log
 rm my.inv
 
 ######################################

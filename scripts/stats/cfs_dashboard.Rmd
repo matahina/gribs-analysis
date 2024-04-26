@@ -9,10 +9,12 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-library(flexdashboard)
-```
 
-```{r}
+# commandArgs(trailingOnly=T)[1] Location Name
+# commandArgs(trailingOnly=T)[2] Profile Name
+# commandArgs(trailingOnly=T)[3] Day Ago
+
+library(flexdashboard)
 library(lubridate)
 library(ggplot2)
 library(gridExtra)
@@ -33,104 +35,141 @@ library(zoo)
 library(reshape)
 library(RColorBrewer)
 library(stringr)
+```
 
-prof_name = commandArgs(trailingOnly=T)[2]
+```{r}
+
+
+prof_name = commandArgs(trailingOnly = T)[2]
 
 Modes <- function(x) {
-   x <- x[!is.na(x)]
-   ux <- unique(x)
-   tab <- tabulate(match(x, ux))
-   ux[tab == max(tab)]
+  x <- x[!is.na(x)]
+  ux <- unique(x)
+  tab <- tabulate(match(x, ux))
+  ux[tab == max(tab)]
 }
 
 mModes <- function(x) {
   mean(Modes(x))
 }
 
-norm <- read.csv("../../assets/norms/norm.csv", header=FALSE)
+norm <- read.csv("../../assets/norms/norm.csv", header = FALSE)
 norm_ncep <- read.csv("../../assets/norms/norm_ncep.csv")
 
-YEAR <- as.integer(format(Sys.time(),"%Y"))
+YEAR <- as.integer(format(Sys.time(), "%Y"))
 
 
 norms <- data.frame(
-  DATE = c(format(as.POSIXlt(norm_ncep$DATE, format= "%d/%m"), paste0(sprintf("%s", YEAR),"-%m-%d %H:%M:%S")),
-           format(as.POSIXlt(norm_ncep$DATE, format= "%d/%m"), paste0(sprintf("%s", YEAR+1),"-%m-%d %H:%M:%S"))),
-  Z500 = c(norm_ncep$Z500,norm_ncep$Z500),
-  T850 = c(norm_ncep$T850,norm_ncep$T850)
+  DATE = c(format(
+    as.POSIXlt(norm_ncep$DATE, format = "%d/%m"),
+    paste0(sprintf("%s", YEAR), "-%m-%d %H:%M:%S")
+  ),
+  format(
+    as.POSIXlt(norm_ncep$DATE, format = "%d/%m"),
+    paste0(sprintf("%s", YEAR + 1), "-%m-%d %H:%M:%S")
+  )),
+  Z500 = c(norm_ncep$Z500, norm_ncep$Z500),
+  T850 = c(norm_ncep$T850, norm_ncep$T850)
 )
 
 norms_t2m <- data.frame(
-  DATE_min = c(format(as.POSIXlt(norm$V1, format= "%d/%m %H:%M"), paste0(sprintf("%s", YEAR),"-%m-%d 06:%M:%S")),
-           format(as.POSIXlt(norm$V1, format= "%d/%m %H:%M"), paste0(sprintf("%s", YEAR+1),"-%m-%d 06:%M:%S"))),
-  DATE_max = c(format(as.POSIXlt(norm$V3, format= "%d/%m %H:%M"), paste0(sprintf("%s", YEAR),"-%m-%d 18:%M:%S")),
-           format(as.POSIXlt(norm$V3, format= "%d/%m %H:%M"), paste0(sprintf("%s", YEAR+1),"-%m-%d 18:%M:%S"))),
-  T2M_min = c(norm$V2,norm$V2),
-  T2M_max = c(norm$V4,norm$V4)
+  DATE_min = c(format(
+    as.POSIXlt(norm$V1, format = "%d/%m %H:%M"),
+    paste0(sprintf("%s", YEAR), "-%m-%d 06:%M:%S")
+  ),
+  format(
+    as.POSIXlt(norm$V1, format = "%d/%m %H:%M"),
+    paste0(sprintf("%s", YEAR + 1), "-%m-%d 06:%M:%S")
+  )),
+  DATE_max = c(format(
+    as.POSIXlt(norm$V3, format = "%d/%m %H:%M"),
+    paste0(sprintf("%s", YEAR), "-%m-%d 18:%M:%S")
+  ),
+  format(
+    as.POSIXlt(norm$V3, format = "%d/%m %H:%M"),
+    paste0(sprintf("%s", YEAR + 1), "-%m-%d 18:%M:%S")
+  )),
+  T2M_min = c(norm$V2, norm$V2),
+  T2M_max = c(norm$V4, norm$V4)
 )
 
 
 
-norms_pp <- data.frame(
-    DATE= c(format(as.POSIXlt(norm$V5[which(format(as.POSIXlt(norm$V5, format= "%d/%m"), "%d") == "01")],
-                              format= "%d/%m"), paste0(sprintf("%s", YEAR),"-%m-%d")),
-           format(as.POSIXlt(norm$V5[which(format(as.POSIXlt(norm$V5, format= "%d/%m"), "%d") == "01")],
-                             format= "%d/%m"), paste0(sprintf("%s", YEAR + 1),"-%m-%d"))),
-    PP_CUM = c(norm$V6[which(format(as.POSIXlt(norm$V5, format= "%d/%m"), "%d") == "01")],
-               norm$V6[which(format(as.POSIXlt(norm$V5, format= "%d/%m"), "%d") == "01")])
-)
+norms_pp <- data.frame(DATE = c(format(
+  as.POSIXlt(norm$V5[which(format(as.POSIXlt(norm$V5, format = "%d/%m"), "%d") == "01")],
+             format = "%d/%m"),
+  paste0(sprintf("%s", YEAR), "-%m-%d")
+),
+format(
+  as.POSIXlt(norm$V5[which(format(as.POSIXlt(norm$V5, format = "%d/%m"), "%d") == "01")],
+             format = "%d/%m"),
+  paste0(sprintf("%s", YEAR + 1), "-%m-%d")
+)),
+PP_CUM = c(norm$V6[which(format(as.POSIXlt(norm$V5, format = "%d/%m"), "%d") == "01")],
+           norm$V6[which(format(as.POSIXlt(norm$V5, format = "%d/%m"), "%d") == "01")]))
 
 
 barwidth <- 22
 
 get_data <- function(date) {
-  
   if (file.exists(sprintf("../../data/cfs/cfs-%s.csv", date))) {
     thetable <- read.csv(sprintf("../../data/cfs/cfs-%s.csv", date))
   } else {
-    thetable <- as.data.frame(t(c(NA,NA,NA,NA,NA,NA,NA)))
+    thetable <- as.data.frame(t(c(NA, NA, NA, NA, NA, NA, NA)))
   }
-    
-  names(thetable) <- c("runs","dates","profile","geop","tempalt","tempsol","precs")
+  
+  names(thetable) <-
+    c("runs",
+      "dates",
+      "profile",
+      "geop",
+      "tempalt",
+      "tempsol",
+      "precs")
   return(thetable)
 }
 
-date_var <- Sys.Date() - 1
+date_var <- Sys.Date() - as.integer(commandArgs(trailingOnly = T)[3])
 ```
 
 ```{r}
-for (i in seq(29,0,-1)) {
+for (i in seq(29, 0, -1)) {
   if (i == 29) {
     allruns <- get_data(str_replace_all(date_var - i, "-", ""))
   } else {
-    allruns <- rbind(allruns, get_data(str_replace_all(date_var - i, "-", "")))
+    allruns <-
+      rbind(allruns, get_data(str_replace_all(date_var - i, "-", "")))
   }
   
 }
 
 if (length(allruns[is.na(allruns)]) != 0) {
-  allruns <- allruns[complete.cases(allruns[,-5]),]
+  allruns <- allruns[complete.cases(allruns[, -5]), ]
 }
 
-allruns <- allruns[order(allruns$dates),]
-allruns <- allruns[which(allruns$profile == prof_name),]
-allruns <- allruns[,-c(3)]
+allruns <- allruns[order(allruns$dates), ]
+allruns <- allruns[which(allruns$profile == prof_name), ]
+allruns <- allruns[, -c(3)]
 ```
 
 
 
 ```{r}
 
+
 the_dates <- sort(unique(allruns$dates))
 
-the_dates <- the_dates[(the_dates>toString(format(date_var+1,"%Y-%m-%d")))]
+the_dates <-
+  the_dates[(the_dates > toString(format(date_var + 1, "%Y-%m-%d")))]
 
 morc1 <- substr(allruns$dates, 6, 7)
 morc2 <- substr(allruns$dates, 9, 10)
-vdates <- paste(morc2, morc1, sep="/")
+vdates <- paste(morc2, morc1, sep = "/")
 
-allruns$geop_dev <- allruns$geop - norm_ncep$Z500[match(vdates,norm_ncep$DATE)]
-allruns$tempalt_dev <- allruns$tempalt - norm_ncep$T850[match(vdates,norm_ncep$DATE)]
+allruns$geop_dev <-
+  allruns$geop - norm_ncep$Z500[match(vdates, norm_ncep$DATE)]
+allruns$tempalt_dev <-
+  allruns$tempalt - norm_ncep$T850[match(vdates, norm_ncep$DATE)]
 
 
 MONTH_START = round_date(date_var, "month")
@@ -144,146 +183,122 @@ if (MONTH_START <= date_var) {
 
 
 ```{r}
-xlist <- match(the_dates[which(format(as.POSIXlt(the_dates),"%d %H") == "01 00")], allruns$dates)
+xlist <-
+  match(the_dates[which(format(as.POSIXlt(the_dates), "%d %H") == "01 00")], allruns$dates)
 
 the_list <- c(xlist[1])
 
-for (i in seq(2,length(xlist))) {
-  the_list <- c(the_list,xlist[i]-1,xlist[i])
+for (i in seq(2, length(xlist))) {
+  the_list <- c(the_list, xlist[i] - 1, xlist[i])
 }
 
-the_list <- the_list[1:length(the_list)-1]
+the_list <- the_list[1:length(the_list) - 1]
 
 i <- 1
 
 
 allruns$lab_months <- format(as.POSIXct(allruns$dates), "%B %Y")
-allruns$lab_months <- ordered(allruns$lab_months, levels = format(as.POSIXct(unique(paste0(substr(allruns$dates,1,7),"-01"))), "%B %Y"))
+allruns$lab_months <-
+  ordered(allruns$lab_months, levels = format(as.POSIXct(unique(
+    paste0(substr(allruns$dates, 1, 7), "-01")
+  )), "%B %Y"))
 
-# format(as.POSIXct(z500_unif$variable[the_list[1]]),"%B")
+dstart = match(the_dates[which(format(as.POSIXlt(the_dates)) == MONTH_START)], allruns$dates)[1]
 
-dstart = match(the_dates[which(format(as.POSIXlt(the_dates)) == MONTH_START)],allruns$dates)[1]
-
-# subset_runs <- allruns[dstart:the_list[i+15],]
-# subset_runs$months <- as.factor(substr(subset_runs$dates,1,7))
-
-g_plot <- ggplot(#subset_runs[which(str_detect(subset_runs$runs,"sc01")),],
-                 allruns[dstart:the_list[i+15],],
-                 aes(x = as.POSIXct(dates), y = geop_dev) 
-                 ) +
-     coord_cartesian(ylim = c(-40, 40)) +
+g_plot <-
+  ggplot(
+    allruns[dstart:the_list[i + 15], ],
+    aes(x = as.POSIXct(dates), y = geop_dev)) +
+  coord_cartesian(ylim = c(-40, 40)) +
   geom_density_2d_filled(contour_var = "density") +
-  facet_wrap(
-    ~lab_months,
-    scales = "free_x",
-    nrow=1
-    ) +
+  facet_wrap(~ lab_months,
+             scales = "free_x",
+             nrow = 1) +
   scale_color_viridis(option = "B") +
   theme_classic() +
-  theme(axis.title.x = element_blank(),
-        legend.position='none',
-        text = element_text(size=9),
-        axis.text.x = element_text(angle = 45, vjust = 1, hjust=1)
-        ) +
-  scale_y_continuous(name = "écart z500",
-                     breaks = seq(-26,32,2),
-                     labels = seq(-26,32,2),
-                     limits = c(-40,40),
-                     expand = c(0, 0)
-                     ) +
-  scale_x_datetime(#breaks = as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])[which(format(as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])), "%A %H") == "lundi 00")]),
-                   # labels = format(as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])[which(format(as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])), "%A %H") == "lundi 00")]),"%a %d/%m"),
-                   # limits = c(as.POSIXct(allruns$dates[dstart]),as.POSIXct(allruns$dates[the_list[i+15]])),
-                   labels = function(x) format(x, "%a %d/%m"),
-                   expand = c(0, 0)
-                   ) +
-  geom_hline(yintercept=0,color="white") + 
-  theme(panel.spacing = unit(0, "lines"),
-        panel.spacing.x = unit(0.125, "lines"),
-        panel.spacing.y = unit(0, "lines"),
-        strip.background = element_rect(fill="black"),
-        strip.text.x = element_text(size = 10, color = "white", face = "bold")
-        )#+
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+2]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+4]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+6]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+8]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+10]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+12]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+14]]),linetype="dashed",color="white") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+2]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i+2]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+4]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i+4]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+6]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i+6]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+8]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i+8]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+10]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i+10]]),"%B"),color="white", size = 4, fontface ="bold")+
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+12]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i+12]]),"%B"),color="white", size = 4, fontface ="bold")+
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+14]])+days(15), y=36, label=format(as.POSIXct(allruns$dates[the_list[i+14]]),"%B"),color="white", size = 4, fontface ="bold")
-
-
-# g_plot
+  theme(
+    axis.title.x = element_blank(),
+    legend.position = 'none',
+    text = element_text(size = 9),
+    axis.text.x = element_text(
+      angle = 45,
+      vjust = 1,
+      hjust = 1
+    )
+  ) +
+  scale_y_continuous(
+    name = "écart z500",
+    breaks = seq(-26, 32, 2),
+    labels = seq(-26, 32, 2),
+    limits = c(-40, 40),
+    expand = c(0, 0)
+  ) +
+  scale_x_datetime(
+    labels = function(x)
+      format(x, "%a %d/%m"),
+    expand = c(0, 0)
+  ) +
+  geom_hline(yintercept = 0, color = "white") +
+  theme(
+    panel.spacing = unit(0, "lines"),
+    panel.spacing.x = unit(0.125, "lines"),
+    panel.spacing.y = unit(0, "lines"),
+    strip.background = element_rect(fill = "black"),
+    strip.text.x = element_text(
+      size = 10,
+      color = "white",
+      face = "bold"
+    )
+  )
 
 
 
-h_plot <- ggplot(allruns[dstart:the_list[i+15],],
-                 aes(x = as.POSIXct(dates), y = tempalt_dev)
-                 ) +
-     coord_cartesian(ylim = c(-20, 20)) +
+h_plot <- ggplot(allruns[dstart:the_list[i + 15], ],
+                 aes(x = as.POSIXct(dates), y = tempalt_dev)) +
+  coord_cartesian(ylim = c(-20, 20)) +
   geom_density_2d_filled(contour_var = "density") +
-  facet_wrap(
-    ~lab_months,
-    scales = "free_x",
-    nrow=1
-    ) +
+  facet_wrap(~ lab_months,
+             scales = "free_x",
+             nrow = 1) +
   scale_color_viridis(option = "B") +
   theme_classic() +
-  theme(axis.title.x = element_blank(),
-        legend.position='none',
-        text = element_text(size=9),
-        axis.text.x=element_text(angle = 45, vjust = 1, hjust=1)
-        ) +
-  scale_y_continuous(name = "écart t850",
-                     breaks = seq(-16,16,2),
-                     labels = seq(-16,16,2),
-                     limits = c(-20,20),
-                     expand = c(0, 0)
-                     ) +
-  scale_x_datetime(#breaks = as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])[which(format(as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])), "%A %H") == "lundi 00")]),
-                   # labels = format(as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])[which(format(as.POSIXct(unique(allruns$dates[dstart:the_list[i+15]])), "%A %H") == "lundi 00")]),"%a %d/%m"),
-                   # limits = c(as.POSIXct(allruns$dates[dstart]),as.POSIXct(allruns$dates[the_list[i+15]])),
-                   labels = function(x) format(x, "%a %d/%m"),
-                   expand = c(0, 0)
-                   ) +
-  geom_hline(yintercept=0,color="white") + 
-  theme(panel.spacing = unit(0, "lines"),
-        panel.spacing.x = unit(0.125, "lines"),
-        panel.spacing.y = unit(0, "lines"),
-        strip.background = element_rect(fill="black"),
-        strip.text.x = element_text(size = 10, color = "white", face = "bold")
-        )#+
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+2]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+4]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+6]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+8]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+10]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+12]]),linetype="dashed",color="white") +
-  # geom_vline(xintercept=as.POSIXct(allruns$dates[the_list[i+14]]),linetype="dashed",color="white") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+2]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i+2]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+4]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i+4]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+6]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i+6]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+8]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i+8]]),"%B"),color="white", size = 4, fontface ="bold") +
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+10]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i+10]]),"%B"),color="white", size = 4, fontface ="bold")+
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+12]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i+12]]),"%B"),color="white", size = 4, fontface ="bold")+
-  # annotate("text",x=as.POSIXct(allruns$dates[the_list[i+14]])+days(15), y=19, label=format(as.POSIXct(allruns$dates[the_list[i+14]]),"%B"),color="white", size = 4, fontface ="bold")
+  theme(
+    axis.title.x = element_blank(),
+    legend.position = 'none',
+    text = element_text(size = 9),
+    axis.text.x = element_text(
+      angle = 45,
+      vjust = 1,
+      hjust = 1
+    )
+  ) +
+  scale_y_continuous(
+    name = "écart t850",
+    breaks = seq(-16, 16, 2),
+    labels = seq(-16, 16, 2),
+    limits = c(-20, 20),
+    expand = c(0, 0)
+  ) +
+  scale_x_datetime(
+    labels = function(x)
+      format(x, "%a %d/%m"),
+    expand = c(0, 0)
+  ) +
+  geom_hline(yintercept = 0, color = "white") +
+  theme(
+    panel.spacing = unit(0, "lines"),
+    panel.spacing.x = unit(0.125, "lines"),
+    panel.spacing.y = unit(0, "lines"),
+    strip.background = element_rect(fill = "black"),
+    strip.text.x = element_text(
+      size = 10,
+      color = "white",
+      face = "bold"
+    )
+  )
 
 
-# h_plot
-
-
-LASTONE <- allruns[the_list[i+15],]$dates
+LASTONE <- allruns[the_list[i + 15], ]$dates
 
 ```
 
@@ -291,6 +306,7 @@ LASTONE <- allruns[the_list[i+15],]$dates
 
 
 ```{r}
+
 
 
 pp_scens <- data.frame(runs = unique(allruns$runs))
@@ -300,46 +316,61 @@ allruns$precs_month <- substr(allruns$dates, 1, 7)
 steps <- sort(unique(allruns$precs_month))
 
 for (ech in steps) {
-  # print(ech)
-  test <- allruns[which(allruns$precs_month == ech),c(1,2,6,10)]
-  pp_scens_test <- cast(na.omit(test), runs ~ precs_month, value = 'precs', fun.aggregate = sum)
+  test <- allruns[which(allruns$precs_month == ech), c(1, 2, 6, 10)]
+  pp_scens_test <-
+    cast(na.omit(test),
+         runs ~ precs_month,
+         value = 'precs',
+         fun.aggregate = sum)
   for (sc in pp_scens_test$runs) {
-    
-    if ( (sort(test[which(test$runs == sc),"dates"])[1] != paste0(ech,"-01 00:00:00")) |
-         (sort(test[which(test$runs == sc),"dates"], decreasing = T)[1] != format(as.POSIXct( paste0(ech,"-01 00:00:00") ) %m+% months(1) - hours(6), "%Y-%m-%d %H:%M:%S"))
-         ) {
-      pp_scens_test[which(pp_scens_test$runs == sc),ech] <- NA
+    if ((sort(test[which(test$runs == sc), "dates"])[1] != paste0(ech, "-01 00:00:00")) |
+        (
+          sort(test[which(test$runs == sc), "dates"], decreasing = T)[1] != format(
+            as.POSIXct(paste0(ech, "-01 00:00:00")) %m+% months(1) - hours(6),
+            "%Y-%m-%d %H:%M:%S"
+          )
+        )) {
+      pp_scens_test[which(pp_scens_test$runs == sc), ech] <- NA
     }
   }
-  pp_scens <- merge(pp_scens ,pp_scens_test,by.y=1,all.x=TRUE)
+  pp_scens <- merge(pp_scens , pp_scens_test, by.y = 1, all.x = TRUE)
 }
 
 
 
 
 rownames(pp_scens) <- pp_scens$runs
-pp_scens <- pp_scens[,2:which(names(pp_scens) == format(as.POSIXct(LASTONE), "%Y-%m"))]
+pp_scens <-
+  pp_scens[, 2:which(names(pp_scens) == format(as.POSIXct(LASTONE), "%Y-%m"))]
 
 
-colnames(pp_scens) <- as.POSIXct(paste(colnames(pp_scens),"01",sep="-"))
+colnames(pp_scens) <-
+  as.POSIXct(paste(colnames(pp_scens), "01", sep = "-"))
 
 q25 = c()
 q50 = c()
 q75 = c()
 for (i in 1:ncol(pp_scens)) {
-q25 = c(q25,  unlist(unname(summary(pp_scens[,i])[2])))
-q50 = c(q50,  unlist(unname(summary(pp_scens[,i])[3])))
-q75 = c(q75,  unlist(unname(summary(pp_scens[,i])[5])))
+  q25 = c(q25,  unlist(unname(summary(pp_scens[, i])[2])))
+  q50 = c(q50,  unlist(unname(summary(pp_scens[, i])[3])))
+  q75 = c(q75,  unlist(unname(summary(pp_scens[, i])[5])))
 }
 
-pp_quartiles <- data.frame(  DATE = colnames(pp_scens), Q25 = q25, Q50 = q50, Q75 = q75 )
+pp_quartiles <-
+  data.frame(
+    DATE = colnames(pp_scens),
+    Q25 = q25,
+    Q50 = q50,
+    Q75 = q75
+  )
 
 
 pp_scens_sort <- pp_scens
 row.names(pp_scens_sort) <- NULL
 for (i in 1:ncol(pp_scens_sort)) {
-  replace <- sort(pp_scens_sort[,i], decreasing = T)
-  pp_scens_sort[,i] <- c(replace,rep(NA,length(pp_scens_sort[,i])-length(replace)))
+  replace <- sort(pp_scens_sort[, i], decreasing = T)
+  pp_scens_sort[, i] <-
+    c(replace, rep(NA, length(pp_scens_sort[, i]) - length(replace)))
 }
 ```
 
@@ -348,277 +379,329 @@ for (i in 1:ncol(pp_scens_sort)) {
 
 ```{r}
 
-pp_scens_sort <- pp_scens_sort[,which(names(pp_scens_sort) >= MONTH_START)]
 
-pp_scens_sort <- pp_scens_sort[,which(names(pp_scens_sort) < round_date(as.POSIXlt(LASTONE),"month"))]
+pp_scens_sort <-
+  pp_scens_sort[, which(names(pp_scens_sort) >= MONTH_START)]
 
-pp_quartiles <- pp_quartiles[which(pp_quartiles$DATE >= MONTH_START),]
+pp_scens_sort <-
+  pp_scens_sort[, which(names(pp_scens_sort) < round_date(as.POSIXlt(LASTONE), "month"))]
 
-pp_quartiles <- pp_quartiles[which(pp_quartiles$DATE < round_date(as.POSIXlt(LASTONE),"month")),]
+pp_quartiles <-
+  pp_quartiles[which(pp_quartiles$DATE >= MONTH_START), ]
+
+pp_quartiles <-
+  pp_quartiles[which(pp_quartiles$DATE < round_date(as.POSIXlt(LASTONE), "month")), ]
 
 
-colors_bar <- data.frame(rep(NA,nrow(pp_scens_sort)))
+colors_bar <- data.frame(rep(NA, nrow(pp_scens_sort)))
 
 for (ech in names(pp_scens_sort)) {
-    colors_bar_elem <- c()
-  for (i in seq(0,length(na.omit(pp_scens_sort[,ech]))-1)) {
-
-     colors_bar_elem <- c(colors_bar_elem, MixColor("cyan", "black", amount1 = abs(length(na.omit(pp_scens_sort[,ech]))-i)/length(na.omit(pp_scens_sort[,ech]))))
+  colors_bar_elem <- c()
+  for (i in seq(0, length(na.omit(pp_scens_sort[, ech])) - 1)) {
+    colors_bar_elem <-
+      c(colors_bar_elem,
+        MixColor("cyan", "black", amount1 = abs(length(
+          na.omit(pp_scens_sort[, ech])
+        ) - i) / length(na.omit(pp_scens_sort[, ech]))))
   }
-    colors_bar[,ech] <- c(rep(NA,nrow(colors_bar)-length(colors_bar_elem)),colors_bar_elem)
+  colors_bar[, ech] <-
+    c(rep(NA, nrow(colors_bar) - length(colors_bar_elem)), colors_bar_elem)
 }
-colors_bar[,1] <- NULL
+colors_bar[, 1] <- NULL
 
 
 plot_ppall <- ggplot() +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[1]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[1]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,1]), 
-            color = NA,
-            fill = rev(colors_bar[,1]),
-            alpha = 1
+  geom_rect(
+    data = pp_scens_sort,
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[1]) - days(10),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[1]) + days(10),
+      ymin = 0,
+      ymax = pp_scens_sort[, 1]
+    ),
+    color = NA,
+    fill = rev(colors_bar[, 1]),
+    alpha = 1
   ) +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[2]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[2]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,2]), 
-            color = NA,
-            fill = rev(colors_bar[,2]),
-            alpha = 1
+  geom_rect(
+    data = pp_scens_sort,
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[2]) - days(10),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[2]) + days(10),
+      ymin = 0,
+      ymax = pp_scens_sort[, 2]
+    ),
+    color = NA,
+    fill = rev(colors_bar[, 2]),
+    alpha = 1
   ) +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[3]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[3]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,3]), 
-            color = NA,
-            fill = rev(colors_bar[,3]),
-            alpha = 1
+  geom_rect(
+    data = pp_scens_sort,
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[3]) - days(10),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[3]) + days(10),
+      ymin = 0,
+      ymax = pp_scens_sort[, 3]
+    ),
+    color = NA,
+    fill = rev(colors_bar[, 3]),
+    alpha = 1
   ) +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[4]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[4]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,4]), 
-            color = NA,
-            fill = rev(colors_bar[,4]),
-            alpha = 1
+  geom_rect(
+    data = pp_scens_sort,
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[4]) - days(10),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[4]) + days(10),
+      ymin = 0,
+      ymax = pp_scens_sort[, 4]
+    ),
+    color = NA,
+    fill = rev(colors_bar[, 4]),
+    alpha = 1
   ) +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[5]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[5]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,5]), 
-            color = NA,
-            fill = rev(colors_bar[,5]),
-            alpha = 1
+  geom_rect(
+    data = pp_scens_sort,
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[5]) - days(10),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[5]) + days(10),
+      ymin = 0,
+      ymax = pp_scens_sort[, 5]
+    ),
+    color = NA,
+    fill = rev(colors_bar[, 5]),
+    alpha = 1
   ) +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[6]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[6]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,6]), 
-            color = NA,
-            fill = rev(colors_bar[,6]),
-            alpha = 1
+  geom_rect(
+    data = pp_scens_sort,
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[6]) - days(10),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[6]) + days(10),
+      ymin = 0,
+      ymax = pp_scens_sort[, 6]
+    ),
+    color = NA,
+    fill = rev(colors_bar[, 6]),
+    alpha = 1
   )  +
-
-  geom_rect(data = pp_quartiles[1,],
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[1]) - days(4),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[1]) + days(4),
-              ymin=Q25,
-              ymax=Q75), 
-            color = "#808080",
-            fill = "grey",
-            alpha = 0.4
-            ) +
-  geom_rect(data = pp_quartiles[2,],
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[2]) - days(4),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[2]) + days(4),
-              ymin=Q25,
-              ymax=Q75), 
-            color = "#808080",
-            fill = "grey",
-            alpha = 0.4
+  
+  geom_rect(
+    data = pp_quartiles[1, ],
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[1]) - days(4),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[1]) + days(4),
+      ymin = Q25,
+      ymax = Q75
+    ),
+    color = "#808080",
+    fill = "grey",
+    alpha = 0.4
   ) +
-  geom_rect(data = pp_quartiles[3,],
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[3]) - days(4),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[3]) + days(4),
-              ymin=Q25,
-              ymax=Q75), 
-            color = "#808080",
-            fill = "grey",
-            alpha = 0.4
+  geom_rect(
+    data = pp_quartiles[2, ],
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[2]) - days(4),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[2]) + days(4),
+      ymin = Q25,
+      ymax = Q75
+    ),
+    color = "#808080",
+    fill = "grey",
+    alpha = 0.4
   ) +
-  geom_rect(data = pp_quartiles[4,],
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[4]) - days(4),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[4]) + days(4),
-              ymin=Q25,
-              ymax=Q75), 
-            color = "#808080",
-            fill = "grey",
-            alpha = 0.4
+  geom_rect(
+    data = pp_quartiles[3, ],
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[3]) - days(4),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[3]) + days(4),
+      ymin = Q25,
+      ymax = Q75
+    ),
+    color = "#808080",
+    fill = "grey",
+    alpha = 0.4
   ) +
-  geom_rect(data = pp_quartiles[5,],
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[5]) - days(4),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[5]) + days(4),
-              ymin=Q25,
-              ymax=Q75), 
-            color = "#808080",
-            fill = "grey",
-            alpha = 0.4
+  geom_rect(
+    data = pp_quartiles[4, ],
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[4]) - days(4),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[4]) + days(4),
+      ymin = Q25,
+      ymax = Q75
+    ),
+    color = "#808080",
+    fill = "grey",
+    alpha = 0.4
   ) +
-  geom_rect(data = pp_quartiles[6,],
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[6]) - days(4),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[6]) + days(4),
-              ymin=Q25,
-              ymax=Q75), 
-            color = "#808080",
-            fill = "grey",
-            alpha = 0.4
+  geom_rect(
+    data = pp_quartiles[5, ],
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[5]) - days(4),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[5]) + days(4),
+      ymin = Q25,
+      ymax = Q75
+    ),
+    color = "#808080",
+    fill = "grey",
+    alpha = 0.4
+  ) +
+  geom_rect(
+    data = pp_quartiles[6, ],
+    mapping = aes(
+      xmin = as.POSIXct(colnames(pp_scens_sort)[6]) - days(4),
+      xmax = as.POSIXct(colnames(pp_scens_sort)[6]) + days(4),
+      ymin = Q25,
+      ymax = Q75
+    ),
+    color = "#808080",
+    fill = "grey",
+    alpha = 0.4
   )
 
 
 
-if (ncol(pp_scens_sort) >= 7 ) {
+if (ncol(pp_scens_sort) >= 7) {
   plot_ppall <- plot_ppall +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[7]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[7]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,7]), 
-            color = NA,
-            fill = rev(colors_bar[,7]),
-            alpha = 1
-  ) 
-}
-
-if (ncol(pp_scens_sort) >= 8 ) {
-  plot_ppall <- plot_ppall +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[8]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[8]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,8]), 
-            color = NA,
-            fill = rev(colors_bar[,8]),
-            alpha = 1
-  ) 
-}
-
-if (ncol(pp_scens_sort) >= 9 ) {
-  plot_ppall <- plot_ppall +
-  geom_rect(data = pp_scens_sort,
-            mapping=aes(
-              xmin=as.POSIXct(colnames(pp_scens_sort)[9]) - days(10),
-              xmax=as.POSIXct(colnames(pp_scens_sort)[9]) + days(10),
-              ymin=0,
-              ymax=pp_scens_sort[,9]), 
-            color = NA,
-            fill = rev(colors_bar[,9]),
-            alpha = 1
-  ) 
-}
-
-
-if (ncol(pp_scens_sort) >= 7 ) {
-  plot_ppall <- plot_ppall +
-    geom_rect(data = pp_quartiles[7,],
-              mapping=aes(
-                xmin=as.POSIXct(colnames(pp_scens_sort)[7]) - days(4),
-                xmax=as.POSIXct(colnames(pp_scens_sort)[7]) + days(4),
-                ymin=Q25,
-                ymax=Q75), 
-              color = "#808080",
-              fill = "grey",
-              alpha = 0.4
+    geom_rect(
+      data = pp_scens_sort,
+      mapping = aes(
+        xmin = as.POSIXct(colnames(pp_scens_sort)[7]) - days(10),
+        xmax = as.POSIXct(colnames(pp_scens_sort)[7]) + days(10),
+        ymin = 0,
+        ymax = pp_scens_sort[, 7]
+      ),
+      color = NA,
+      fill = rev(colors_bar[, 7]),
+      alpha = 1
     )
 }
 
-if (ncol(pp_scens_sort) >= 8 ) {
+if (ncol(pp_scens_sort) >= 8) {
   plot_ppall <- plot_ppall +
-    geom_rect(data = pp_quartiles[8,],
-              mapping=aes(
-                xmin=as.POSIXct(colnames(pp_scens_sort)[8]) - days(4),
-                xmax=as.POSIXct(colnames(pp_scens_sort)[8]) + days(4),
-                ymin=Q25,
-                ymax=Q75), 
-              color = "#808080",
-              fill = "grey",
-              alpha = 0.4
+    geom_rect(
+      data = pp_scens_sort,
+      mapping = aes(
+        xmin = as.POSIXct(colnames(pp_scens_sort)[8]) - days(10),
+        xmax = as.POSIXct(colnames(pp_scens_sort)[8]) + days(10),
+        ymin = 0,
+        ymax = pp_scens_sort[, 8]
+      ),
+      color = NA,
+      fill = rev(colors_bar[, 8]),
+      alpha = 1
     )
 }
 
-if (ncol(pp_scens_sort) >= 9 ) {
+if (ncol(pp_scens_sort) >= 9) {
   plot_ppall <- plot_ppall +
-    geom_rect(data = pp_quartiles[9,],
-              mapping=aes(
-                xmin=as.POSIXct(colnames(pp_scens_sort)[9]) - days(4),
-                xmax=as.POSIXct(colnames(pp_scens_sort)[9]) + days(4),
-                ymin=Q25,
-                ymax=Q75), 
-              color = "#808080",
-              fill = "grey",
-              alpha = 0.4
+    geom_rect(
+      data = pp_scens_sort,
+      mapping = aes(
+        xmin = as.POSIXct(colnames(pp_scens_sort)[9]) - days(10),
+        xmax = as.POSIXct(colnames(pp_scens_sort)[9]) + days(10),
+        ymin = 0,
+        ymax = pp_scens_sort[, 9]
+      ),
+      color = NA,
+      fill = rev(colors_bar[, 9]),
+      alpha = 1
     )
 }
 
 
+if (ncol(pp_scens_sort) >= 7) {
+  plot_ppall <- plot_ppall +
+    geom_rect(
+      data = pp_quartiles[7, ],
+      mapping = aes(
+        xmin = as.POSIXct(colnames(pp_scens_sort)[7]) - days(4),
+        xmax = as.POSIXct(colnames(pp_scens_sort)[7]) + days(4),
+        ymin = Q25,
+        ymax = Q75
+      ),
+      color = "#808080",
+      fill = "grey",
+      alpha = 0.4
+    )
+}
 
-plot_ppall <- 
+if (ncol(pp_scens_sort) >= 8) {
+  plot_ppall <- plot_ppall +
+    geom_rect(
+      data = pp_quartiles[8, ],
+      mapping = aes(
+        xmin = as.POSIXct(colnames(pp_scens_sort)[8]) - days(4),
+        xmax = as.POSIXct(colnames(pp_scens_sort)[8]) + days(4),
+        ymin = Q25,
+        ymax = Q75
+      ),
+      color = "#808080",
+      fill = "grey",
+      alpha = 0.4
+    )
+}
+
+if (ncol(pp_scens_sort) >= 9) {
+  plot_ppall <- plot_ppall +
+    geom_rect(
+      data = pp_quartiles[9, ],
+      mapping = aes(
+        xmin = as.POSIXct(colnames(pp_scens_sort)[9]) - days(4),
+        xmax = as.POSIXct(colnames(pp_scens_sort)[9]) + days(4),
+        ymin = Q25,
+        ymax = Q75
+      ),
+      color = "#808080",
+      fill = "grey",
+      alpha = 0.4
+    )
+}
+
+
+
+plot_ppall <-
   plot_ppall +
   theme_linedraw() +
-  theme(plot.title = element_text(hjust = 0.5,face = "bold"),
-        axis.title = element_blank(),
-        legend.position = "none",
-        panel.background = element_rect(fill = "black",
-                                        colour = "black",
-                                        size = 0,
-                                        linetype = "solid")
-        ) +
-  scale_x_datetime(
-    breaks = as.POSIXct(colnames(pp_scens_sort)),
-    labels = format(as.POSIXct(colnames(pp_scens_sort)),"%B %Y")
-    ) +
+  theme(
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "none",
+    panel.background = element_rect(
+      fill = "black",
+      colour = "black",
+      size = 0,
+      linetype = "solid"
+    )
+  ) +
+  scale_x_datetime(breaks = as.POSIXct(colnames(pp_scens_sort)),
+                   labels = format(as.POSIXct(colnames(pp_scens_sort)), "%B %Y")) +
   scale_y_continuous(
     expand = c(0, 0),
-    breaks = seq(0,200,10),
-    labels = seq(0,200,10),
-    limits= c(0,200)
-    ) +
-  # ggtitle(sprintf("PP + NORMs81-10 _ CFS 00z06z12z18z  %s > %s",date_var-29, date_var)) +
-  ggtitle(sprintf("PP + NORMs81-10 _ CFS 00z06z12z18z  %s > %s",
-                  sort(unique(substr(allruns$runs, 1, 10)))[1], 
-                  sort(unique(substr(allruns$runs, 1, 10)), decreasing=T)[1]
-                  )) +
+    breaks = seq(0, 200, 10),
+    labels = seq(0, 200, 10),
+    limits = c(0, 200)
+  ) +
+  ggtitle(sprintf(
+    "PP + NORMs81-10 _ CFS 00z06z12z18z  %s > %s",
+    sort(unique(substr(allruns$runs, 1, 10)))[1],
+    sort(unique(substr(allruns$runs, 1, 10)), decreasing =
+           T)[1]
+  )) +
   
-  geom_segment(data = pp_quartiles,
-    aes(x = as.POSIXct(DATE) - days(7),
-        y = Q50,
-        xend = as.POSIXct(DATE) + days(7),
-        yend = Q50
-        ),
+  geom_segment(
+    data = pp_quartiles,
+    aes(
+      x = as.POSIXct(DATE) - days(7),
+      y = Q50,
+      xend = as.POSIXct(DATE) + days(7),
+      yend = Q50
+    ),
     color = "grey40"
-    ) +
+  ) +
   
-  geom_line(data= norms_pp[seq(which(norms_pp$DATE == colnames(pp_scens_sort)[1]),which(norms_pp$DATE == colnames(pp_scens_sort)[length(colnames(pp_scens_sort))])),], aes(x=as.POSIXct(DATE), y=PP_CUM, group=1), color="white")
+  geom_line(data = norms_pp[seq(which(norms_pp$DATE == colnames(pp_scens_sort)[1]),
+                                which(norms_pp$DATE == colnames(pp_scens_sort)[length(colnames(pp_scens_sort))])), ],
+            aes(x = as.POSIXct(DATE), y = PP_CUM, group = 1),
+            color = "white")
 ```
 
 
@@ -626,23 +709,46 @@ plot_ppall <-
 
 
 ```{r, echo=F, warning=F, error=F, message=F, results="hide"}
-pdf(sprintf("../../data/cfs/cfs-dens_%s.pdf", str_replace_all(date_var, "-", "") ),width=40,height = 20)
+pdf(sprintf("../../data/cfs/cfs-dens_%s.pdf", str_replace_all(date_var, "-", "") ), width = 40, height = 20)
 grid.arrange(g_plot,
              h_plot,
-             ncol=1,nrow=2)
+             ncol = 1, nrow = 2)
 
 grid.arrange(g_plot,
              plot_ppall,
-             ncol=1,nrow=2)
+             ncol = 1, nrow = 2)
 dev.off()
-png(file = sprintf("../../data/cfs/cfs-z500_%s.png", str_replace_all(date_var, "-", "") ), width = 1920, height = 540)
+
+png(
+  file = sprintf(
+    "../../data/cfs/cfs-z500_%s.png",
+    str_replace_all(date_var, "-", "")
+  ),
+  width = 1920,
+  height = 540
+)
 g_plot
 dev.off()
-png(file = sprintf("../../data/cfs/cfs-t850_%s.png", str_replace_all(date_var, "-", "") ), width = 1920, height = 540)
+
+png(
+  file = sprintf(
+    "../../data/cfs/cfs-t850_%s.png",
+    str_replace_all(date_var, "-", "")
+  ),
+  width = 1920,
+  height = 540
+)
 h_plot
 dev.off()
-png(file = sprintf("../../data/cfs/cfs-pp_%s.png", str_replace_all(date_var, "-", "") ), width = 1920, height = 540)
-# pp_dens_plot
+
+png(
+  file = sprintf(
+    "../../data/cfs/cfs-pp_%s.png",
+    str_replace_all(date_var, "-", "")
+  ),
+  width = 1920,
+  height = 540
+)
 plot_ppall
 dev.off()
 ```
@@ -680,7 +786,6 @@ h_plot
 
 
 ```{r fig.width=25, fig.height=5}
-# pp_dens_plot
 plot_ppall
 ```
 
