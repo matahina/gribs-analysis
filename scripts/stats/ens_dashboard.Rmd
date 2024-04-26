@@ -1,5 +1,5 @@
 ---
-title: 'Ensembles `r format(Sys.time(),"%Y-%m-%d %H:%M:%S") ; params$location`'
+title: 'Ensembles `r paste(format(Sys.time(),"%Y-%m-%d %H:%M:%S") , commandArgs(trailingOnly=T)[1])`'
 output: 
   flexdashboard::flex_dashboard:
     vertical_layout: fill
@@ -36,8 +36,7 @@ library(attempt)
 
 
 
-prof_name = params$prof_name
-
+prof_name = commandArgs(trailingOnly=T)[2]
 
 
 norm <- read.csv("../../assets/norms/norm.csv", header=FALSE)
@@ -106,10 +105,10 @@ get_data <- function(date, model) {
   if (file.exists(sprintf("../../data/%s/%s-%s.csv", model, model, date))) {
     thetable <- read.csv(sprintf("../../data/%s/%s-%s.csv", model, model, date))
   } else {
-    thetable <- as.data.frame(t(c(NA,NA,NA,NA,NA,NA)))
+    thetable <- as.data.frame(t(c(NA,NA,NA,NA,NA,NA,NA)))
   }
     
-  names(thetable) <- c("runs","dates","geop","tempalt","tempsol","precs")
+  names(thetable) <- c("runs","dates","profile","geop","tempalt","tempsol","precs")
   thetable$runs <- paste(toupper(model), thetable$runs)
   return(thetable)
 }
@@ -204,6 +203,7 @@ allruns <-
 
 allruns <- allruns[order(allruns$dates),]
 allruns <- allruns[which(allruns$profile == prof_name),]
+allruns <- allruns[,-c(3)]
 # the_dates <- sort(unique(c(z500_unif$variable,t850_unif$variable,pp_unif$variable)))
 # 
 # the_dates <- the_dates[(the_dates>toString(format(sysdate,"%Y-%m-%d")))]

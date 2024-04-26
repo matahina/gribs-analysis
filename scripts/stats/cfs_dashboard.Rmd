@@ -1,5 +1,5 @@
 ---
-title: 'CFS `r format(Sys.time(),"%Y-%m-%d %H:%M:%S")`'
+title: 'CFS `r paste(format(Sys.time(),"%Y-%m-%d %H:%M:%S") , commandArgs(trailingOnly=T)[1])`'
 output: 
   flexdashboard::flex_dashboard:
     orientation: rows
@@ -33,6 +33,8 @@ library(zoo)
 library(reshape)
 library(RColorBrewer)
 library(stringr)
+
+prof_name = commandArgs(trailingOnly=T)[2]
 
 Modes <- function(x) {
    x <- x[!is.na(x)]
@@ -86,10 +88,10 @@ get_data <- function(date) {
   if (file.exists(sprintf("../../data/cfs/cfs-%s.csv", date))) {
     thetable <- read.csv(sprintf("../../data/cfs/cfs-%s.csv", date))
   } else {
-    thetable <- as.data.frame(t(c(NA,NA,NA,NA,NA,NA)))
+    thetable <- as.data.frame(t(c(NA,NA,NA,NA,NA,NA,NA)))
   }
     
-  names(thetable) <- c("runs","dates","geop","tempalt","tempsol","precs")
+  names(thetable) <- c("runs","dates","profile","geop","tempalt","tempsol","precs")
   return(thetable)
 }
 
@@ -111,6 +113,8 @@ if (length(allruns[is.na(allruns)]) != 0) {
 }
 
 allruns <- allruns[order(allruns$dates),]
+allruns <- allruns[which(allruns$profile == prof_name),]
+allruns <- allruns[,-c(3)]
 ```
 
 

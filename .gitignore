@@ -8,3 +8,4 @@ data/
 /scripts/stats/cfs_dashboard.html
 /scripts/dl/lock.txt
 /.Rhistory
+/mount-profiles.sh
