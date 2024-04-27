@@ -147,10 +147,20 @@ else:
                         print(server_size)
 
                         j = j +1
+                        if j >1:
+                            with open('../logs/'+model_date+'.log', 'a') as errlog:
+                                errlog.write(model_name+"   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+'\n')
+                                errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
+                            print(' Expected: '+server_size+' Retrieved: '+str(dl_size))
+                            print(" Will retry")
+                            do_loop = False
+                            break
                         if j >100:
                             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                                errlog.write(model_name+"   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+" WON'T RETRY!!\n")
-                            print(' Expected: '+server_size+' Retrieved: '+str(dl_size)+" WON'T RETRY!!")
+                                errlog.write(model_name+"   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+'\n')
+                                errlog.write(model_name+"   "+file_name+" WON'T RETRY!!\n")
+                            print(' Expected: '+server_size+' Retrieved: '+str(dl_size))
+                            print(" WON'T RETRY!!")
                             do_loop = False
                             break
                     if j < 100:
