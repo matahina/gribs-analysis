@@ -17,7 +17,7 @@ output:
 
 prof_name = commandArgs(trailingOnly = T)[2]
 day_ago = as.integer(commandArgs(trailingOnly = T)[3])
-the_tz = as.integer(commandArgs(trailingOnly = T)[4])
+the_tz = commandArgs(trailingOnly = T)[4]
 
 library(flexdashboard)
 library(lubridate)
