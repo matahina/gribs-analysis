@@ -31,7 +31,7 @@ profile = str(sys.argv[1])
 
 for i in config.sections():
     if profile in i:
-        if config[i]['lon'] < 0:
+        if float(config[i]['lon']) < 0:
             profile_coords = [config[i]['lat'], 360 + float(config[i]['lon'])]
         else:
             profile_coords = [config[i]['lat'], config[i]['lon']]

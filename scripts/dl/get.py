@@ -30,6 +30,27 @@ for i in config.sections():
             else:
                 profiles[i] = [config[i]['lat'], config[i]['lon']]
 
+def north(lat):
+    result = (round(float(lat) * 2) / 2 )
+    if result > 90:
+        result = 90
+    return str(result)
+def south(lat):
+    result = (round(float(lat) * 2) / 2 )-0.5
+    if result < -90:
+        result = -90
+    return str(result)
+def west_east(lon,we):
+    result_west = (round(float(lon) * 2) / 2 )-0.5
+    if result_west < 0:
+        result_west = 0
+    result_east = (round(float(lon) * 2) / 2 )
+    if result_east > 360:
+        result_east = 360
+    if we == "w":
+        return result_west
+    if we == "e":
+        return result_east
 
 model_date = str(sys.argv[1])
 model_run = str(sys.argv[2])
@@ -75,10 +96,10 @@ if model_name != "cfs":
                     'var_HGT' : 'on',
                     'var_TMP' : 'on',
                     'subregion' : '',
-                    'leftlon' : str((round(float(location[1]) * 2) / 2 )-0.5),
-                    'rightlon' : str((round(float(location[1]) * 2) / 2 )),
-                    'toplat' : str((round(float(location[0]) * 2) / 2 )),
-                    'bottomlat' : str((round(float(location[0]) * 2) / 2 )-0.5)
+                    'toplat' : north(location[0]),
+                    'leftlon' : west_east(location[1],"w"),
+                    'rightlon' : west_east(location[1],"e"),
+                    'bottomlat' : south(location[0]),
                         }
 
                 postfields = urllib.parse.urlencode(post_body)
