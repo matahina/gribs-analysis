@@ -1,11 +1,11 @@
 ## R
 
 ```bash
-sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3 python-requests
+sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3 python-requests arrow netcdf
 ```
 
 ```R
-install.packages(c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "rNOMADS", "assertthat", "ini", "collapse"))
+install.packages(c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "rNOMADS", "assertthat", "ini", "collapse", "ncdf4", "raster"))
 ```
 
 Install locally for a specific user

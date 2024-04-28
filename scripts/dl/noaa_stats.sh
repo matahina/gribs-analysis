@@ -22,12 +22,14 @@ echo "BUSY" > lock.txt
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""R Analysis Start - "${1^^}" "$DATE"" >> ../../data/logs/"$DATE".log
 test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "R Analysis Start" "${1^^} $DATE"
 LOC=`sed -nr "/^\["$3"\]/ { :l /^name[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" ./magic_config.ini`
+TZ=`sed -nr "/^\["$3"\]/ { :l /^tz[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" ./magic_config.ini`
+
 
 ######################################
 ## R Analysis
 ######################################
 cd ../stats
-R -e "rmarkdown::render('"$1"_dashboard.Rmd', output_file = '"$1"_dashboard_"$3".html')" --args "$LOC" "$3" "$2" >> ../../data/logs/"$DATE".log
+R -e "rmarkdown::render('"$1"_dashboard.Rmd', output_file = '"$1"_dashboard_"$3".html')" --args "$LOC" "$3" "$2" "'$TZ'"  >> ../../data/logs/"$DATE".log
 rm my.inv
 
 ######################################

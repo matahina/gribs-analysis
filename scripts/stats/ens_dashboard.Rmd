@@ -12,6 +12,11 @@ output:
 # commandArgs(trailingOnly=T)[1] Location Name
 # commandArgs(trailingOnly=T)[2] Profile Name
 # commandArgs(trailingOnly=T)[3] Day Ago
+# commandArgs(trailingOnly=T)[4] TZ
+
+prof_name = commandArgs(trailingOnly = T)[2]
+day_ago = as.integer(commandArgs(trailingOnly = T)[3])
+the_tz = commandArgs(trailingOnly = T)[4]
 
 library(flexdashboard)
 library(lubridate)
@@ -36,68 +41,47 @@ library(attempt)
 ```
 
 ```{r}
+date_var <- Sys.Date() - day_ago
 
+norms_df <- read.csv(sprintf("../../assets/norms_%s/norms_df_%s.csv", prof_name, prof_name))
 
+norms_df_past <- norms_df
+norms_df_now <- norms_df
+norms_df_future <- norms_df
 
-prof_name = commandArgs(trailingOnly = T)[2]
+norms_df_past$date <- paste0(format(date_var-years(1), "%Y"),"-",norms_df$subdate)
+norms_df_now$date <- paste0(format(date_var, "%Y"),"-",norms_df$subdate)
+norms_df_future$date <- paste0(format(date_var+years(1), "%Y"),"-",norms_df$subdate)
 
-
-norm <- read.csv("../../assets/norms/norm.csv", header = FALSE)
-norm_ncep <- read.csv("../../assets/norms/norm_ncep.csv")
-
-norms <- data.frame(
-  DATE = c(format(
-    as.POSIXlt(norm_ncep$DATE, format = "%d/%m"),
-    paste0(as.character(as.integer(
-      substr(Sys.Date(), 1, 4)
-    ) - 1), "-%m-%d %H:%M:%S")
-  ),
-  format(
-    as.POSIXlt(norm_ncep$DATE, format = "%d/%m"),
-    paste0(as.character(as.integer(
-      substr(Sys.Date(), 1, 4)
-    ) + 0), "-%m-%d %H:%M:%S")
-  )),
-  Z500 = c(norm_ncep$Z500, norm_ncep$Z500),
-  T850 = c(norm_ncep$T850, norm_ncep$T850)
-)
-
-leaap = FALSE
-
-if (leap_year(as.integer(substr(Sys.Date(), 1, 4)) - 1)) {
-  leaap = TRUE
-  nnorms <-
-    rbind(norms[1:59, ], c(
-      format(
-        as.POSIXlt("29/02", format = "%d/%m"),
-        paste0(as.character(as.integer(
-          substr(Sys.Date(), 1, 4)
-        ) - 1), "-%m-%d %H:%M:%S")
-      ),
-      mean(as.numeric(nnorms[c(59:60), 2])),
-      mean(as.numeric(nnorms[c(59:60), 3]))
-    ), norms[60:nrow(norms), ])
-}
-if (leap_year(as.integer(substr(Sys.Date(), 1, 4)) + 0)) {
-  leaap = TRUE
-  nnorms <-
-    rbind(norms[1:424, ], c(
-      format(
-        as.POSIXlt("29/02", format = "%d/%m"),
-        paste0(as.character(as.integer(
-          substr(Sys.Date(), 1, 4)
-        ) + 0), "-%m-%d %H:%M:%S")
-      ),
-      mean(as.numeric(norms[c(424:425), 2])),
-      mean(as.numeric(norms[c(424:425), 3]))
-    ), norms[425:nrow(norms), ])
+if (!leap_year(date_var-years(1)))
+{
+  norms_df_past <- norms_df_past[-which(grepl("02-29",norms_df_past$date)),]
 }
 
-if (leaap == TRUE) {
-  norms <- data.frame(DATE = nnorms[, 1],
-                      Z500 = as.numeric(nnorms[, 2]),
-                      T850 = as.numeric(nnorms[, 3]))
+if (!leap_year(date_var))
+{
+  norms_df_now<- norms_df_now[-which(grepl("02-29",norms_df_now$date)),]
 }
+
+if (!leap_year(date_var+years(1)))
+{
+  norms_df_future <- norms_df_future[-which(grepl("02-29",norms_df_future$date)),]
+}
+
+norms_profile <- 
+  merge(norms_df_past,
+        norms_df_now,
+        all.x = TRUE,
+        all.y = TRUE)
+
+norms_profile <- 
+  merge(norms_profile,
+        norms_df_future,
+        all.x = TRUE,
+        all.y = TRUE)
+
+norms_profile$subdate <- NULL
+norms_profile$date <- as_datetime(norms_profile$date) + hours(3)
 
 z500_cols <- read.csv("../../assets/norms/dam.csv", quote = "'")
 
@@ -118,16 +102,6 @@ trans_axes_tsol <- function(orig) {
   return(new)
 }
 
-Modes <- function(x) {
-  x <- x[!is.na(x)]
-  ux <- unique(x)
-  tab <- tabulate(match(x, ux))
-  ux[tab == max(tab)]
-}
-
-mModes <- function(x) {
-  mean(Modes(x))
-}
 
 barwidth = c(rep(2, 63), rep(4, 24))
 
@@ -151,7 +125,7 @@ get_data <- function(date, model) {
   return(thetable)
 }
 
-date_var <- Sys.Date() - as.integer(commandArgs(trailingOnly = T)[3])
+
 ```
 
 
@@ -176,10 +150,14 @@ allruns <- allruns[order(allruns$dates), ]
 allruns <- allruns[which(allruns$profile == prof_name), ]
 allruns <- allruns[, -c(3)]
 
+allruns$dates = paste(allruns$dates,"UTC")
 the_dates <- sort(unique(allruns$dates))
 
 the_dates <-
-  the_dates[(the_dates > toString(format(date_var + 1, "%Y-%m-%d")))]
+  the_dates[(the_dates >  as_datetime(sprintf("%s 21:00:00", date_var)))]
+
+the_dates <-
+  the_dates[(the_dates < format(as_datetime(the_dates[1]) + days(14),"%Y-%m-%d %H:%M:%S"))]
 ```
 
 
@@ -277,32 +255,37 @@ plotruns$tempalt <- round_any(plotruns$tempalt, 0.1)
 plotruns$tempsol <- round_any(plotruns$tempsol, 0.1)
 
 
+
+
+
+
+
+
 plotruns <- plotruns[which(plotruns$dates >= the_dates[1]), ]
-plotruns <-
-  plotruns[which(plotruns$dates <= tail(the_dates[which(the_dates < as.POSIXct(the_dates[1]) +
-                                                          days(14))], 1)), ]
+plotruns <- plotruns[which(plotruns$dates <= the_dates[length(the_dates)]),]
 
 pp_probs_all <-
   pp_probs_all[which(row.names(pp_probs_all) >= the_dates[1]), ]
 pp_probs_all <-
-  pp_probs_all[which(row.names(pp_probs_all) <= tail(the_dates[which(the_dates < as.POSIXct(the_dates[1]) +
-                                                                       days(14))], 1)), ]
+  pp_probs_all[which(row.names(pp_probs_all) <= the_dates[length(the_dates)]),]
 
 
 pp_probs_gefs <-
   pp_probs_gefs[which(row.names(pp_probs_gefs) >= the_dates[1]), ]
 pp_probs_gefs <-
-  pp_probs_gefs[which(row.names(pp_probs_gefs) <= tail(the_dates[which(the_dates < as.POSIXct(the_dates[1]) +
-                                                                         days(14))], 1)), ]
+  pp_probs_gefs[which(row.names(pp_probs_gefs) <= the_dates[length(the_dates)]),]
 
 
-pp_probs_all$V1 <- as_datetime(pp_probs_all$V1)
+pp_probs_all$V1 <- c(as_datetime(pp_probs_all$V1[1:63]) + minutes(90),as_datetime(pp_probs_all$V1[64:87]) + hours(3))
 
-pp_probs_gefs$V1 <- as_datetime(pp_probs_gefs$V1)
+pp_probs_gefs$V1 <- c(as_datetime(pp_probs_gefs$V1[1:63]) + minutes(90),as_datetime(pp_probs_gefs$V1[64:87]) + hours(3))
+
+pp_probs_all$V1 <- as.POSIXct(pp_probs_all$V1, tz="UTC")
+pp_probs_gefs$V1 <- as.POSIXct(pp_probs_gefs$V1, tz="UTC")
 
 plotruns$dates <- as_datetime(plotruns$dates)
 
-norms$DATE <- as_datetime(norms$DATE)
+# norms$DATE <- as_datetime(norms$DATE)
 
 the_dates <- as_datetime(the_dates)
 
@@ -329,7 +312,9 @@ plot_z500all <-
   ) +
   scale_x_datetime(expand = c(0, 0),
                    date_breaks = "1 day",
-                   date_labels = "%d %b") +
+                   date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))) +
   scale_y_continuous(
     expand = c(0, 0),
     breaks = seq(480, 620, 20),
@@ -343,12 +328,12 @@ plot_z500all <-
     )
   ) + ggtitle(sprintf(
     "Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
-    Sys.Date() - 1
+    date_var
   )) +
-  geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
-                             which(norms$DATE == the_dates[1]) + 14), ],
-            aes(x = DATE, y = Z500, group = 1),
-            color = "gray")
+  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "hgt",],
+                           aes(x = date, y = value, group = 1),
+                           color = "gray")
 
 
 plot_z500gefs <-
@@ -372,7 +357,9 @@ plot_z500gefs <-
   ) +
   scale_x_datetime(expand = c(0, 0),
                    date_breaks = "1 day",
-                   date_labels = "%d %b") +
+                   date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))) +
   scale_y_continuous(
     expand = c(0, 0),
     breaks = seq(480, 620, 20),
@@ -384,11 +371,11 @@ plot_z500gefs <-
       breaks = seq(480, 620, 20),
       labels = seq(480, 620, 20)
     )
-  ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z  %s", Sys.Date() - 1)) +
-  geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
-                             which(norms$DATE == the_dates[1]) + 14),],
-            aes(x = DATE, y = Z500, group = 1),
-            color = "gray")
+  ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z  %s", date_var)) +
+geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "hgt",],
+                           aes(x = date, y = value, group = 1),
+                           color = "gray")
 
 
 
@@ -408,7 +395,9 @@ plot_t850all <-
   ) +
   scale_x_datetime(expand = c(0, 0),
                    date_breaks = "1 day",
-                   date_labels = "%d %b") +
+                   date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))) +
   scale_y_continuous(
     expand = c(0, 0),
     breaks = seq(-30, 40, 10),
@@ -422,7 +411,7 @@ plot_t850all <-
     )
   ) + ggtitle(sprintf(
     "T850 + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
-    Sys.Date() - 1
+    date_var
   ))
 idx <- 110
 for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
@@ -449,10 +438,10 @@ plot_t850all <- plot_t850all +
     colour = tempalt
   )) +
   scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits = c(-26, 32)) +
-  scale_alpha() + geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
-                                             which(norms$DATE == the_dates[1]) + 14),],
-                            aes(x = DATE, y = T850, group = 1),
-                            color = "gray")
+  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "t850",],
+                           aes(x = date, y = value, group = 1),
+                           color = "gray")
 plot_t850gefs <-
   ggplot(plotruns[which(grepl("GEFS", plotruns$runs)), ], aes(dates, tempalt)) + theme_linedraw() + theme(
     plot.title = element_text(hjust = 0.5, face = "bold"),
@@ -468,7 +457,9 @@ plot_t850gefs <-
   ) +
   scale_x_datetime(expand = c(0, 0),
                    date_breaks = "1 day",
-                   date_labels = "%d %b") +
+                   date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))) +
   scale_y_continuous(
     expand = c(0, 0),
     breaks = seq(-30, 40, 10),
@@ -480,8 +471,7 @@ plot_t850gefs <-
       breaks = as.numeric(names(pp_cols)),
       labels = names(pp_cols)
     )
-  ) + ggtitle(sprintf("T850 + PP _ ENS GEFS 00z06z12z18z  %s", Sys.Date() -
-                        1))
+  ) + ggtitle(sprintf("T850 + PP _ ENS GEFS 00z06z12z18z  %s", date_var))
 
 idx <- 110
 for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
@@ -507,24 +497,16 @@ plot_t850gefs <- plot_t850gefs +
     colour = tempalt
   )) +
   scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits = c(-26, 32)) +
-  scale_alpha() +  geom_line(data = norms[seq(which(norms$DATE == the_dates[1]),
-                                              which(norms$DATE == the_dates[1]) + 14), ],
-                             aes(x = DATE, y = T850, group = 1),
-                             color = "gray")
+  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "t850",],
+                           aes(x = date, y = value, group = 1),
+                           color = "gray")
 
 ```
 
 ```{r}
 
 
-norms_tsol <-
-  data.frame(date = as.POSIXlt(c(norm$V1, norm$V3), format = "%d/%m %H:%M"),
-             tsol = c(norm$V2, norm$V4))
-
-norms_tsol_data <-
-  norms_tsol[which(norms_tsol$date > the_dates[1]),][which(norms_tsol[which(norms_tsol$date > the_dates[1]), "date"] < as.POSIXct(the_dates[1]) + days(14)),]
-
-norms_tsol_data$date <- as_datetime(norms_tsol_data$date)
 
 plot_t2mall <-
   ggplot(plotruns, aes(dates, tempsol)) + theme_linedraw() + theme(
@@ -541,7 +523,9 @@ plot_t2mall <-
   ) +
   scale_x_datetime(expand = c(0, 0),
                    date_breaks = "1 day",
-                   date_labels = "%d %b") +
+                   date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))) +
   scale_y_continuous(
     expand = c(0, 0),
     breaks = seq(-20, 50, 10),
@@ -555,7 +539,7 @@ plot_t2mall <-
     )
   ) + ggtitle(sprintf(
     "T2M + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
-    Sys.Date() - 1
+    date_var
   ))
 idx <- 110
 for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
@@ -588,9 +572,10 @@ plot_t2mall <-
     colour = tempsol
   )) +
   scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits = c(-16, 50)) +
-  scale_alpha() + geom_line(data = norms_tsol_data,
-                            aes(x = date, y = tsol, group = 1),
-                            color = "gray")
+  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "t2m",],
+                           aes(x = date, y = value, group = 1),
+                           color = "gray")
 
 
 
@@ -608,7 +593,9 @@ plot_t2mgefs <-
     axis.text.x = element_text(angle = 90)
   ) + scale_x_datetime(expand = c(0, 0),
                        date_breaks = "1 day",
-                       date_labels = "%d %b") +
+                       date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))) +
   scale_y_continuous(
     expand = c(0, 0),
     breaks = seq(-20, 50, 10),
@@ -620,8 +607,7 @@ plot_t2mgefs <-
       breaks = as.numeric(names(pp_cols)),
       labels = names(pp_cols)
     )
-  ) + ggtitle(sprintf("T2M + PP _ ENS GEFS 00z06z12z18z  %s", Sys.Date() -
-                        1))
+  ) + ggtitle(sprintf("T2M + PP _ ENS GEFS 00z06z12z18z  %s", date_var))
 
 idx <- 110
 for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
@@ -657,9 +643,10 @@ plot_t2mgefs <-
     colour = tempsol
   )) +
   scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits = c(-16, 50)) +
-  scale_alpha() +  geom_line(data = norms_tsol_data,
-                             aes(x = date, y = tsol, group = 1),
-                             color = "gray")
+  scale_alpha() +  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "t2m",],
+                           aes(x = date, y = value, group = 1),
+                           color = "gray")
 ```
 
 # z500/t850 {data-navmenu="Diagrammes Probabilistes"}
@@ -999,7 +986,9 @@ for (clust in seq(1, 8)) {
       scale_x_datetime(
         expand = c(0, 0),
         date_breaks = "1 day",
-        date_labels = "%d %b"
+        date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))
       ) + scale_y_continuous(
         expand = c(0, 0),
         breaks = seq(480, 620, 20),
@@ -1011,13 +1000,13 @@ for (clust in seq(1, 8)) {
         clust,
         length(elems),
         nrow(z500_scens)
-      )) + geom_line(
-        data = norms[seq(which(norms$DATE == the_dates[1]),
-                         which(norms$DATE == the_dates[1]) + 15),],
-        aes(x = DATE, y = Z500, group = 1),
+      )) + 
+      geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "hgt",],
+                           aes(x = date, y = value, group = 1),
         color = "white",
         linetype = "dashed"
-      )
+      ) 
     
     
   }
@@ -1437,7 +1426,9 @@ for (clust in seq(1, 8)) {
       ) + scale_x_datetime(
         expand = c(0, 0),
         date_breaks = "1 day",
-        date_labels = "%d %b"
+        date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))
       ) +
       scale_y_continuous(
         expand = c(0, 0),
@@ -1450,13 +1441,13 @@ for (clust in seq(1, 8)) {
         clust,
         length(elems),
         nrow(t850_scens)
-      )) + geom_line(
-        data = norms[seq(which(norms$DATE == the_dates[1]),
-                         which(norms$DATE == the_dates[1]) + 15),],
-        aes(x = DATE, y = T850, group = 1),
+      )) + 
+      geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+                                                  & norms_profile$type == "t850",],
+                           aes(x = date, y = value, group = 1),
         color = "white",
         linetype = "dashed"
-      )
+      ) 
     
   }
 }
@@ -1880,7 +1871,9 @@ for (clust in seq(1, 8)) {
       ) +   scale_x_datetime(
         expand = c(0, 0),
         date_breaks = "1 day",
-        date_labels = "%d %b"
+        date_labels = "%d %b",
+                   timezone = the_tz,
+                   limits = c(the_dates[1], the_dates[1] + days(14))
       ) +
       scale_y_continuous(
         expand = c(0, 0),

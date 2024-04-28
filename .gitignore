@@ -9,3 +9,8 @@ data/
 /scripts/dl/lock.txt
 /.Rhistory
 /mount-profiles.sh
+/assets/norms/norm.csv
+/assets/norms/norm_ncep.csv
+/assets/norms/norm_ncep_old.csv
+/assets/norms_*/
+/ens_dashboard_Profile_1.html

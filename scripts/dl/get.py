@@ -25,7 +25,10 @@ profiles = {}
 for i in config.sections():
     if "Profile" in i:
         if config[i]['use_it'] == "yes":
-            profiles[i] = [config[i]['lat'], config[i]['lon']]
+            if float(config[i]['lon']) < 0:
+                profiles[i] = [config[i]['lat'], 360 + float(config[i]['lon'])]
+            else:
+                profiles[i] = [config[i]['lat'], config[i]['lon']]
 
 
 model_date = str(sys.argv[1])

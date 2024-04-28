@@ -11,6 +11,42 @@ library(assertthat)
 library(ini)
 library(collapse)
 
+
+north <- function(lat) {
+  result = ceiling(as.numeric(lat) + 2)
+if (result > 90){
+  result = 90
+return (result)}
+}
+
+south <- function(lat) {
+  result = floor(as.numeric(lat) - 2)
+  if (result < -90){
+    result = -90
+    return (result)}
+}
+
+
+west_east <- function(lon,we) {
+  result_west = floor(as.numeric(lon) - 2)
+if (result_west < -180){
+  result_west = -180
+}
+result_east = ceiling(as.numeric(lon) + 2)
+if (result_east > 180){
+  result_east = 180 
+}
+
+if (we == "w"){
+  return (result_west)}
+if (we == "e"){
+  return (result_east)}
+}
+
+
+
+
+
 config <- read.ini("magic_config.ini")
 
 profiles <- data.frame(
@@ -89,13 +125,10 @@ for (z in seq(0, last_z, step_z)) {
             '500 mb',
             'HGT',
             domain = c(
-              floor(as.numeric(profiles[which(profiles$name == location), "lon"]) - 2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lon"]) +
-                        2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lat"]) +
-                        2),
-              floor(as.numeric(profiles[which(profiles$name == location), "lat"]) -
-                      2)
+              west_east(profiles[which(profiles$name == location), "lon"],"w"),
+              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
             )
           )
           
@@ -104,13 +137,10 @@ for (z in seq(0, last_z, step_z)) {
             '850 mb',
             'TMP',
             domain = c(
-              floor(as.numeric(profiles[which(profiles$name == location), "lon"]) - 2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lon"]) +
-                        2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lat"]) +
-                        2),
-              floor(as.numeric(profiles[which(profiles$name == location), "lat"]) -
-                      2)
+              west_east(profiles[which(profiles$name == location), "lon"],"w"),
+              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
             )
           )
           
@@ -119,13 +149,10 @@ for (z in seq(0, last_z, step_z)) {
             '2 m above ground',
             'TMP',
             domain = c(
-              floor(as.numeric(profiles[which(profiles$name == location), "lon"]) - 2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lon"]) +
-                        2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lat"]) +
-                        2),
-              floor(as.numeric(profiles[which(profiles$name == location), "lat"]) -
-                      2)
+              west_east(profiles[which(profiles$name == location), "lon"],"w"),
+              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
             )
           )
           
@@ -134,13 +161,10 @@ for (z in seq(0, last_z, step_z)) {
             'surface',
             'PRATE',
             domain = c(
-              floor(as.numeric(profiles[which(profiles$name == location), "lon"]) - 2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lon"]) +
-                        2),
-              ceiling(as.numeric(profiles[which(profiles$name == location), "lat"]) +
-                        2),
-              floor(as.numeric(profiles[which(profiles$name == location), "lat"]) -
-                      2)
+              west_east(profiles[which(profiles$name == location), "lon"],"w"),
+              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
             )
           )
           
@@ -252,13 +276,10 @@ for (z in seq(0, last_z, step_z)) {
               c('500 mb', '850 mb', '2 m above ground', 'surface'),
               c('HGT', 'APCP', 'TMP'),
               domain = c(
-                floor(as.numeric(profiles[which(profiles$name == location), "lon"]) - 2),
-                ceiling(as.numeric(profiles[which(profiles$name == location), "lon"]) +
-                          2),
-                ceiling(as.numeric(profiles[which(profiles$name == location), "lat"]) +
-                          2),
-                floor(as.numeric(profiles[which(profiles$name == location), "lat"]) -
-                        2)
+                west_east(profiles[which(profiles$name == location), "lon"],"w"),
+                west_east(profiles[which(profiles$name == location), "lon"],"e"),
+                north(profiles[which(profiles$name == location), "lat"]),
+                south(profiles[which(profiles$name == location), "lat"])
               )
             ))
           }, warning = function(war) {
@@ -267,13 +288,10 @@ for (z in seq(0, last_z, step_z)) {
               c('500 mb', '850 mb', '2 m above ground', 'surface'),
               c('HGT', 'APCP', 'TMP'),
               domain = c(
-                floor(as.numeric(profiles[which(profiles$name == location), "lon"]) - 2),
-                ceiling(as.numeric(profiles[which(profiles$name == location), "lon"]) +
-                          2),
-                ceiling(as.numeric(profiles[which(profiles$name == location), "lat"]) +
-                          2),
-                floor(as.numeric(profiles[which(profiles$name == location), "lat"]) -
-                        2)
+                west_east(profiles[which(profiles$name == location), "lon"],"w"),
+                west_east(profiles[which(profiles$name == location), "lon"],"e"),
+                north(profiles[which(profiles$name == location), "lat"]),
+                south(profiles[which(profiles$name == location), "lat"])
               )
             ))
           },
