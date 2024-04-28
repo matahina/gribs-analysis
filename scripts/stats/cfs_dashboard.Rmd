@@ -44,6 +44,7 @@ library(stringr)
 
 ```{r}
 
+date_var <- Sys.Date() - day_ago
 
 
 YEAR <- as.integer(format(Sys.time(), "%Y"))
@@ -170,7 +171,6 @@ get_data <- function(date) {
   return(thetable)
 }
 
-date_var <- Sys.Date() - day_ago
 ```
 
 ```{r}

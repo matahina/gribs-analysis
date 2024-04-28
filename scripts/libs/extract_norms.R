@@ -103,7 +103,7 @@ norms_df = data.frame(subdate = character(),
                       value = numeric(),
                       stringsAsFactors = FALSE)
 
-mega_df$date
+
 mega_df$subdate <- substr(mega_df$date, 6,23)
 for (elem in unique(mega_df$type)) {
   lil_df <- mega_df[which(mega_df$type == elem),]
