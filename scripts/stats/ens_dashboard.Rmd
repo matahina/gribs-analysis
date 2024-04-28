@@ -774,7 +774,7 @@ plot_t2mgefs
 
 
 ```{r, echo=F, warning=F, error=F, message=F, results="hide"}
-pdf(sprintf("../../data/gefs/ens_unif-%s.pdf",str_replace_all(date_var, "-", "")),height=18,width=16)
+pdf(sprintf("../../data/gefs/ens_unif-%s_%s.pdf",str_replace_all(date_var, "-", ""),prof_name),height=18,width=16)
 grid.arrange(plot_z500all,plot_z500gefs,plot_t850all,plot_t850gefs,plot_t2mall,plot_t2mgefs)
 dev.off()
 ```
@@ -2137,8 +2137,8 @@ myplots_pa[[10]]
 ```{r, echo=F, warning=F, error=F, message=F, results="hide"}
 pdf(
   sprintf(
-    "../../data/gefs/ens_cluster_unif-%s.pdf",
-    str_replace_all(date_var, "-", "")
+    "../../data/gefs/ens_cluster_unif-%s_%s.pdf",
+    str_replace_all(date_var, "-", ""), prof_name
   ),
   height = 23,
   width = 15

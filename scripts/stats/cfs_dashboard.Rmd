@@ -718,9 +718,9 @@ plot_ppall <-
                    labels = format(as.POSIXct(colnames(pp_scens_sort)), "%B %Y")) +
   scale_y_continuous(
     expand = c(0, 0),
-    breaks = seq(0, 200, 10),
-    labels = seq(0, 200, 10),
-    limits = c(0, 200)
+    breaks = seq(0, 300, 10),
+    labels = seq(0, 300, 10),
+    limits = c(0, 300)
   ) +
   ggtitle(sprintf(
     "PP + NORMs91-20 (Reana NCEP) _ CFS 00z06z12z18z  %s > %s",
@@ -754,7 +754,7 @@ geom_line(data =
 
 
 ```{r, echo=F, warning=F, error=F, message=F, results="hide"}
-pdf(sprintf("../../data/cfs/cfs-dens_%s.pdf", str_replace_all(date_var, "-", "") ), width = 40, height = 20)
+pdf(sprintf("../../data/cfs/cfs-dens_%s_%s.pdf", str_replace_all(date_var, "-", ""), prof_name ), width = 40, height = 20)
 grid.arrange(g_plot,
              h_plot,
              ncol = 1, nrow = 2)
@@ -766,8 +766,8 @@ dev.off()
 
 png(
   file = sprintf(
-    "../../data/cfs/cfs-z500_%s.png",
-    str_replace_all(date_var, "-", "")
+    "../../data/cfs/cfs-z500_%s_%s.png",
+    str_replace_all(date_var, "-", ""), prof_name
   ),
   width = 1920,
   height = 540
@@ -777,8 +777,8 @@ dev.off()
 
 png(
   file = sprintf(
-    "../../data/cfs/cfs-t850_%s.png",
-    str_replace_all(date_var, "-", "")
+    "../../data/cfs/cfs-t850_%s_%s.png",
+    str_replace_all(date_var, "-", ""), prof_name
   ),
   width = 1920,
   height = 540
@@ -788,8 +788,8 @@ dev.off()
 
 png(
   file = sprintf(
-    "../../data/cfs/cfs-pp_%s.png",
-    str_replace_all(date_var, "-", "")
+    "../../data/cfs/cfs-pp_%s_%s.png",
+    str_replace_all(date_var, "-", ""), prof_name
   ),
   width = 1920,
   height = 540
