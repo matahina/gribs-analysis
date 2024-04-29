@@ -14,3 +14,9 @@ data/
 /assets/norms/norm_ncep_old.csv
 /assets/norms_*/
 /ens_dashboard_Profile_1.html
+/cfs_dashboard_Profile_1.html
+/cfs_dashboard_Profile_2.html
+/cfs_dashboard_Profile_3.html
+/ens_dashboard_Profile_2.html
+/ens_dashboard_Profile_3.html
+/scripts/dl/my.inv

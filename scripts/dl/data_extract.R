@@ -15,15 +15,15 @@ library(collapse)
 north <- function(lat) {
   result = ceiling(as.numeric(lat) + 2)
 if (result > 90){
-  result = 90
-return (result)}
+  result = 90}
+return (result)
 }
 
 south <- function(lat) {
   result = floor(as.numeric(lat) - 2)
   if (result < -90){
-    result = -90
-    return (result)}
+    result = -90}
+    return (result)
 }
 
 

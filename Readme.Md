@@ -2,6 +2,8 @@
 
 ```bash
 sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3 python-requests arrow netcdf
+
+yay -S --aur wgrib wgrib2
 ```
 
 ```R
@@ -19,10 +21,6 @@ Use bash not zsh
 ## CURL
 
 ## Wget
-
-## wgrib
-
-## wgrib2
 
 ## Crontab
 
