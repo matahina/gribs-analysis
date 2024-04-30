@@ -131,7 +131,9 @@ if model_name != "cfs":
                     except http.client.RemoteDisconnected as e:
                         with open('../logs/'+model_date+'.log', 'a') as errlog:
                             errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                            errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
                         print('Reason: ', e.reason)
+                        print(" Will retry")
                         do_loop = True
                     if i > 100:
                         break
@@ -177,7 +179,7 @@ else:
                                 errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
                             print(' Expected: '+server_size+' Retrieved: '+str(dl_size))
                             print(" Will retry")
-                            do_loop = False
+                            do_loop = True
                             break
                         if j >100:
                             with open('../logs/'+model_date+'.log', 'a') as errlog:
@@ -208,7 +210,9 @@ else:
                 except http.client.RemoteDisconnected as e:
                     with open('../logs/'+model_date+'.log', 'a') as errlog:
                         errlog.write(model_name+"   "+file_name+' Reason: '+ str(e)+'\n')
+                        errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
                     print('Reason: ', e)
+                    print(" Will retry")
                     do_loop = True
                 if i > 100:
                     do_loop = False
