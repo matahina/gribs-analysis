@@ -1167,7 +1167,7 @@ a <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -1182,7 +1182,7 @@ b <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -1197,7 +1197,7 @@ c <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -1608,7 +1608,7 @@ a <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -1623,7 +1623,7 @@ b <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -1638,7 +1638,7 @@ c <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -2049,7 +2049,7 @@ a <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -2064,7 +2064,7 @@ b <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
@@ -2079,7 +2079,7 @@ c <-
     legend.position = "right"
   ) +
   scale_fill_manual(
-    limits = c(1:numb),
+    limits = factor(c(1:numb)),
     values = brewer.pal(n = 12, name = "Paired")[1:numb],
     name = "Clusters"
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
