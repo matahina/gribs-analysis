@@ -17,6 +17,40 @@ socket.setdefaulttimeout(60*5)
 
 import requests
 
+import threading
+
+def get_ens(da_url, da_name):
+    i = 0
+    do_loop = True
+    while do_loop:
+        print(da_name, i)
+        i = i + 1
+        do_loop = False
+        try:
+            response = urllib.request.urlretrieve(
+                da_url,
+                da_name)
+        except urllib.error.HTTPError as e:
+            with open('../logs/'+model_date+'.log', 'a') as errlog:
+                errlog.write(model_name+"   "+da_name+' Error code: '+str(e.code)+'\n')
+            print('Error code: ', e.code)
+        except urllib.error.URLError as e:
+            with open('../logs/'+model_date+'.log', 'a') as errlog:
+                errlog.write(model_name+"   "+da_name+' Reason: '+ str(e.reason)+'\n')
+            print('Reason: ', e.reason)
+        except http.client.RemoteDisconnected as e:
+            with open('../logs/'+model_date+'.log', 'a') as errlog:
+                errlog.write(model_name+"   "+da_name+' Reason: '+ str(e.reason)+'\n')
+                errlog.write(model_name+"   "+da_name+' Will retry'+'\n')
+            print('Reason: ', e.reason)
+            print(" Will retry")
+            do_loop = True
+        if i > 100:
+            if do_loop:
+                errlog.write(model_name+"   "+file_name+" WON'T RETRY!!\n")
+                print(" WON'T RETRY!!")
+            do_loop = False
+
 config = configparser.ConfigParser()
 config.read('magic_config.ini')
 
@@ -67,22 +101,26 @@ if model_name != "cfs":
 
     for sc in range(1,n_pert):
         for ech in list(range(0,193,3)) + list(range(198,385,6)):
+
+            if model_name == "fnmoc":
+                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl'
+                body_dir = '/fens.'+model_date+'/'+model_run+'/pgrb2ap5'
+                body_file = 'ENSEMBLE.halfDegree.MET.fcst_et'+"{:03d}".format(sc)+'.'+"{:03d}".format(ech)+'.'+model_date+model_run
+
+            if model_name == "gefs":
+                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl'
+                body_dir = '/gefs.'+model_date+'/'+model_run+'/atmos/pgrb2ap5'
+                body_file = 'gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
+
+            if model_name == "gem":
+                url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl'
+                body_dir = '/cmce.'+model_date+'/'+model_run+'/pgrb2ap5'
+                body_file = 'cmc_gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
+
+            thread_list = []
+
             for prof_name, location in profiles.items():
 
-                if model_name == "fnmoc":
-                    url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_fens.pl'
-                    body_dir = '/fens.'+model_date+'/'+model_run+'/pgrb2ap5'
-                    body_file = 'ENSEMBLE.halfDegree.MET.fcst_et'+"{:03d}".format(sc)+'.'+"{:03d}".format(ech)+'.'+model_date+model_run
-
-                if model_name == "gefs":
-                    url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_gefs_atmos_0p50a.pl'
-                    body_dir = '/gefs.'+model_date+'/'+model_run+'/atmos/pgrb2ap5'
-                    body_file = 'gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
-
-                if model_name == "gem":
-                    url = 'https://nomads.ncep.noaa.gov/cgi-bin/filter_cmcens.pl'
-                    body_dir = '/cmce.'+model_date+'/'+model_run+'/pgrb2ap5'
-                    body_file = 'cmc_gep'+'{:02d}'.format(sc)+'.t'+model_run+'z.pgrb2a.0p50.f'+'{:03d}'.format(ech)
 
                 ## Set the request's body.
                 post_body = {
@@ -102,6 +140,8 @@ if model_name != "cfs":
                     'bottomlat' : south(location[0]),
                         }
 
+
+
                 postfields = urllib.parse.urlencode(post_body)
 
                 full_url = url + '?' + postfields
@@ -110,33 +150,14 @@ if model_name != "cfs":
 
                 print(file_name)
                 print(full_url)
+                thread = threading.Thread(target=get_ens, args=(full_url,file_name))
+                thread_list.append(thread)
+            for thread in thread_list:
+                thread.start()
+            for thread in thread_list:
+                thread.join()
+            time.sleep(0.2)
 
-                i = 0
-                do_loop = True
-                while do_loop:
-                    i = i + 1
-                    do_loop = False
-                    try:
-                        response = urllib.request.urlretrieve(
-                            full_url,
-                            file_name)
-                    except urllib.error.HTTPError as e:
-                        with open('../logs/'+model_date+'.log', 'a') as errlog:
-                            errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
-                        print('Error code: ', e.code)
-                    except urllib.error.URLError as e:
-                        with open('../logs/'+model_date+'.log', 'a') as errlog:
-                            errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-                        print('Reason: ', e.reason)
-                    except http.client.RemoteDisconnected as e:
-                        with open('../logs/'+model_date+'.log', 'a') as errlog:
-                            errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-                            errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
-                        print('Reason: ', e.reason)
-                        print(" Will retry")
-                        do_loop = True
-                    if i > 100:
-                        break
 
 else:
     for sc in range(1,5):
