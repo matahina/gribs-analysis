@@ -125,8 +125,42 @@ if model_name != "cfs":
 
             thread_list = []
 
-            for prof_name, location in profiles.items():
+            if config['General']['area'] != 'yes':
+                for prof_name, location in profiles.items():
 
+
+                    ## Set the request's body.
+                    post_body = {
+                        'dir' : body_dir,
+                        'file' : body_file,
+                        'lev_2_m_above_ground' : 'on',
+                        'lev_500_mb' : 'on',
+                        'lev_850_mb' : 'on',
+                        'lev_surface' : 'on',
+                        'var_APCP' : 'on',
+                        'var_HGT' : 'on',
+                        'var_TMP' : 'on',
+                        'subregion' : '',
+                        'toplat' : north(location[0]),
+                        'leftlon' : west_east(location[1],"w"),
+                        'rightlon' : west_east(location[1],"e"),
+                        'bottomlat' : south(location[0]),
+                            }
+
+
+
+                    postfields = urllib.parse.urlencode(post_body)
+
+                    full_url = url + '?' + postfields
+
+                    file_name = model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+"_"+prof_name+".grb2"
+
+                    print(file_name)
+                    print(full_url)
+                    thread = threading.Thread(target=get_ens, args=(full_url,file_name))
+                    thread_list.append(thread)
+
+            else:
 
                 ## Set the request's body.
                 post_body = {
@@ -140,10 +174,10 @@ if model_name != "cfs":
                     'var_HGT' : 'on',
                     'var_TMP' : 'on',
                     'subregion' : '',
-                    'toplat' : north(location[0]),
-                    'leftlon' : west_east(location[1],"w"),
-                    'rightlon' : west_east(location[1],"e"),
-                    'bottomlat' : south(location[0]),
+                    'toplat' : config['General']['top_lat'],
+                    'leftlon' : config['General']['left_lon'],
+                    'rightlon' : config['General']['right_lon'],
+                    'bottomlat' : config['General']['bottom_lat']
                         }
 
 
@@ -152,15 +186,14 @@ if model_name != "cfs":
 
                 full_url = url + '?' + postfields
 
-                file_name = model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+"_"+prof_name+".grb2"
+                file_name = model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+".grb2"
 
                 print(file_name)
                 print(full_url)
                 thread = threading.Thread(target=get_ens, args=(full_url,file_name))
                 thread_list.append(thread)
-            i = 0
+
             for thread in thread_list:
-                i = i + 1
                 thread.start()
             for thread in thread_list:
                 thread.join()
