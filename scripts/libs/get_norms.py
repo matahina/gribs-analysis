@@ -22,6 +22,8 @@ socket.setdefaulttimeout(60*5)
 
 import requests
 
+import threading
+
 config = configparser.ConfigParser()
 config.read('../dl/magic_config.ini')
 
@@ -59,6 +61,35 @@ def west_east(lon,we):
         return result_west
     if we == "e":
         return result_east
+
+def get_file(da_url, da_name):
+    i = 0
+    do_loop = True
+    while do_loop:
+        i = i + 1
+        try:
+            response = urllib.request.urlretrieve(
+                da_url,
+                da_name)
+            do_loop = False
+        except urllib.error.HTTPError as e:
+            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
+                errlog.write(model_name+"   "+da_name+' Error code: '+str(e.code)+'\n')
+            print('Error code: ', e.code)
+            do_loop = True
+        except urllib.error.URLError as e:
+            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
+                errlog.write(model_name+"   "+da_name+' Reason: '+ str(e.reason)+'\n')
+            print('Reason: ', e.reason)
+            do_loop = True
+        except http.client.RemoteDisconnected as e:
+            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
+                errlog.write(model_name+"   "+da_name+' Reason: '+ str(e.reason)+'\n')
+            print('Reason: ', e.reason)
+            do_loop = True
+        if i > 100:
+            do_loop = False
+
 
 
 
@@ -107,7 +138,14 @@ while do_loop:
     if i > 100:
         break
 
+z500_urls = []
+z500_fnames = []
 
+t850_urls = []
+t850_fnames = []
+
+t2m_urls = []
+t2m_fnames = []
 
 for year in range(1991,2021):
     url = 'https://psl.noaa.gov/thredds/ncss/grid/Datasets/ncep.reanalysis2/pressure/hgt.'+str(year)+'.nc'
@@ -126,40 +164,9 @@ for year in range(1991,2021):
     postfields = urllib.parse.urlencode(post_body).replace("%3A",":")
     full_url = url + '?' + postfields
     file_name = "hgt_"+str(year)+".nc"
-    print(file_name)
-    print(full_url)
+    z500_fnames.append(file_name)
+    z500_urls.append(full_url)
 
-    i = 0
-    do_loop = True
-    while do_loop:
-        i = i + 1
-        try:
-            response = urllib.request.urlretrieve(
-                full_url,
-                file_name)
-            do_loop = False
-        except urllib.error.HTTPError as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
-            print('Error code: ', e.code)
-            do_loop = True
-        except urllib.error.URLError as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-            print('Reason: ', e.reason)
-            do_loop = True
-        except http.client.RemoteDisconnected as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-            print('Reason: ', e.reason)
-            do_loop = True
-        if i > 100:
-            break
-
-
-
-
-for year in range(1991,2021):
     url = 'https://psl.noaa.gov/thredds/ncss/grid/Datasets/ncep.reanalysis2/pressure/air.'+str(year)+'.nc'
     post_body = {
         'var' : "air",
@@ -176,49 +183,9 @@ for year in range(1991,2021):
     postfields = urllib.parse.urlencode(post_body).replace("%3A",":")
     full_url = url + '?' + postfields
     file_name = "t850_"+str(year)+".nc"
-    print(file_name)
-    print(full_url)
+    t850_fnames.append(file_name)
+    t850_urls.append(full_url)
 
-    i = 0
-    do_loop = True
-    while do_loop:
-        i = i + 1
-        try:
-            response = urllib.request.urlretrieve(
-                full_url,
-                file_name)
-            do_loop = False
-        except urllib.error.HTTPError as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
-            print('Error code: ', e.code)
-            do_loop = True
-        except urllib.error.URLError as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-            print('Reason: ', e.reason)
-            do_loop = True
-        except http.client.RemoteDisconnected as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-            print('Reason: ', e.reason)
-            do_loop = True
-        if i > 100:
-            break
-
-
-
-
-
-
-
-
-
-
-
-
-
-for year in range(1991,2021):
     url = 'https://psl.noaa.gov/thredds/ncss/grid/Datasets/ncep.reanalysis2/gaussian_grid/air.2m.gauss.'+str(year)+'.nc'
     post_body = {
         'var' : "air",
@@ -234,35 +201,30 @@ for year in range(1991,2021):
     postfields = urllib.parse.urlencode(post_body).replace("%3A",":")
     full_url = url + '?' + postfields
     file_name = "t2m_"+str(year)+".nc"
-    print(file_name)
-    print(full_url)
 
-    i = 0
-    do_loop = True
-    while do_loop:
-        i = i + 1
-        try:
-            response = urllib.request.urlretrieve(
-                full_url,
-                file_name)
-            do_loop = False
-        except urllib.error.HTTPError as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
-            print('Error code: ', e.code)
-            do_loop = True
-        except urllib.error.URLError as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-            print('Reason: ', e.reason)
-            do_loop = True
-        except http.client.RemoteDisconnected as e:
-            with open('../../data/logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
-            print('Reason: ', e.reason)
-            do_loop = True
-        if i > 100:
-            break
+    t2m_fnames.append(file_name)
+    t2m_urls.append(full_url)
 
-
+for k in range(0,30):
+    print(z500_urls[k])
+    print(z500_fnames[k])
+    print()
+    print(t850_urls[k])
+    print(t850_fnames[k])
+    print()
+    print(t2m_urls[k])
+    print(t2m_fnames[k])
+    print()
+    thread_list = []
+    thread_a = threading.Thread(target=get_file, args=(z500_urls[k],z500_fnames[k]))
+    thread_list.append(thread_a)
+    thread_b = threading.Thread(target=get_file, args=(t850_urls[k],t850_fnames[k]))
+    thread_list.append(thread_b)
+    thread_c = threading.Thread(target=get_file, args=(t2m_urls[k],t2m_fnames[k]))
+    thread_list.append(thread_c)
+    for thread in thread_list:
+        thread.start()
+    for thread in thread_list:
+        thread.join()
+    time.sleep(0.2)
 
