@@ -33,7 +33,13 @@ def get_ens(da_url, da_name):
         except urllib.error.HTTPError as e:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
                 errlog.write(model_name+"   "+da_name+' Error code: '+str(e.code)+'\n')
+                if e.code == 302:
+                    errlog.write(model_name+"   "+da_name+' Will retry'+'\n')
             print('Error code: ', e.code)
+            if e.code == 302:
+                print(" Will retry")
+                do_loop = True
+                time.sleep(600)
         except urllib.error.URLError as e:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
                 errlog.write(model_name+"   "+da_name+' Reason: '+ str(e.reason)+'\n')
@@ -152,11 +158,13 @@ if model_name != "cfs":
                 print(full_url)
                 thread = threading.Thread(target=get_ens, args=(full_url,file_name))
                 thread_list.append(thread)
+            i = 0
             for thread in thread_list:
+                i = i + 1
                 thread.start()
             for thread in thread_list:
                 thread.join()
-            time.sleep(0.2)
+            time.sleep(0.1)
 
 
 else:
