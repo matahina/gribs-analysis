@@ -14,7 +14,7 @@ mega_df = data.frame(date = character(),
            type = character(),
            stringsAsFactors = FALSE)
 
-config <- read.ini("../dl/magic_config.ini")
+config <- read.ini("../../magic_config.ini")
 
 for (name in names(config)) {
   if (name == prof_name) {

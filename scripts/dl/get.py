@@ -58,7 +58,7 @@ def get_ens(da_url, da_name):
             do_loop = False
 
 config = configparser.ConfigParser()
-config.read('magic_config.ini')
+config.read('../../magic_config.ini')
 
 profiles = {}
 

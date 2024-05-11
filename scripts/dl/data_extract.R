@@ -47,7 +47,7 @@ if (we == "e"){
 
 
 
-config <- read.ini("magic_config.ini")
+config <- read.ini("../../magic_config.ini")
 
 profiles <- data.frame(
   name = character(),

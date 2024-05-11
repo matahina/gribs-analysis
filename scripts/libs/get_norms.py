@@ -25,7 +25,7 @@ import requests
 import threading
 
 config = configparser.ConfigParser()
-config.read('../dl/magic_config.ini')
+config.read('../../magic_config.ini')
 
 profile_coords = []
 
