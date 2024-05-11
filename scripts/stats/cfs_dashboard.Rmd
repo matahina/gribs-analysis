@@ -49,43 +49,6 @@ date_var <- Sys.Date() - day_ago
 
 YEAR <- as.integer(format(Sys.time(), "%Y"))
 
-
-# norms <- data.frame(
-#   DATE = c(format(
-#     as.POSIXlt(norm_ncep$DATE, format = "%d/%m"),
-#     paste0(sprintf("%s", YEAR), "-%m-%d %H:%M:%S")
-#   ),
-#   format(
-#     as.POSIXlt(norm_ncep$DATE, format = "%d/%m"),
-#     paste0(sprintf("%s", YEAR + 1), "-%m-%d %H:%M:%S")
-#   )),
-#   Z500 = c(norm_ncep$Z500, norm_ncep$Z500),
-#   T850 = c(norm_ncep$T850, norm_ncep$T850)
-# )
-# 
-# norms_t2m <- data.frame(
-#   DATE_min = c(format(
-#     as.POSIXlt(norm$V1, format = "%d/%m %H:%M"),
-#     paste0(sprintf("%s", YEAR), "-%m-%d 06:%M:%S")
-#   ),
-#   format(
-#     as.POSIXlt(norm$V1, format = "%d/%m %H:%M"),
-#     paste0(sprintf("%s", YEAR + 1), "-%m-%d 06:%M:%S")
-#   )),
-#   DATE_max = c(format(
-#     as.POSIXlt(norm$V3, format = "%d/%m %H:%M"),
-#     paste0(sprintf("%s", YEAR), "-%m-%d 18:%M:%S")
-#   ),
-#   format(
-#     as.POSIXlt(norm$V3, format = "%d/%m %H:%M"),
-#     paste0(sprintf("%s", YEAR + 1), "-%m-%d 18:%M:%S")
-#   )),
-#   T2M_min = c(norm$V2, norm$V2),
-#   T2M_max = c(norm$V4, norm$V4)
-# )
-
-# 
-# 
 norms_pp <- read.csv(sprintf("../../assets/norms_%s/norms_pp_%s.csv", prof_name, prof_name))
 
 

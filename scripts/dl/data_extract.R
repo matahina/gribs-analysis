@@ -14,33 +14,37 @@ library(collapse)
 
 north <- function(lat) {
   result = ceiling(as.numeric(lat) + 2)
-if (result > 90){
-  result = 90}
-return (result)
+  if (result > 90) {
+    result = 90
+  }
+  return (result)
 }
 
 south <- function(lat) {
   result = floor(as.numeric(lat) - 2)
-  if (result < -90){
-    result = -90}
-    return (result)
+  if (result < -90) {
+    result = -90
+  }
+  return (result)
 }
 
 
-west_east <- function(lon,we) {
+west_east <- function(lon, we) {
   result_west = floor(as.numeric(lon) - 2)
-if (result_west < -180){
-  result_west = -180
-}
-result_east = ceiling(as.numeric(lon) + 2)
-if (result_east > 180){
-  result_east = 180 
-}
-
-if (we == "w"){
-  return (result_west)}
-if (we == "e"){
-  return (result_east)}
+  if (result_west < -180) {
+    result_west = -180
+  }
+  result_east = ceiling(as.numeric(lon) + 2)
+  if (result_east > 180) {
+    result_east = 180
+  }
+  
+  if (we == "w") {
+    return (result_west)
+  }
+  if (we == "e") {
+    return (result_east)
+  }
 }
 
 
@@ -59,7 +63,7 @@ profiles <- data.frame(
 for (name in names(config)) {
   if (grepl("Profile", name)) {
     if (config[[name]]["use_it"] == "yes") {
-      profiles[nrow(profiles) + 1,] <-
+      profiles[nrow(profiles) + 1, ] <-
         unname(unlist(c(name, config[[name]]["lat"], config[[name]]["lon"])))
     }
   }
@@ -111,18 +115,18 @@ for (z in seq(0, last_z, step_z)) {
     for (ech in the_range) {
       for (location in profiles$name) {
         if (config[["General"]]["area"] == "yes") {
-        filename = sprintf("%s_%02d_%03d_%03d.grb2",
-                           extractdate,
-                           z,
-                           sc,
-                           ech)
+          filename = sprintf("%s_%02d_%03d_%03d.grb2",
+                             extractdate,
+                             z,
+                             sc,
+                             ech)
         } else {
-        filename = sprintf("%s_%02d_%03d_%03d_%s.grb2",
-                           extractdate,
-                           z,
-                           sc,
-                           ech,
-                           location)
+          filename = sprintf("%s_%02d_%03d_%03d_%s.grb2",
+                             extractdate,
+                             z,
+                             sc,
+                             ech,
+                             location)
         }
         
         if (args[2] == "cfs") {
@@ -133,8 +137,8 @@ for (z in seq(0, last_z, step_z)) {
             '500 mb',
             'HGT',
             domain = c(
-              west_east(profiles[which(profiles$name == location), "lon"],"w"),
-              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
@@ -145,8 +149,8 @@ for (z in seq(0, last_z, step_z)) {
             '850 mb',
             'TMP',
             domain = c(
-              west_east(profiles[which(profiles$name == location), "lon"],"w"),
-              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
@@ -157,8 +161,8 @@ for (z in seq(0, last_z, step_z)) {
             '2 m above ground',
             'TMP',
             domain = c(
-              west_east(profiles[which(profiles$name == location), "lon"],"w"),
-              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
@@ -169,8 +173,8 @@ for (z in seq(0, last_z, step_z)) {
             'surface',
             'PRATE',
             domain = c(
-              west_east(profiles[which(profiles$name == location), "lon"],"w"),
-              west_east(profiles[which(profiles$name == location), "lon"],"e"),
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
@@ -284,8 +288,8 @@ for (z in seq(0, last_z, step_z)) {
               c('500 mb', '850 mb', '2 m above ground', 'surface'),
               c('HGT', 'APCP', 'TMP'),
               domain = c(
-                west_east(profiles[which(profiles$name == location), "lon"],"w"),
-                west_east(profiles[which(profiles$name == location), "lon"],"e"),
+                west_east(profiles[which(profiles$name == location), "lon"], "w"),
+                west_east(profiles[which(profiles$name == location), "lon"], "e"),
                 north(profiles[which(profiles$name == location), "lat"]),
                 south(profiles[which(profiles$name == location), "lat"])
               )
@@ -296,8 +300,8 @@ for (z in seq(0, last_z, step_z)) {
               c('500 mb', '850 mb', '2 m above ground', 'surface'),
               c('HGT', 'APCP', 'TMP'),
               domain = c(
-                west_east(profiles[which(profiles$name == location), "lon"],"w"),
-                west_east(profiles[which(profiles$name == location), "lon"],"e"),
+                west_east(profiles[which(profiles$name == location), "lon"], "w"),
+                west_east(profiles[which(profiles$name == location), "lon"], "e"),
                 north(profiles[which(profiles$name == location), "lat"]),
                 south(profiles[which(profiles$name == location), "lat"])
               )
@@ -365,13 +369,13 @@ for (z in seq(0, last_z, step_z)) {
               paste(tout$model.run.date[1], sprintf("sc%02d", sc))
             
             
-            donneesrun[nrow(donneesrun) + 1,] <- c(runs,
-                                                   dates,
-                                                   location,
-                                                   var_hgt,
-                                                   var_talt,
-                                                   var_tsol,
-                                                   var_pp)
+            donneesrun[nrow(donneesrun) + 1, ] <- c(runs,
+                                                    dates,
+                                                    location,
+                                                    var_hgt,
+                                                    var_talt,
+                                                    var_tsol,
+                                                    var_pp)
           }
           
           

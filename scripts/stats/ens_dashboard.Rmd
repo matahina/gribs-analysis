@@ -38,6 +38,7 @@ library(ggpubr)
 library(gridExtra)
 
 library(attempt)
+library(dplyr)
 ```
 
 ```{r}
@@ -167,7 +168,7 @@ the_dates <-
 
 
 ```{r}
-library(dplyr)
+
 pp_unif <- allruns[, c(1, 2, 6)]
 pp_unif <- na.omit(pp_unif)
 names(pp_unif) <- c("runs", "variable", "value")
