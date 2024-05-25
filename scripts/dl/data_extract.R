@@ -132,7 +132,8 @@ for (z in seq(0, last_z, step_z)) {
         if (args[2] == "cfs") {
           filename = sprintf(".%02d.%s%02d.daily.grb2", sc, extractdate, z)
           
-          tadaa <- ReadGrib(
+          tadaa <- tryCatch({
+            return(ReadGrib(
             sprintf("../../data/cfs/z500%s", filename),
             '500 mb',
             'HGT',
@@ -142,9 +143,26 @@ for (z in seq(0, last_z, step_z)) {
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
-          )
+          ))
+          }, warning = function(war) {
+              return(ReadGrib(
+            sprintf("../../data/cfs/z500%s", filename),
+            '500 mb',
+            'HGT',
+            domain = c(
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
+            )
+          ))
+          },
+          error = function(e) {
+            return(data.frame())
+          })
 
-          tadab <- ReadGrib(
+          tadab <- tryCatch({
+            return(ReadGrib(
             sprintf("../../data/cfs/t850%s", filename),
             '850 mb',
             'TMP',
@@ -154,9 +172,26 @@ for (z in seq(0, last_z, step_z)) {
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
-          )
+          ))
+          }, warning = function(war) {
+              return(ReadGrib(
+            sprintf("../../data/cfs/z500%s", filename),
+            '500 mb',
+            'HGT',
+            domain = c(
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
+            )
+          ))
+          },
+          error = function(e) {
+            return(data.frame())
+          })
 
-          tadac <- ReadGrib(
+          tadac <- tryCatch({
+            return(ReadGrib(
             sprintf("../../data/cfs/tmp2m%s", filename),
             '2 m above ground',
             'TMP',
@@ -166,9 +201,26 @@ for (z in seq(0, last_z, step_z)) {
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
-          )
+          ))
+          }, warning = function(war) {
+              return(ReadGrib(
+            sprintf("../../data/cfs/z500%s", filename),
+            '500 mb',
+            'HGT',
+            domain = c(
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
+            )
+          ))
+          },
+          error = function(e) {
+            return(data.frame())
+          })
 
-          tadad <- ReadGrib(
+          tadad <- tryCatch({
+            return(ReadGrib(
             sprintf("../../data/cfs/prate%s", filename),
             'surface',
             'PRATE',
@@ -178,7 +230,23 @@ for (z in seq(0, last_z, step_z)) {
               north(profiles[which(profiles$name == location), "lat"]),
               south(profiles[which(profiles$name == location), "lat"])
             )
-          )
+          ))
+          }, warning = function(war) {
+              return(ReadGrib(
+            sprintf("../../data/cfs/z500%s", filename),
+            '500 mb',
+            'HGT',
+            domain = c(
+              west_east(profiles[which(profiles$name == location), "lon"], "w"),
+              west_east(profiles[which(profiles$name == location), "lon"], "e"),
+              north(profiles[which(profiles$name == location), "lat"]),
+              south(profiles[which(profiles$name == location), "lat"])
+            )
+          ))
+          },
+          error = function(e) {
+            return(data.frame())
+          })
           
           extract_a <- c(NA, NA, NA, NA)
           extract_b <- c(NA, NA, NA, NA)
