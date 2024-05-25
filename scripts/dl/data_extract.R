@@ -143,7 +143,7 @@ for (z in seq(0, last_z, step_z)) {
               south(profiles[which(profiles$name == location), "lat"])
             )
           )
-          
+
           tadab <- ReadGrib(
             sprintf("../../data/cfs/t850%s", filename),
             '850 mb',
@@ -155,7 +155,7 @@ for (z in seq(0, last_z, step_z)) {
               south(profiles[which(profiles$name == location), "lat"])
             )
           )
-          
+
           tadac <- ReadGrib(
             sprintf("../../data/cfs/tmp2m%s", filename),
             '2 m above ground',
@@ -167,7 +167,7 @@ for (z in seq(0, last_z, step_z)) {
               south(profiles[which(profiles$name == location), "lat"])
             )
           )
-          
+
           tadad <- ReadGrib(
             sprintf("../../data/cfs/prate%s", filename),
             'surface',
@@ -180,29 +180,42 @@ for (z in seq(0, last_z, step_z)) {
             )
           )
           
+          extract_a <- c(NA, NA, NA, NA)
+          extract_b <- c(NA, NA, NA, NA)
+          extract_c <- c(NA, NA, NA, NA)
+          extract_d <- c(NA, NA, NA, NA)
+
+          if (length(tadaa$value)>0) {
           extract_a <-
             BuildProfile(tadaa,
                          as.numeric(profiles[which(profiles$name == location), "lon"]),
                          as.numeric(profiles[which(profiles$name == location), "lat"]),
                          spatial.average = FALSE)
+          }
           
+          if (length(tadab$value)>0) {
           extract_b <-
             BuildProfile(tadab,
                          as.numeric(profiles[which(profiles$name == location), "lon"]),
                          as.numeric(profiles[which(profiles$name == location), "lat"]),
                          spatial.average = FALSE)
+          }
           
+          if (length(tadac$value)>0) {
           extract_c <-
             BuildProfile(tadac,
                          as.numeric(profiles[which(profiles$name == location), "lon"]),
                          as.numeric(profiles[which(profiles$name == location), "lat"]),
                          spatial.average = FALSE)
+          }
           
+          if (length(tadad$value)>0) {
           extract_d <-
             BuildProfile(tadad,
                          as.numeric(profiles[which(profiles$name == location), "lon"]),
                          as.numeric(profiles[which(profiles$name == location), "lat"]),
                          spatial.average = FALSE)
+          }
           
           run_name <-
             paste(fmode(
@@ -216,6 +229,35 @@ for (z in seq(0, last_z, step_z)) {
             , sprintf("sc%02d", sc))
           
           tab_a = data.frame(
+            runs = c(NA),
+            dates = c(NA),
+            geop = c(NA),
+            profile = location
+          )
+          
+          tab_b = data.frame(
+            runs = c(NA),
+            dates = c(NA),
+            tempalt = c(NA),
+            profile = location
+          )
+          
+          tab_c = data.frame(
+            runs = c(NA),
+            dates = c(NA),
+            tempsol = c(NA),
+            profile = location
+          )
+          
+          tab_d = data.frame(
+            runs = c(NA),
+            dates = c(NA),
+            precs = c(NA),
+            profile = location
+          )
+          
+          if (length(extract_a) != 4) {
+          tab_a = data.frame(
             runs = rep(run_name, times = length(extract_a[[1]]$forecast.date)),
             dates = extract_a[[1]]$forecast.date,
             geop = unlist(unname(c(
@@ -223,7 +265,9 @@ for (z in seq(0, last_z, step_z)) {
             ))) / 10,
             profile = location
           )
+          }
           
+          if (length(extract_b) != 4) {
           tab_b = data.frame(
             runs = rep(run_name, times = length(extract_b[[1]]$forecast.date)),
             dates = extract_b[[1]]$forecast.date,
@@ -232,7 +276,9 @@ for (z in seq(0, last_z, step_z)) {
             ))) - 273.15,
             profile = location
           )
+          }
           
+          if (length(extract_c) != 4) {
           tab_c = data.frame(
             runs = rep(run_name, times = length(extract_c[[1]]$forecast.date)),
             dates = extract_c[[1]]$forecast.date,
@@ -241,7 +287,9 @@ for (z in seq(0, last_z, step_z)) {
             ))) - 273.15,
             profile = location
           )
+          }
           
+          if (length(extract_d) != 4) {
           tab_d = data.frame(
             runs = rep(run_name, times = length(extract_d[[1]]$forecast.date)),
             dates = extract_d[[1]]$forecast.date,
@@ -250,7 +298,7 @@ for (z in seq(0, last_z, step_z)) {
             ))) * 3600 * 6,
             profile = location
           )
-          
+          }
           
           rm(total)
           total <-
@@ -279,7 +327,7 @@ for (z in seq(0, last_z, step_z)) {
               all.y = TRUE
             )
           
-          donneesrun <- total
+          donneesrun <- total[-which(is.na(total$runs) & which(is.na(total$dates))),]
           
         } else {
           tout <- tryCatch({
