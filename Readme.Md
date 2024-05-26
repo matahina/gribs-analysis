@@ -27,6 +27,7 @@ Downloads and Dashboard generating are logged if you need to catch errors.
 When everything is set up and running, generated dashboards are available in root directory of the program. Some dashboard examples are available online :
 
 | **Ensemblists**          | **Long-Term**            |
+|---|---|
 | [Metz](https://matahina.ddns.net/weather/ens_dashboard_Profile_1.html)              |  [Metz](https://matahina.ddns.net/weather/cfs_dashboard_Profile_1.html)            |
 | [Abidjan](https://matahina.ddns.net/weather/ens_dashboard_Profile_2.html)           |  [Abidjan](https://matahina.ddns.net/weather/cfs_dashboard_Profile_2.html)         |
 | [Johannesburg](https://matahina.ddns.net/weather/ens_dashboard_Profile_3.html)      |  [Johannesburg](https://matahina.ddns.net/weather/cfs_dashboard_Profile_3.html)    |
@@ -209,17 +210,18 @@ It is recommended to play with minutes to not start everything at the same time.
 ./noaa_dl.sh [MODEL_NAME] [MODEL_RUN] [DAY_AGO]
 ```
 
-\[MODEL_NAME\] is one of the 4 models considered previously : `gefs` `gem` `fnmoc` `cfs`.
+`[MODEL_NAME]` is one of the 4 models considered previously : `gefs` `gem` `fnmoc` `cfs`.
 
-\[MODEL_RUN\] is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
+`[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
 
-\[DAY_AGO\] is for the day of the run. If you want to download a run from 4 days ago, set `4`. If you download a run the same day it has been done, set `0`. If you download a run that was done the day before, it can be because it takes a while to be available or because you're in a different time zone, set `1`.
+`[DAY_AGO]` is for the day of the run. If you want to download a run from 4 days ago, set `4`. If you download a run the same day it has been done, set `0`. If you download a run that was done the day before, it can be because it takes a while to be available or because you're in a different time zone, set `1`.
 
 ### Availability of runs
 
 Availability is when forecast until h+360 is done for a run. This table with examples for 2 time zones will help you:
 
 | **Model** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
+|---|---|---|---|
 | **GEFS**  |                              |                                  |                              |
 | 00Z       | 07:00                        | 09:00                            | 15:00                        |
 | 06Z       | 13:00                        | 15:00                            | 21:00                        |
