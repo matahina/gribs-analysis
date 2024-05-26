@@ -22,6 +22,8 @@ Only few parameters are analyzed: geopotential (z500), temperature (t850 and t2m
 
 It also uses data from [NCEP Reanalysis](https://psl.noaa.gov/data/gridded/data.ncep.reanalysis2.html) to compare with long-term data means.
 
+Downloads and Dashboard generating are logged if you need to catch errors.
+
 When everything is set up and running, generated dashboards are available in root directory of the program. Some dashboard examples are available online :
 
 |-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
@@ -253,4 +255,10 @@ FNMOC 12z is often available much later than expected (last grib files for h+360
 You can create two other files to fit your needs :
     - `[YOUR PATH!!]/gribs-analysis/scripts/libs/notify_ssh.sh` If it exists, it will be called when `noaa_dl.sh` and `noaa_stats.sh` start and end. By example, to send via ssh a notify-osd message to your computer to see your server is running this program.
     - `[YOUR PATH!!]/gribs-analysis/scripts/libs/publish_dashboards.sh` If it exists, it will be called when `noaa_stats.sh` ends. By example, to move your dashboard in */var/www/* if your server is also hosting a website (or to move them via ssh-ftp to another server).
+
+## License
+This bunch of crap code lines is GPL, free, public domain, have fun with it!!!
+
+## Project status
+Active.
 
