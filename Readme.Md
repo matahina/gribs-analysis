@@ -26,14 +26,11 @@ Downloads and Dashboard generating are logged if you need to catch errors.
 
 When everything is set up and running, generated dashboards are available in root directory of the program. Some dashboard examples are available online :
 
-|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| **Ensemblists**                                                                     | **Long-Term**                                                                                      |
-|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
-| [Metz](https://matahina.ddns.net/weather/ens_dashboard_Profile_1.html)              |  [Metz](https://matahina.ddns.net/weather/cfs_dashboard_Profile_1.html)                            |
-| [Abidjan](https://matahina.ddns.net/weather/ens_dashboard_Profile_2.html)           |  [Abidjan](https://matahina.ddns.net/weather/cfs_dashboard_Profile_2.html)                         |
-| [Johannesburg](https://matahina.ddns.net/weather/ens_dashboard_Profile_3.html)      |  [Johannesburg](https://matahina.ddns.net/weather/cfs_dashboard_Profile_3.html)                    |
-| [Cape Town](https://matahina.ddns.net/weather/ens_dashboard_Profile_4.html)         |  [Cape Town](https://matahina.ddns.net/weather/cfs_dashboard_Profile_4.html)                       |
-|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| **Ensemblists**          | **Long-Term**            |
+| [Metz](https://matahina.ddns.net/weather/ens_dashboard_Profile_1.html)              |  [Metz](https://matahina.ddns.net/weather/cfs_dashboard_Profile_1.html)            |
+| [Abidjan](https://matahina.ddns.net/weather/ens_dashboard_Profile_2.html)           |  [Abidjan](https://matahina.ddns.net/weather/cfs_dashboard_Profile_2.html)         |
+| [Johannesburg](https://matahina.ddns.net/weather/ens_dashboard_Profile_3.html)      |  [Johannesburg](https://matahina.ddns.net/weather/cfs_dashboard_Profile_3.html)    |
+| [Cape Town](https://matahina.ddns.net/weather/ens_dashboard_Profile_4.html)         |  [Cape Town](https://matahina.ddns.net/weather/cfs_dashboard_Profile_4.html)       |
 
 
 ## Requirements
@@ -222,29 +219,23 @@ It is recommended to play with minutes to not start everything at the same time.
 
 Availability is when forecast until h+360 is done for a run. This table with examples for 2 time zones will help you:
 
-|-----------|------------------------------|----------------------------------|------------------------------|
 | **Model** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
-|-----------|------------------------------|----------------------------------|------------------------------|
 | **GEFS**  |                              |                                  |                              |
 | 00Z       | 07:00                        | 09:00                            | 15:00                        |
 | 06Z       | 13:00                        | 15:00                            | 21:00                        |
 | 12Z       | 19:00                        | 21:00                            | 03:00 (day+1)                |
 | 18Z       | 01:00 (day+1)                | 03:00 (day+1)                    | 09:00 (day+1)                |
-|-----------|------------------------------|----------------------------------|------------------------------|
 | **GEM**   |                              |                                  |                              |
 | 00Z       | 07:00                        | 09:00                            | 15:00                        |
 | 12Z       | 19:00                        | 21:00                            | 03:00 (day+1)                |
-|-----------|------------------------------|----------------------------------|------------------------------|
 | **FNMOC** |                              |                                  |                              |
 | 00Z       | 07:00                        | 09:00                            | 15:00                        |
 | 12Z       | 00:00 (day+1)                | 02:00 (day+1)                    | 08:00 (day+1)                |
-|-----------|------------------------------|----------------------------------|------------------------------|
 | **CFS**   |                              |                                  |                              |
 | 00Z       | 12:00                        | 14:00                            | 20:00                        |
 | 06Z       | 18:00                        | 20:00                            | 02:00 (day+1)                |
 | 12Z       | 00:00 (day+1)                | 02:00 (day+1)                    | 08:00 (day+1)                |
 | 18Z       | 06:00 (day+1)                | 08:00 (day+1)                    | 14:00 (day+1)                |
-|-----------|------------------------------|----------------------------------|------------------------------|
 
 For Europe/Paris, DST time is considered. You can do -1h during winter but you will have to edit your crontab twice a year.
 
@@ -253,8 +244,10 @@ FNMOC 12z is often available much later than expected (last grib files for h+360
 ## Set up (4): Bonus files
 
 You can create two other files to fit your needs :
-    - `[YOUR PATH!!]/gribs-analysis/scripts/libs/notify_ssh.sh` If it exists, it will be called when `noaa_dl.sh` and `noaa_stats.sh` start and end. By example, to send via ssh a notify-osd message to your computer to see your server is running this program.
-    - `[YOUR PATH!!]/gribs-analysis/scripts/libs/publish_dashboards.sh` If it exists, it will be called when `noaa_stats.sh` ends. By example, to move your dashboard in */var/www/* if your server is also hosting a website (or to move them via ssh-ftp to another server).
+
+- `[YOUR PATH!!]/gribs-analysis/scripts/libs/notify_ssh.sh` If it exists, it will be called when `noaa_dl.sh` and `noaa_stats.sh` start and end. By example, to send via ssh a notify-osd message to your computer to see your server is running this program.
+
+- `[YOUR PATH!!]/gribs-analysis/scripts/libs/publish_dashboards.sh` If it exists, it will be called when `noaa_stats.sh` ends. By example, to move your dashboard in */var/www/* if your server is also hosting a website (or to move them via ssh-ftp to another server).
 
 ## License
 This bunch of crap code lines is GPL, free, public domain, have fun with it!!!
