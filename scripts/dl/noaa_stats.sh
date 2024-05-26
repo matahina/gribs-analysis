@@ -31,6 +31,8 @@ TZ=`sed -nr "/^\["$3"\]/ { :l /^tz[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" ../
 cd ../stats
 R -e "rmarkdown::render('"$1"_dashboard.Rmd', output_file = '"$1"_dashboard_"$3".html')" --args "$LOC" "$3" "$2" "'$TZ'"  >> ../../data/logs/"$DATE".log
 rm my.inv
+mv ens_dashboard*.html ../../
+mv cfs_dashboard*.html ../../
 
 ######################################
 ## Clear files

@@ -6,6 +6,33 @@
 >
 > You need Python and Cron.
 
+## What it does
+
+It retrieves grib files from 4 different weather prediction models from NOAA and CMC (GEFS, FNMOC, GEM and CFS).
+
+GEFS, FNMOC and GEM are ensemblist models. The different scenarios are downloaded, not the deterministic nor the control ones. Data is extracted into csv files. Grib files from n-2 day are removed everyday.
+
+CFS is long-term model. Time grib data is downloaded. Every 10th of the month, grib files from n-1 month are removed.
+
+For ensemblist models, a dashboard is computed with basic time series clustering of the scenarios from the previous day forecasts (up to 200 scenarios).
+
+For long-term model, a dashboard is computed with probabilities to see above/below long-term means for different variables from the previous forecasts of the 28 last days.
+
+Only few parameters are analyzed: geopotential (z500), temperature (t850 and t2m), precipitation (ACPC or PRATE).
+
+It also uses data from [NCEP Reanalysis](https://psl.noaa.gov/data/gridded/data.ncep.reanalysis2.html) to compare with long-term data means.
+
+When everything is set up and running, generated dashboards are available in root directory of the program. Some dashboard examples are available online :
+
+|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| **Ensemblists**                                                                     | **Long-Term**                                                                                      |
+|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+| [Metz](https://matahina.ddns.net/weather/ens_dashboard_Profile_1.html)              |  [Metz](https://matahina.ddns.net/weather/cfs_dashboard_Profile_1.html)                            |
+| [Abidjan](https://matahina.ddns.net/weather/ens_dashboard_Profile_2.html)           |  [Abidjan](https://matahina.ddns.net/weather/cfs_dashboard_Profile_2.html)                         |
+| [Johannesburg](https://matahina.ddns.net/weather/ens_dashboard_Profile_3.html)      |  [Johannesburg](https://matahina.ddns.net/weather/cfs_dashboard_Profile_3.html)                    |
+| [Cape Town](https://matahina.ddns.net/weather/ens_dashboard_Profile_4.html)         |  [Cape Town](https://matahina.ddns.net/weather/cfs_dashboard_Profile_4.html)                       |
+|-------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------|
+
 
 ## Requirements
 
@@ -94,10 +121,10 @@ rm -R wgri* # Unless you wan want to keep the build directories
 install.packages(c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "rNOMADS", "assertthat", "ini", "collapse", "ncdf4", "raster"), force=FALSE)
 ```
 
-It might take a while. Do it again if anything wrong happened. The option `force=FALSE` ensures you won't reinstall packages already set and compiled.
+It might take a while. Do it again if anything wrong happened. The option `force=FALSE` ensures you won't reinstall everything.
 
 
-## Set up
+## Set up (1)
 
 ### Data directory
 
@@ -113,14 +140,117 @@ mkdir gem
 mkdir logs
 ```
 
-### Profiles
+## Set up (2): Profiles
 
-### Crontab
+### Config file
 
-Install locally for a specific user
+You can run this program for different locations. Grib files are downloaded according to a subset area for each location based on given coordinates.
 
-Make a crontab !
-Run for a specific user (same as the one who installed R libs)
+Edit the file `magic_config.ini`. The original one is explicit enough to understand it. You can remove profiles, add some, or leave only one. Choose the cities you want and fill it with the appropriate values. If you set `use_it = no`, data from this location won't be downloaded nor extracted.
 
+If you have more than 2 profiles, you must set `area = yes` in *\[General\]* section. Otherwise, you can set in to `area = no`.
 
+When the setting `area = yes` in enabled, it tells the scripts to download one grib of this subset area instead of several gribs from different locations. NOAA might block your IP if you download too much grib files for individual locations.
+
+### Get NCEP reanalysis long-term data means
+
+Check if [NOAA service](https://psl.noaa.gov/thredds/catalog.html) is available before...
+
+Then run:
+
+```bash
+./scripts/dl/norms_dl.sh "Profile_1"
+```
+
+Repeat for each profile. Change the profile name given as argument according to the names in `magic_config.ini`.
+
+## Set up (3): Crontab
+
+The same user who runs this program has installed R packages and will edit crontab with `crontab -e`.
+
+### Example
+
+This is for a server in Europe/Paris tz zone:
+
+```
+## GEFS
+5 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "00" "0"
+5 15 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "06" "0"
+5 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "12" "0"
+5 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "18" "1"
+## GEM
+10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gem" "00" "0"
+10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gem" "12" "0"
+## FNMOC
+15 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "fnmoc" "00" "0"
+15 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "fnmoc" "12" "1"
+## CFS
+20 14 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "00" "0"
+20 20 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "06" "0"
+20 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "12" "1"
+20 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "18" "1"
+## STATS
+30 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_1"
+31 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_2"
+32 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_3"
+33 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_4"
+30 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_1"
+31 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_2"
+32 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_3"
+33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_4"
+```
+
+Two scripts can't run at the same time. A lock file prevents another script to start. It will wait until the lock is removed.
+
+It is recommended to play with minutes to not start everything at the same time.
+
+### Command args
+
+```
+./noaa_dl.sh [MODEL_NAME] [MODEL_RUN] [DAY_AGO]
+```
+
+\[MODEL_NAME\] is one of the 4 models considered previously : `gefs` `gem` `fnmoc` `cfs`.
+
+\[MODEL_RUN\] is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
+
+\[DAY_AGO\] is for the day of the run. If you want to download a run from 4 days ago, set `4`. If you download a run the same day it has been done, set `0`. If you download a run that was done the day before, it can be because it takes a while to be available or because you're in a different time zone, set `1`.
+
+### Availability of runs
+
+Availability is when forecast until h+360 is done for a run. This table with examples for 2 time zones will help you:
+
+|-----------|------------------------------|----------------------------------|------------------------------|
+| **Model** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
+|-----------|------------------------------|----------------------------------|------------------------------|
+| **GEFS**  |                              |                                  |                              |
+| 00Z       | 07:00                        | 09:00                            | 15:00                        |
+| 06Z       | 13:00                        | 15:00                            | 21:00                        |
+| 12Z       | 19:00                        | 21:00                            | 03:00 (day+1)                |
+| 18Z       | 01:00 (day+1)                | 03:00 (day+1)                    | 09:00 (day+1)                |
+|-----------|------------------------------|----------------------------------|------------------------------|
+| **GEM**   |                              |                                  |                              |
+| 00Z       | 07:00                        | 09:00                            | 15:00                        |
+| 12Z       | 19:00                        | 21:00                            | 03:00 (day+1)                |
+|-----------|------------------------------|----------------------------------|------------------------------|
+| **FNMOC** |                              |                                  |                              |
+| 00Z       | 07:00                        | 09:00                            | 15:00                        |
+| 12Z       | 00:00 (day+1)                | 02:00 (day+1)                    | 08:00 (day+1)                |
+|-----------|------------------------------|----------------------------------|------------------------------|
+| **CFS**   |                              |                                  |                              |
+| 00Z       | 12:00                        | 14:00                            | 20:00                        |
+| 06Z       | 18:00                        | 20:00                            | 02:00 (day+1)                |
+| 12Z       | 00:00 (day+1)                | 02:00 (day+1)                    | 08:00 (day+1)                |
+| 18Z       | 06:00 (day+1)                | 08:00 (day+1)                    | 14:00 (day+1)                |
+|-----------|------------------------------|----------------------------------|------------------------------|
+
+For Europe/Paris, DST time is considered. You can do -1h during winter but you will have to edit your crontab twice a year.
+
+FNMOC 12z is often available much later than expected (last grib files for h+360 can appear at 23:45UTC on NOAA servers).
+
+## Set up (4): Bonus files
+
+You can create two other files to fit your needs :
+    - `[YOUR PATH!!]/gribs-analysis/scripts/libs/notify_ssh.sh` If it exists, it will be called when `noaa_dl.sh` and `noaa_stats.sh` start and end. By example, to send via ssh a notify-osd message to your computer to see your server is running this program.
+    - `[YOUR PATH!!]/gribs-analysis/scripts/libs/publish_dashboards.sh` If it exists, it will be called when `noaa_stats.sh` ends. By example, to move your dashboard in */var/www/* if your server is also hosting a website (or to move them via ssh-ftp to another server).
 
