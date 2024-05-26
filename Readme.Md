@@ -220,20 +220,25 @@ It is recommended to play with minutes to not start everything at the same time.
 
 Availability is when forecast until h+360 is done for a run. This table with examples for 2 time zones will help you:
 
-| **Model** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
+| **GEFS** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
 |---|---|---|---|
-| **GEFS**  |                              |                                  |                              |
 | 00Z       | 07:00                        | 09:00                            | 15:00                        |
 | 06Z       | 13:00                        | 15:00                            | 21:00                        |
 | 12Z       | 19:00                        | 21:00                            | 03:00 (day+1)                |
 | 18Z       | 01:00 (day+1)                | 03:00 (day+1)                    | 09:00 (day+1)                |
-| **GEM**   |                              |                                  |                              |
+
+| **GEM** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
+|---|---|---|---|
 | 00Z       | 07:00                        | 09:00                            | 15:00                        |
 | 12Z       | 19:00                        | 21:00                            | 03:00 (day+1)                |
-| **FNMOC** |                              |                                  |                              |
+
+| **FNMOC** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
+|---|---|---|---|
 | 00Z       | 07:00                        | 09:00                            | 15:00                        |
 | 12Z       | 00:00 (day+1)                | 02:00 (day+1)                    | 08:00 (day+1)                |
-| **CFS**   |                              |                                  |                              |
+
+| **CFS** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
+|---|---|---|---|
 | 00Z       | 12:00                        | 14:00                            | 20:00                        |
 | 06Z       | 18:00                        | 20:00                            | 02:00 (day+1)                |
 | 12Z       | 00:00 (day+1)                | 02:00 (day+1)                    | 08:00 (day+1)                |
