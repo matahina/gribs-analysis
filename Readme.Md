@@ -115,7 +115,7 @@ rm -R wgri* # Unless you wan want to keep the build directories
 # sudo rm /usr/bin/wgri*
 ```
 
-### R Packages:
+### R Packages (all distros):
 
 ```R
 install.packages(c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "rNOMADS", "assertthat", "ini", "collapse", "ncdf4", "raster"), force=FALSE)
