@@ -4,7 +4,9 @@
 
 > [!WARNING]  
 > Error in Manjaro because of `libicui18n.so.74` as of June 1st, 2024
+>
 > You need to re-install R package `stringi`
+>
 > in R: `install.packages("stringi")`
 
 > This program is designed to work on Linux, on a server.
