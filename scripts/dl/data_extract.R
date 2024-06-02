@@ -174,17 +174,17 @@ for (z in seq(0, last_z, step_z)) {
             )
           ))
           }, warning = function(war) {
-              return(ReadGrib(
-            sprintf("../../data/cfs/z500%s", filename),
-            '500 mb',
-            'HGT',
-            domain = c(
-              west_east(profiles[which(profiles$name == location), "lon"], "w"),
-              west_east(profiles[which(profiles$name == location), "lon"], "e"),
-              north(profiles[which(profiles$name == location), "lat"]),
-              south(profiles[which(profiles$name == location), "lat"])
-            )
-          ))
+            return(ReadGrib(
+              sprintf("../../data/cfs/t850%s", filename),
+              '850 mb',
+              'TMP',
+              domain = c(
+                west_east(profiles[which(profiles$name == location), "lon"], "w"),
+                west_east(profiles[which(profiles$name == location), "lon"], "e"),
+                north(profiles[which(profiles$name == location), "lat"]),
+                south(profiles[which(profiles$name == location), "lat"])
+              )
+            ))
           },
           error = function(e) {
             return(data.frame())
@@ -203,17 +203,17 @@ for (z in seq(0, last_z, step_z)) {
             )
           ))
           }, warning = function(war) {
-              return(ReadGrib(
-            sprintf("../../data/cfs/z500%s", filename),
-            '500 mb',
-            'HGT',
-            domain = c(
-              west_east(profiles[which(profiles$name == location), "lon"], "w"),
-              west_east(profiles[which(profiles$name == location), "lon"], "e"),
-              north(profiles[which(profiles$name == location), "lat"]),
-              south(profiles[which(profiles$name == location), "lat"])
-            )
-          ))
+            return(ReadGrib(
+              sprintf("../../data/cfs/tmp2m%s", filename),
+              '2 m above ground',
+              'TMP',
+              domain = c(
+                west_east(profiles[which(profiles$name == location), "lon"], "w"),
+                west_east(profiles[which(profiles$name == location), "lon"], "e"),
+                north(profiles[which(profiles$name == location), "lat"]),
+                south(profiles[which(profiles$name == location), "lat"])
+              )
+            ))
           },
           error = function(e) {
             return(data.frame())
@@ -232,17 +232,17 @@ for (z in seq(0, last_z, step_z)) {
             )
           ))
           }, warning = function(war) {
-              return(ReadGrib(
-            sprintf("../../data/cfs/z500%s", filename),
-            '500 mb',
-            'HGT',
-            domain = c(
-              west_east(profiles[which(profiles$name == location), "lon"], "w"),
-              west_east(profiles[which(profiles$name == location), "lon"], "e"),
-              north(profiles[which(profiles$name == location), "lat"]),
-              south(profiles[which(profiles$name == location), "lat"])
-            )
-          ))
+            return(ReadGrib(
+              sprintf("../../data/cfs/prate%s", filename),
+              'surface',
+              'PRATE',
+              domain = c(
+                west_east(profiles[which(profiles$name == location), "lon"], "w"),
+                west_east(profiles[which(profiles$name == location), "lon"], "e"),
+                north(profiles[which(profiles$name == location), "lat"]),
+                south(profiles[which(profiles$name == location), "lat"])
+              )
+            ))
           },
           error = function(e) {
             return(data.frame())
@@ -284,6 +284,13 @@ for (z in seq(0, last_z, step_z)) {
                          as.numeric(profiles[which(profiles$name == location), "lat"]),
                          spatial.average = FALSE)
           }
+          
+          print("")
+          print(filename)
+          print(length(tadaa$value))
+          print(length(tadab$value))
+          print(length(tadac$value))
+          print(length(tadad$value))
           
           run_name <-
             paste(fmode(
@@ -395,7 +402,12 @@ for (z in seq(0, last_z, step_z)) {
               all.y = TRUE
             )
           
-          donneesrun <- total[-which(is.na(total$runs) & which(is.na(total$dates))),]
+          if (length(which(is.na(total$runs) & which(is.na(total$dates)))) > 0) {
+            donneesrun <- total[-which(is.na(total$runs) & which(is.na(total$dates))),]
+          } else {
+            donneesrun <- total
+          }
+          
           
         } else {
           tout <- tryCatch({
