@@ -11,6 +11,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $DIR
 
+DATE=`date +%Y%m%d -d $2" day ago"`
+
 echo "["`date +"%Y-%m-%d %T %z"`"]     ""R Analysis Start - "${1^^}" "$DATE"" >> ../../data/logs/"$DATE".log
 test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "R Analysis Start" "${1^^} $DATE"
 LOC=`sed -nr "/^\["$3"\]/ { :l /^name[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" ../../magic_config.ini`
