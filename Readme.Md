@@ -1,18 +1,18 @@
 # Gribs-Analysis
 
-**Version 24.05**
-
-> [!WARNING]  
-> Error in Manjaro because of `libicui18n.so.74` as of May 31st, 2024
->
-> You need to re-install R package `stringi`
->
-> in R: `install.packages("stringi")`
+**Version 25.06**
 
 > [!NOTE] 
 > This program is designed to work on Linux, on a server.
 >
-> You need Python and Cron.
+> You need Python, Bash, R and Cron.
+
+> [!IMPORTANT]  
+> 25.06 Changes:
+> 
+> New noaa_launch.sh file for crontab launching and avoiding scripts to run at the same time.
+> Not tested on recent ubuntu releases
+> Some R packages might be difficult to install, check their documentation and make sure they are all installed and working.
 
 ## What it does
 
@@ -47,17 +47,17 @@ When everything is set up and running, generated dashboards are available in roo
 ### Arch/Manjaro:
 
 ```bash
-sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3 python-requests arrow netcdf curl wget
+sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3 python-requests arrow netcdf curl wget podofo
 ```
 
 ```bash
 yay -S --aur wgrib wgrib2 udunits
 ```
 
-### Ubuntu:
+### Ubuntu LTS:
 
 ```bash
-sudo apt install build-essential libaec-dev zlib1g-dev libcurl4-openssl-dev libboost-dev curl wget zip unzip bzip2 gfortran gcc g++ cmake libnetcdf-dev netcdf-bin gdal-bin pandoc python3-urllib3 python3-requests r-base libgdal-dev libudunits2-0 libudunits2-dev
+sudo apt install build-essential libaec-dev zlib1g-dev libcurl4-openssl-dev libboost-dev curl wget zip unzip bzip2 gfortran gcc g++ cmake libnetcdf-dev netcdf-bin gdal-bin pandoc python3-urllib3 python3-requests r-base libgdal-dev libudunits2-0 libudunits2-dev libpodofo-dev
 ```
 Some of them are required for compiling [wgrib2](https://gist.github.com/wxguy/945d18af773c2208a33a5e0429a4b813) in the next steps.
 
@@ -129,7 +129,7 @@ rm -R wgri* # Unless you wan want to keep the build directories
 install.packages(c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "rNOMADS", "assertthat", "ini", "collapse", "ncdf4", "raster"), force=FALSE)
 ```
 
-It might take a while. Do it again if anything wrong happened. The option `force=FALSE` ensures you won't reinstall everything.
+It might take a while. **Do it again if anything wrong happened.** The option `force=FALSE` ensures you won't reinstall everything.
 
 
 ## Set up (1)
@@ -182,37 +182,49 @@ This is for a server in Europe/Paris tz zone:
 
 ```
 ## GEFS
-5 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "00" "0"
-5 15 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "06" "0"
-5 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "12" "0"
-5 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gefs" "18" "1"
+5 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "00" "0" "dl"
+5 15 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "06" "0" "dl"
+5 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "12" "0" "dl"
+5 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "18" "1" "dl"
 ## GEM
-10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gem" "00" "0"
-10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "gem" "12" "0"
+10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gem" "00" "0" "dl"
+10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gem" "12" "0" "dl"
 ## FNMOC
-15 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "fnmoc" "00" "0"
-15 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "fnmoc" "12" "1"
+15 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "fnmoc" "00" "0" "dl"
+15 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "fnmoc" "12" "1" "dl"
 ## CFS
-20 14 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "00" "0"
-20 20 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "06" "0"
-20 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "12" "1"
-20 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_dl.sh "cfs" "18" "1"
+20 14 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "00" "0" "dl"
+20 20 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "06" "0" "dl"
+20 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "12" "1" "dl"
+20 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "18" "1" "dl"
 ## STATS
-30 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_1"
-31 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_2"
-32 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_3"
-33 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "ens" "1" "Profile_4"
-30 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_1"
-31 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_2"
-32 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_3"
-33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_stats.sh "cfs" "1" "Profile_4"
+30 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_1" "stats"
+31 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_2" "stats"
+32 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_3" "stats"
+33 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_4" "stats"
+30 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_1" "stats"
+31 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_2" "stats"
+32 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_3" "stats"
+33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_4" "stats"
 ```
 
-Two scripts can't run at the same time. A lock file prevents another script to start. It will wait until the lock is removed.
-
-It is recommended to play with minutes to not start everything at the same time.
+Two scripts can't run at the same time. Calling `noaa_launch.sh` prevents another script to start by being queued.
 
 ### Command args
+
+
+```
+./noaa_launch.sh [ARG1] [ARG2] [ARG3] [ARG4]
+```
+
+`[ARG1]` depends on ARG4, see below.
+
+`[ARG2]` depends on ARG4, see below.
+
+`[ARG3]` depends on ARG4, see below.
+
+`[ARG4]` is either `dl` or `stats`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
+
 
 ```
 ./noaa_dl.sh [MODEL_NAME] [MODEL_RUN] [DAY_AGO]
@@ -223,6 +235,17 @@ It is recommended to play with minutes to not start everything at the same time.
 `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
 
 `[DAY_AGO]` is for the day of the run. If you want to download a run from 4 days ago, set `4`. If you download a run the same day it has been done, set `0`. If you download a run that was done the day before, it can be because it takes a while to be available or because you're in a different time zone, set `1`.
+
+
+```
+./noaa_stats.sh [SET] [DAY_AGO] [PROFILE]
+```
+
+`[SET]` is either `ens` (gem+gefs+fnmoc) or `cfs`.
+
+`[DAY_AGO]` is for the day of the runs. You should set `1` to get dashboard of all runs of previous day.
+
+`[PROFILE]` is one of the profiles you set in ini file, by example `Profile_1`.
 
 ### Availability of runs
 
