@@ -11,7 +11,9 @@
 > 25.06 Changes:
 > 
 > New noaa_launch.sh file for crontab launching and avoiding scripts to run at the same time.
+>
 > Not tested on recent ubuntu releases
+>
 > Some R packages might be difficult to install, check their documentation and make sure they are all installed and working.
 
 ## What it does
