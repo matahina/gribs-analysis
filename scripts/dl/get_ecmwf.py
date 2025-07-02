@@ -9,9 +9,6 @@ model_run = str(sys.argv[2])
 
 from ecmwf.opendata import Client
 
-print(model_date)
-print(model_run)
-
 client = Client(source="ecmwf")
 
 os.chdir("../../data/ecmwf/")
@@ -32,6 +29,7 @@ try:
         client.retrieve(
             date=model_date,
             time=model_run,
+                number=i,
             step=list(range(0,144,3))+list(range(144,366,6)),
             stream="enfo",
             type="pf",
@@ -42,6 +40,7 @@ try:
         client.retrieve(
             date=model_date,
             time=model_run,
+                number=i,
             step=list(range(0,144,3))+list(range(144,366,6)),
             stream="enfo",
             type="pf",
