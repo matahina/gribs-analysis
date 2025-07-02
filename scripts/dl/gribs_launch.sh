@@ -4,6 +4,7 @@
 # $2 : Run
 # $3 : Day ago
 # $4 : Type (dl / stats)
+# $5 : Source (noaa / ecmwf)
 
 
 ######################################
@@ -21,7 +22,7 @@ else
     str2="`echo "$str" | tail -n1`"
     let str2++
 fi
-echo "$DIR/noaa_$4.sh $1 $2 $3" > "ongoing/$str2"
+echo "$DIR/$5_$4.sh $1 $2 $3" > "ongoing/$str2"
 chmod +x "ongoing/$str2"
 
 if [[ $(cat lock.txt) == "FREE" ]]

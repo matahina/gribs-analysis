@@ -1,6 +1,6 @@
 # Gribs-Analysis
 
-**Version 25.06**
+**Experimental ECMWF branch**
 
 > [!NOTE] 
 > This program is designed to work on Linux, on a server.
@@ -8,13 +8,15 @@
 > You need Python, Bash, R and Cron.
 
 > [!IMPORTANT]  
-> 25.06 Changes:
+> Set up python3 venv:
 > 
-> New noaa_launch.sh file for crontab launching and avoiding scripts to run at the same time.
->
-> Not tested on recent ubuntu releases
->
-> Some R packages might be difficult to install, check their documentation and make sure they are all installed and working.
+> ```bash
+> python -m venv ecmwf_env
+> source ecmwf_env/bin/activate
+> pip install ecmwf-opendata
+> deactivate
+> ```
+
 
 ## What it does
 
@@ -184,39 +186,42 @@ This is for a server in Europe/Paris tz zone:
 
 ```
 ## GEFS
-5 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "00" "0" "dl"
-5 15 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "06" "0" "dl"
-5 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "12" "0" "dl"
-5 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gefs" "18" "1" "dl"
+5 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gefs" "00" "0" "dl" "noaa"
+5 15 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gefs" "06" "0" "dl" "noaa"
+5 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gefs" "12" "0" "dl" "noaa"
+5 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gefs" "18" "1" "dl" "noaa"
+## ECMWF
+20 12 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "00" "0" "dl" "ecmwf"
+20 1 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "12" "1" "dl" "ecmwf"
 ## GEM
-10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gem" "00" "0" "dl"
-10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "gem" "12" "0" "dl"
+10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "00" "0" "dl" "noaa"
+10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "12" "0" "dl" "noaa"
 ## FNMOC
-15 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "fnmoc" "00" "0" "dl"
-15 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "fnmoc" "12" "1" "dl"
+15 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "fnmoc" "00" "0" "dl" "noaa"
+15 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "fnmoc" "12" "1" "dl" "noaa"
 ## CFS
-20 14 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "00" "0" "dl"
-20 20 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "06" "0" "dl"
-20 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "12" "1" "dl"
-20 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "18" "1" "dl"
+20 14 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "00" "0" "dl" "noaa"
+20 20 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "06" "0" "dl" "noaa"
+20 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "12" "1" "dl" "noaa"
+20 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "18" "1" "dl" "noaa"
 ## STATS
-30 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_1" "stats"
-31 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_2" "stats"
-32 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_3" "stats"
-33 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "ens" "1" "Profile_4" "stats"
-30 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_1" "stats"
-31 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_2" "stats"
-32 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_3" "stats"
-33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/noaa_launch.sh "cfs" "1" "Profile_4" "stats"
+30 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_1" "stats" "noaa"
+31 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_2" "stats" "noaa"
+32 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_3" "stats" "noaa"
+33 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_4" "stats" "noaa"
+30 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_1" "stats" "noaa"
+31 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_2" "stats" "noaa"
+32 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_3" "stats" "noaa"
+33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_4" "stats" "noaa"
 ```
 
-Two scripts can't run at the same time. Calling `noaa_launch.sh` prevents another script to start by being queued.
+Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents another script to start by being queued.
 
 ### Command args
 
 
 ```
-./noaa_launch.sh [ARG1] [ARG2] [ARG3] [ARG4]
+./gribs_launch.sh [ARG1] [ARG2] [ARG3] [ARG4] [ARG5]
 ```
 
 `[ARG1]` depends on ARG4, see below.
@@ -226,6 +231,8 @@ Two scripts can't run at the same time. Calling `noaa_launch.sh` prevents anothe
 `[ARG3]` depends on ARG4, see below.
 
 `[ARG4]` is either `dl` or `stats`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
+
+`[ARG5]` is either `noaa` or `ecmwf`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
 
 
 ```

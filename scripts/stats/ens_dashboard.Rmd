@@ -146,6 +146,11 @@ allruns <-
         get_data(str_replace_all(date_var, "-", ""), "fnmoc"),
         all.x = TRUE,
         all.y = TRUE)
+allruns <-
+  merge(allruns,
+        get_data(str_replace_all(date_var, "-", ""), "ecmwf"),
+        all.x = TRUE,
+        all.y = TRUE)
 
 allruns <- allruns[order(allruns$dates), ]
 allruns <- allruns[which(allruns$profile == prof_name), ]
@@ -328,7 +333,7 @@ plot_z500all <-
       labels = seq(480, 620, 20)
     )
   ) + ggtitle(sprintf(
-    "Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
+    "Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z ECMWF 00z12z  %s",
     date_var
   )) +
   geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
@@ -411,7 +416,7 @@ plot_t850all <-
       labels = names(pp_cols)
     )
   ) + ggtitle(sprintf(
-    "T850 + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
+    "T850 + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z ECMWF 00z12z  %s",
     date_var
   ))
 idx <- 110
@@ -539,7 +544,7 @@ plot_t2mall <-
       labels = names(pp_cols)
     )
   ) + ggtitle(sprintf(
-    "T2M + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z  %s",
+    "T2M + PP _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z ECMWF 00z12z  %s",
     date_var
   ))
 idx <- 110
@@ -813,16 +818,16 @@ if (length(which(rowSums(is.na(z500_scens[, 2:ncol(z500_scens)])) == ncol(z500_s
 
 
 
-if (length(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) - 3)])) > 2)) > 0) {
-  if (nrow(z500_scens[, 2:(ncol(z500_scens) - 3)]) !=
-      nrow(z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) -
-                                                             3)])) > 2)), 2:(ncol(z500_scens) - 3)])) {
+if (length(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) - 7)])) > 2)) > 0) {
+  if (nrow(z500_scens[, 2:(ncol(z500_scens) - 7)]) !=
+      nrow(z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) 
+                                                             - 7)])) > 2)), 2:(ncol(z500_scens) - 7)])) {
     z500_scens <-
-      z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) - 3)])) > 2)), ]
+      z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) - 7)])) > 2)), ]
   } else {
-    z500_scens[, 2:(ncol(z500_scens) - 3)] <-
-      z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) -
-                                                          3)])) > 2)), 2:(ncol(z500_scens) - 3)]
+    z500_scens[, 2:(ncol(z500_scens) - 7)] <-
+      z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) 
+                                                        - 7)])) > 2)), 2:(ncol(z500_scens) - 7)]
   }
 }
 
@@ -1093,6 +1098,9 @@ ze <- c(
     "GEFS %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
@@ -1101,6 +1109,9 @@ ze <- c(
   paste(rep(sprintf(
     "GEFS %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
@@ -1111,6 +1122,9 @@ ze <- c(
     "GEFS %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
@@ -1119,6 +1133,9 @@ ze <- c(
   paste(rep(sprintf(
     "GEFS %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
@@ -1130,24 +1147,28 @@ ze_s <- c(
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
+  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("06z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2),
+  rep("", 20 * 2 + 50),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
+  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("18z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2)
+  rep("", 20 * 2 + 50)
 )
 
-cl <- rep(NA, 20 * 8 + 30 * 4)
+cl <- rep(NA, 20 * 8 + 30 * 4 + 50 * 4)
 
 for (clust in seq(1, numb)) {
   elems <-
@@ -1175,6 +1196,21 @@ a <-
                                                                               rev(ze_s[which(str_detect(map[, 1], "GEFS"))])) + ggtitle("GEFS")
 
 b <-
+  ggplot(map[which(str_detect(map[, 1], "ECMWF")), ], aes(x = 1, y = rev(SCENS))) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
+    panel.grid.major = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "right"
+  ) +
+  scale_fill_manual(
+    limits = factor(c(1:numb)),
+    values = brewer.pal(n = 12, name = "Paired")[1:numb],
+    name = "Clusters"
+  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
+                                                                              rev(ze_s[which(str_detect(map[, 1], "ECMWF"))])) + ggtitle("ECMWF")
+
+c <-
   ggplot(map[which(str_detect(map[, 1], "GEM")), ], aes(x = 1, y = rev(SCENS))) +
   geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
     panel.grid.major = element_blank(),
@@ -1189,7 +1225,7 @@ b <-
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
                                                                               rev(ze_s[which(str_detect(map[, 1], "GEM"))])) + ggtitle("GEM")
 
-c <-
+d <-
   ggplot(map[which(str_detect(map[, 1], "FNMOC")), ], aes(x = 1, y = rev(SCENS))) +
   geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
     panel.grid.major = element_blank(),
@@ -1209,7 +1245,8 @@ myplots_za[[9]] <-
   ggarrange(a,
             b,
             c,
-            ncol = 3,
+            d,
+            ncol = 4,
             common.legend = TRUE,
             legend = "bottom")
 myplots_za[[9]]
@@ -1233,7 +1270,7 @@ myplots_za[[10]]
 
 
 ```{r}
-
+ 
 
 t850_unif <- allruns[, c(1, 2, 4)]
 t850_unif <- t850_unif[which(t850_unif$dates >= the_dates[1]), ]
@@ -1262,15 +1299,14 @@ if (length(which(rowSums(is.na(t850_scens[, 2:ncol(t850_scens)])) == ncol(t850_s
 }
 
 
-if (length(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) - 3)])) > 2)) > 0) {
-  if (nrow(t850_scens[, 2:(ncol(t850_scens) - 3)]) !=
-      nrow(t850_scens[-c(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) - 3)])) > 2)), 2:(ncol(t850_scens) - 3)])) {
+if (length(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) - 7)])) > 2)) > 0) {
+  if (nrow(t850_scens[, 2:(ncol(t850_scens) - 7)]) !=
+      nrow(t850_scens[-c(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) - 7)])) > 2)), 2:(ncol(t850_scens) - 7)])) {
     t850_scens <-
-      t850_scens[-c(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) - 3)])) > 2)),]
+      t850_scens[-c(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) - 7)])) > 2)),]
   } else {
-    t850_scens[, 2:(ncol(t850_scens) - 3)] <-
-      t850_scens[-c(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) -
-                                                          3)])) > 2)), 2:(ncol(t850_scens) - 3)]
+    t850_scens[, 2:(ncol(t850_scens) - 7)] <-
+      t850_scens[-c(which(rowSums(is.na(t850_scens[, 2:(ncol(t850_scens) - 7)])) > 2)), 2:(ncol(t850_scens) - 7)]
   }
 }
 
@@ -1534,6 +1570,9 @@ ze <- c(
     "GEFS %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
@@ -1542,6 +1581,9 @@ ze <- c(
   paste(rep(sprintf(
     "GEFS %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
@@ -1552,6 +1594,9 @@ ze <- c(
     "GEFS %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
@@ -1560,6 +1605,9 @@ ze <- c(
   paste(rep(sprintf(
     "GEFS %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
@@ -1571,24 +1619,28 @@ ze_s <- c(
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
+  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("06z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2),
+  rep("", 20 * 2 + 50),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
+  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("18z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2)
+  rep("", 20 * 2 + 50)
 )
 
-cl <- rep(NA, 20 * 8 + 30 * 4)
+cl <- rep(NA, 20 * 8 + 30 * 4 + 50 * 4)
 
 for (clust in seq(1, numb)) {
   elems <-
@@ -1599,6 +1651,7 @@ for (clust in seq(1, numb)) {
 }
 
 map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
+
 
 a <-
   ggplot(map[which(str_detect(map[, 1], "GEFS")), ], aes(x = 1, y = rev(SCENS))) +
@@ -1616,6 +1669,21 @@ a <-
                                                                               rev(ze_s[which(str_detect(map[, 1], "GEFS"))])) + ggtitle("GEFS")
 
 b <-
+  ggplot(map[which(str_detect(map[, 1], "ECMWF")), ], aes(x = 1, y = rev(SCENS))) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
+    panel.grid.major = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "right"
+  ) +
+  scale_fill_manual(
+    limits = factor(c(1:numb)),
+    values = brewer.pal(n = 12, name = "Paired")[1:numb],
+    name = "Clusters"
+  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
+                                                                              rev(ze_s[which(str_detect(map[, 1], "ECMWF"))])) + ggtitle("ECMWF")
+
+c <-
   ggplot(map[which(str_detect(map[, 1], "GEM")), ], aes(x = 1, y = rev(SCENS))) +
   geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
     panel.grid.major = element_blank(),
@@ -1630,7 +1698,7 @@ b <-
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
                                                                               rev(ze_s[which(str_detect(map[, 1], "GEM"))])) + ggtitle("GEM")
 
-c <-
+d <-
   ggplot(map[which(str_detect(map[, 1], "FNMOC")), ], aes(x = 1, y = rev(SCENS))) +
   geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
     panel.grid.major = element_blank(),
@@ -1645,12 +1713,12 @@ c <-
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
                                                                               rev(ze_s[which(str_detect(map[, 1], "FNMOC"))])) + ggtitle("FNMOC")
 
-
 myplots_ta[[9]] <-
   ggarrange(a,
             b,
             c,
-            ncol = 3,
+            d,
+            ncol = 4,
             common.legend = TRUE,
             legend = "bottom")
 myplots_ta[[9]]
@@ -1706,15 +1774,14 @@ if (length(which(rowSums(is.na(pp_scens[, 2:ncol(pp_scens)])) == ncol(pp_scens) 
 }
 
 
-if (length(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 3)])) > 2)) > 0) {
-  if (nrow(pp_scens[, 2:(ncol(pp_scens) - 3)]) !=
-      nrow(pp_scens[-c(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 3)])) > 2)), 2:(ncol(pp_scens) - 3)])) {
+if (length(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 7)])) > 2)) > 0) {
+  if (nrow(pp_scens[, 2:(ncol(pp_scens) - 7)]) !=
+      nrow(pp_scens[-c(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 7)])) > 2)), 2:(ncol(pp_scens) - 7)])) {
     pp_scens <-
-      pp_scens[-c(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 3)])) > 2)),]
+      pp_scens[-c(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 7)])) > 2)),]
   } else {
-    pp_scens[, 2:(ncol(pp_scens) - 3)] <-
-      pp_scens[-c(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 3)])) > 2)), 2:(ncol(pp_scens) -
-                                                                                       3)]
+    pp_scens[, 2:(ncol(pp_scens) - 7)] <-
+      pp_scens[-c(which(rowSums(is.na(pp_scens[, 2:(ncol(pp_scens) - 7)])) > 2)), 2:(ncol(pp_scens) - 7)]
   }
 }
 
@@ -1975,6 +2042,9 @@ ze <- c(
     "GEFS %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
@@ -1983,6 +2053,9 @@ ze <- c(
   paste(rep(sprintf(
     "GEFS %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
@@ -1993,6 +2066,9 @@ ze <- c(
     "GEFS %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
@@ -2001,6 +2077,9 @@ ze <- c(
   paste(rep(sprintf(
     "GEFS %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+  paste(rep(sprintf(
+    "ECMWF %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
+  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
   paste(rep(sprintf(
     "GEM %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
   )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
@@ -2012,24 +2091,28 @@ ze_s <- c(
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
+  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("06z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2),
+  rep("", 20 * 2 + 50),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
+  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
   paste("18z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
   paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2)
+  rep("", 20 * 2 + 50)
 )
 
-cl <- rep(NA, 20 * 8 + 30 * 4)
+cl <- rep(NA, 20 * 8 + 30 * 4 + 50 * 4)
 
 for (clust in seq(1, numb)) {
   elems <-
@@ -2040,6 +2123,7 @@ for (clust in seq(1, numb)) {
 }
 
 map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
+
 
 a <-
   ggplot(map[which(str_detect(map[, 1], "GEFS")), ], aes(x = 1, y = rev(SCENS))) +
@@ -2057,6 +2141,21 @@ a <-
                                                                               rev(ze_s[which(str_detect(map[, 1], "GEFS"))])) + ggtitle("GEFS")
 
 b <-
+  ggplot(map[which(str_detect(map[, 1], "ECMWF")), ], aes(x = 1, y = rev(SCENS))) +
+  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
+    panel.grid.major = element_blank(),
+    plot.title = element_text(hjust = 0.5, face = "bold"),
+    axis.title = element_blank(),
+    legend.position = "right"
+  ) +
+  scale_fill_manual(
+    limits = factor(c(1:numb)),
+    values = brewer.pal(n = 12, name = "Paired")[1:numb],
+    name = "Clusters"
+  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
+                                                                              rev(ze_s[which(str_detect(map[, 1], "ECMWF"))])) + ggtitle("ECMWF")
+
+c <-
   ggplot(map[which(str_detect(map[, 1], "GEM")), ], aes(x = 1, y = rev(SCENS))) +
   geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
     panel.grid.major = element_blank(),
@@ -2071,7 +2170,7 @@ b <-
   ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
                                                                               rev(ze_s[which(str_detect(map[, 1], "GEM"))])) + ggtitle("GEM")
 
-c <-
+d <-
   ggplot(map[which(str_detect(map[, 1], "FNMOC")), ], aes(x = 1, y = rev(SCENS))) +
   geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
     panel.grid.major = element_blank(),
@@ -2091,7 +2190,8 @@ myplots_pa[[9]] <-
   ggarrange(a,
             b,
             c,
-            ncol = 3,
+            d,
+            ncol = 4,
             common.legend = TRUE,
             legend = "bottom")
 myplots_pa[[9]]
