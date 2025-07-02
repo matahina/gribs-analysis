@@ -150,6 +150,7 @@ mkdir fnmoc
 mkdir gefs
 mkdir gem
 mkdir logs
+mkdir ecmwf
 ```
 
 ## Set up (2): Profiles
