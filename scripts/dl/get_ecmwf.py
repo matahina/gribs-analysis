@@ -9,6 +9,8 @@ model_run = str(sys.argv[2])
 
 from ecmwf.opendata import Client
 
+print(model_date)
+print(model_run)
 
 client = Client(source="ecmwf")
 
