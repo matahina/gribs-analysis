@@ -22,6 +22,8 @@ test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "ECMWF DL Start" "$2z $
 source ../../ecmwf_env/bin/activate
 python3 get_ecmwf.py $DATE $2
 deactivate
+python3 split_ecmwf.py $DATE $2
+
 
 ######################################
 ## GRIB2 Extract Data
