@@ -42,7 +42,7 @@ for junk in sfiles:
 
 os.chdir("../ecmwf/")
 
-sfiles = glob.glob('./*.grb2')
+sfiles = glob.glob('./*.grib2')
 matching = [s for s in sfiles if old in s]
 
 for anciens in matching:
