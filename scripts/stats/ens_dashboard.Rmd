@@ -2292,6 +2292,7 @@ for (row in 1:nrow(pp_scens)) {
     na.approx(unlist(pp_scens[row, 2:(ncol(pp_scens) - 3)]), na.rm = FALSE)
 }
 
+pp_scens <- pp_scens[,-c(2)]
 
 limit <- 0
 
