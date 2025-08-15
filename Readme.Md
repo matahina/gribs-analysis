@@ -7,16 +7,6 @@
 >
 > You need Python, Bash, R and Cron.
 
-> [!IMPORTANT]  
-> Set up python3 venv:
-> 
-> ```bash
-> python -m venv ecmwf_env
-> source ecmwf_env/bin/activate
-> pip install ecmwf-opendata
-> deactivate
-> ```
-
 
 ## What it does
 
@@ -58,32 +48,10 @@ sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3 python-requests arro
 yay -S --aur wgrib wgrib2 udunits
 ```
 
-### Ubuntu LTS:
+### Ubuntu 24.04.3 LTS server (minimal):
 
 ```bash
-sudo apt install build-essential libaec-dev zlib1g-dev libcurl4-openssl-dev libboost-dev curl wget zip unzip bzip2 gfortran gcc g++ cmake libnetcdf-dev netcdf-bin gdal-bin pandoc python3-urllib3 python3-requests r-base libgdal-dev libudunits2-0 libudunits2-dev libpodofo-dev
-```
-Some of them are required for compiling [wgrib2](https://gist.github.com/wxguy/945d18af773c2208a33a5e0429a4b813) in the next steps.
-
-
-For [arrow](https://arrow.apache.org/install/):
-```bash
-sudo apt update
-sudo apt install -y -V ca-certificates lsb-release wget
-wget https://apache.jfrog.io/artifactory/arrow/$(lsb_release --id --short | tr 'A-Z' 'a-z')/apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-sudo apt install -y -V ./apache-arrow-apt-source-latest-$(lsb_release --codename --short).deb
-sudo apt update
-sudo apt install -y -V libarrow-dev # For C++
-sudo apt install -y -V libarrow-glib-dev # For GLib (C)
-sudo apt install -y -V libarrow-dataset-dev # For Apache Arrow Dataset C++
-sudo apt install -y -V libarrow-dataset-glib-dev # For Apache Arrow Dataset GLib (C)
-sudo apt install -y -V libarrow-acero-dev # For Apache Arrow Acero
-sudo apt install -y -V libarrow-flight-dev # For Apache Arrow Flight C++
-sudo apt install -y -V libarrow-flight-glib-dev # For Apache Arrow Flight GLib (C)
-sudo apt install -y -V libgandiva-dev # For Gandiva C++
-sudo apt install -y -V libgandiva-glib-dev # For Gandiva GLib (C)
-sudo apt install -y -V libparquet-dev # For Apache Parquet C++
-sudo apt install -y -V libparquet-glib-dev # For Apache Parquet GLib (C)
+sudo apt install build-essential cmake r-base curl libssl-dev libgdal-dev libudunits2-dev python3-venv pandoc
 ```
 
 For [wgrib](https://www.cpc.ncep.noaa.gov/products/wesley/wgrib.html):
@@ -91,56 +59,71 @@ For [wgrib](https://www.cpc.ncep.noaa.gov/products/wesley/wgrib.html):
 wget https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib/wgrib.tar
 mkdir wgrib
 tar -xvf wgrib.tar -C wgrib
+rm wgrib.tar
 cd wgrib
 make
-sudo cp wgrib /usr/bin/
+sudo cp wgrib /usr/local/bin/
 ```
 
 For [wgrib2](https://github.com/NOAA-EMC/wgrib2):
+First, up-to-date version of `libg2c`
 ```bash
-# We first need JasPer and the easiest way is from old repositories
-sudo add-apt-repository "deb http://security.ubuntu.com/ubuntu xenial-security main"
-sudo apt-key adv --keyserver keyserver.ubuntu.com --recv-keys 3B4FE6ACC0B21F32
-sudo apt update
-sudo apt install libjasper1 libjasper-dev
-
-cd ../
-wget -O wgrib2.zip https://github.com/NOAA-EMC/wgrib2/archive/refs/tags/v2.0.8-cmake-v6.zip
-unzip wgrib2.zip
-cd wgrib2-2.0.8-cmake-v6/
-mkdir build && cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=install
-make
-make install
-cd install/bin/
-sudo cp wgrib2 /usr/bin/
+wget https://github.com/NOAA-EMC/NCEPLIBS-g2c/archive/refs/tags/v2.2.0.zip
+unzip v2.2.0.zip 
+rm v2.2.0.zip 
+cd NCEPLIBS-g2c-2.2.0/
+mkdir build
+cd build
+cmake .. -DUSE_OpenJPEG=ON -DUSE_Jasper=OFF -DCMAKE_INSTALL_PREFIX="/usr/local/"
+cmake --build ./ --parallel 4
+sudo cmake --install ./
 ```
-
-Clean everything:
+Then `wgrib2`
 ```bash
-cd ../../../../
-rm wgrib.tar wgrib2.zip
-rm apache-arrow-apt-* # Unless you want to keep the deb package
-rm -R wgri* # Unless you wan want to keep the build directories
-
-# If you want to remove wgrib and wgrib2 later, just do:
-# sudo rm /usr/bin/wgri*
+wget https://github.com/NOAA-EMC/wgrib2/archive/refs/tags/v3.7.0.zip
+unzip v3.7.0.zip
+rm v3.7.0.zip
+cd wgrib2-3.7.0/
+mkdir build && cd build
+cmake .. -DUSE_AEC=on -DUSE_G2CLIB_HIGH=on -DUSE_G2CLIB_LOW=on -DCMAKE_INSTALL_PREFIX="/usr/local"
+make
+sudo make install
 ```
 
 ### R Packages (all distros):
 
 ```R
-install.packages(c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "rNOMADS", "assertthat", "ini", "collapse", "ncdf4", "raster"), force=FALSE)
+required.packages <- c("arrow", "flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "assertthat", "ini", "collapse", "ncdf4", "raster", "rvest", "fields", "GEOmap", "MBA", "XML", "uuid")
+new.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
+if(length(new.packages)) install.packages(new.packages)
 ```
 
-It might take a while. **Do it again if anything wrong happened.** The option `force=FALSE` ensures you won't reinstall everything.
+It might take a while. **Do it again if anything wrong happened.**
 
+Then
+
+```R
+install.packages("https://cran.r-project.org/src/contrib/Archive/rNOMADS/rNOMADS_2.5.3.tar.gz",
+                 repos=NULL, method="libcurl")
+```
+## Set up (0)
+
+### Set up python3 venv:
+
+You need to be at the root of `gribs-analysis` directory.
+
+```bash
+python3 -m venv ecmwf_env
+source ecmwf_env/bin/activate
+pip install ecmwf-opendata
+deactivate
+```
 
 ## Set up (1)
 
 ### Data directory
 
-Run the following commands:
+You need to be at the root of `gribs-analysis` directory.
 
 ```bash
 mkdir data
@@ -156,6 +139,8 @@ mkdir ecmwf
 ## Set up (2): Profiles
 
 ### Config file
+
+You need to be at the root of `gribs-analysis` directory.
 
 You can run this program for different locations. Grib files are downloaded according to a subset area for each location based on given coordinates.
 
@@ -192,8 +177,8 @@ This is for a server in Europe/Paris tz zone:
 5 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gefs" "12" "0" "dl" "noaa"
 5 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gefs" "18" "1" "dl" "noaa"
 ## ECMWF
-20 12 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "00" "0" "dl" "ecmwf"
-20 1 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "12" "1" "dl" "ecmwf"
+5 12 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "00" "0" "dl" "ecmwf"
+5 23 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "12" "1" "dl" "ecmwf"
 ## GEM
 10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "00" "0" "dl" "noaa"
 10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "12" "0" "dl" "noaa"
@@ -267,6 +252,11 @@ Availability is when forecast until h+360 is done for a run. This table with exa
 | 06Z       | 13:00                        | 15:00                            | 21:00                        |
 | 12Z       | 19:00                        | 21:00                            | 03:00 (day+1)                |
 | 18Z       | 01:00 (day+1)                | 03:00 (day+1)                    | 09:00 (day+1)                |
+
+| **ECMWF** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
+|---|---|---|---|
+| 00Z       | 08:45                        | 10:45                            | 16:45                        |
+| 12Z       | 20:45                        | 22:45                            | 04:45 (day+1)                |
 
 | **GEM** | **Available in UTC time at** | **Available in tz Europe/Paris** | **Available in tz Hongkong** |
 |---|---|---|---|

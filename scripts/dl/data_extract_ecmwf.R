@@ -118,15 +118,17 @@ for (z in seq(0, 12, 12)) {
         })
         
         
-        
-        
+        extra <- NA
+
+        if (!is.data.frame(tada)) {
         
         extra <- BuildProfile(tada,
                               as.numeric(profiles[which(profiles$name == location), "lon"]),
                               as.numeric(profiles[which(profiles$name == location), "lat"]),
                               spatial.average = FALSE)
         
-        
+        }
+
         tadb <- tryCatch({
           return(ReadGrib(
             sprintf("../../data/ecmwf/%s%sdata_tsolpp%s.grib2", extractdate, str_pad(z, 2, pad = "0"),toString(sc)),
@@ -157,7 +159,10 @@ for (z in seq(0, 12, 12)) {
         })
         
         
-        
+        extrb <- NA
+
+        if (!is.data.frame(tadb)) {
+
         
         
         extrb <- BuildProfile(tadb,
@@ -165,7 +170,8 @@ for (z in seq(0, 12, 12)) {
                               as.numeric(profiles[which(profiles$name == location), "lat"]),
                               spatial.average = FALSE)
         
-        
+        }
+
         
         
         tadc <- tryCatch({
@@ -198,13 +204,17 @@ for (z in seq(0, 12, 12)) {
         })
         
         
+        extrc <- NA
+
+        if (!is.data.frame(tadc)) {
+
         
         extrc <- BuildProfile(tadc,
                               as.numeric(profiles[which(profiles$name == location), "lon"]),
                               as.numeric(profiles[which(profiles$name == location), "lat"]),
                               spatial.average = FALSE)
         
-        
+        }
         
         tadd <- tryCatch({
           return(ReadGrib(
@@ -235,13 +245,19 @@ for (z in seq(0, 12, 12)) {
           return(data.frame())
         })
         
-        
+        extrd <- NA
+
+        if (!is.data.frame(tadd)) {
+
         
         extrd <- BuildProfile(tadd,
                               as.numeric(profiles[which(profiles$name == location), "lon"]),
                               as.numeric(profiles[which(profiles$name == location), "lat"]),
                               spatial.average = FALSE)
         
+
+        }
+
             print(z)
             print(sc)
             print(location)
