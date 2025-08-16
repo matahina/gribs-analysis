@@ -17,10 +17,9 @@ output:
 
 prof_name = commandArgs(trailingOnly = T)[2]
 
-date_var = paste(paste0(strsplit(commandArgs(trailingOnly = T)[3],"")[[1]][1:4], collapse = ""),
-      paste0(strsplit(commandArgs(trailingOnly = T)[3],"")[[1]][5:6], collapse = ""),
-      paste0(strsplit(commandArgs(trailingOnly = T)[3],"")[[1]][7:8], collapse = ""),
-      sep ="-")
+prof_name = commandArgs(trailingOnly = T)[2]
+date_var = as.Date(commandArgs(trailingOnly = T)[3],"%Y%m%d")
+the_tz = commandArgs(trailingOnly = T)[4]
 
 the_tz = commandArgs(trailingOnly = T)[4]
 
