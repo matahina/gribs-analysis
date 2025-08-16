@@ -24,7 +24,7 @@ Only few parameters are analyzed: geopotential (z500), temperature (t850 and t2m
 
 It also uses data from [NCEP Reanalysis](https://psl.noaa.gov/data/gridded/data.ncep.reanalysis2.html) to compare with long-term data means.
 
-Downloads and Dashboard generating are logged if you need to catch errors.
+Both downloads and dashboard generation are logged for error-catching purposes.
 
 When everything is set up and running, generated dashboards are available in root directory of the program. Some dashboard examples are available online :
 
@@ -66,6 +66,7 @@ sudo cp wgrib /usr/local/bin/
 ```
 
 For [wgrib2](https://github.com/NOAA-EMC/wgrib2):
+    
 First, up-to-date version of `libg2c`
 ```bash
 wget https://github.com/NOAA-EMC/NCEPLIBS-g2c/archive/refs/tags/v2.2.0.zip
@@ -98,17 +99,14 @@ new.packages <- required.packages[!(required.packages %in% installed.packages()[
 if(length(new.packages)) install.packages(new.packages)
 ```
 
-It might take a while. **Do it again if anything wrong happened.**
-
-Then
-
+It might take a while. **Do it again if anything wrong happened.** Then
 ```R
 install.packages("https://cran.r-project.org/src/contrib/Archive/rNOMADS/rNOMADS_2.5.3.tar.gz",
                  repos=NULL, method="libcurl")
 ```
 ## Set up (0)
 
-### Set up python3 venv:
+### Set up python3 virtual env
 
 You need to be at the root of `gribs-analysis` directory.
 
@@ -178,7 +176,7 @@ This is for a server in Europe/Paris tz zone:
 5 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gefs" "18" "1" "dl" "noaa"
 ## ECMWF
 5 12 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "00" "0" "dl" "ecmwf"
-5 23 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "12" "1" "dl" "ecmwf"
+5 23 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "12" "0" "dl" "ecmwf"
 ## GEM
 10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "00" "0" "dl" "noaa"
 10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "12" "0" "dl" "noaa"
