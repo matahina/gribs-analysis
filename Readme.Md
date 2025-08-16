@@ -216,15 +216,15 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 ./gribs_launch.sh [ARG1] [ARG2] [ARG3] [ARG4] [ARG5]
 ```
 
-`[ARG1]` depends on ARG4 and ARG5, it will input the same args as `[ARG_5]_[ARG_4].sh`
+- `[ARG1]` depends on ARG4 and ARG5, it will input the same args as `[ARG_5]_[ARG_4].sh`
 
-`[ARG2]` depends on ARG4 and ARG5, it will input the same args as `[ARG_5]_[ARG_4].sh`
+- `[ARG2]` depends on ARG4 and ARG5, it will input the same args as `[ARG_5]_[ARG_4].sh`
 
-`[ARG3]` is for the day of either run (for downloading), or set of runs (for stats dashboard). Just use an integer: `0` for today, `1` for the day before, etc.
+- `[ARG3]` is for the day of either run (for downloading), or set of runs (for stats dashboard). Just use an integer: `0` for today, `1` for the day before, etc.
 
-`[ARG4]` is either `dl` or `stats`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
+- `[ARG4]` is either `dl` or `stats`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
 
-`[ARG5]` is either `noaa` or `ecmwf`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
+- `[ARG5]` is either `noaa` or `ecmwf`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
 
 
 **noaa_dl.sh**
@@ -235,11 +235,11 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 ./noaa_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
 ```
 
-`[MODEL_NAME]` is one of the 4 models considered previously : `gefs` `gem` `fnmoc` `cfs`.
+- `[MODEL_NAME]` is one of the 4 models considered previously : `gefs` `gem` `fnmoc` `cfs`.
 
-`[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
+- `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
 
-`[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
+- `[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
 
 
 **ecmwf_dl.sh**
@@ -250,11 +250,11 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 ./ecmwf_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
 ```
 
-`[MODEL_NAME]` has one choice at the moment : `ecmwf`.
+- `[MODEL_NAME]` has one choice at the moment : `ecmwf`.
 
-`[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `12`. Leading zero is important. ECMWF runs from 06Z and 18Z aren't working with this script at the moment.
+- `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `12`. Leading zero is important. ECMWF runs from 06Z and 18Z aren't working with this script at the moment.
 
-`[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
+- `[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
 
 
 **noaa_stats.sh**
@@ -265,11 +265,11 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 ./noaa_stats.sh [SET] [PROFILE] [DATE]
 ```
 
-`[SET]` is either `ens` (gem+gefs+fnmoc) or `cfs`. It will cover all runs from the specificied DATE.
+- `[SET]` is either `ens` (gem+gefs+fnmoc) or `cfs`. It will cover all runs from the specificied DATE.
 
-`[PROFILE]` is one of the profiles you set in ini file, by example `Profile_1`.
+- `[PROFILE]` is one of the profiles you set in ini file, by example `Profile_1`.
 
-`[DATE]` is for the date of the set. You need to put a date, either today or another day before (for catching an older set by example), in this format: `YYYYMMDD`.
+- `[DATE]` is for the date of the set. You need to put a date, either today or another day before (for catching an older set by example), in this format: `YYYYMMDD`.
 
 
 ### Availability of runs
