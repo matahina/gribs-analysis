@@ -36,19 +36,23 @@ When everything is set up and running, generated dashboards are available in roo
 | [Cape Town](https://matahina.ddns.net/weather/ens_dashboard_Profile_4.html)         |  [Cape Town](https://matahina.ddns.net/weather/cfs_dashboard_Profile_4.html)       |
 
 
-## Requirements
+## Requirements (Distro packages)
 
-### Arch/Manjaro:
+### Manjaro 25.0
+> [!NOTE] 
+> Tested on manjaro-kde-25.0.6-250730-linux612
 
 ```bash
-sudo pacman -S r gcc-fortran gdal pandoc-cli python-urllib3 python-requests arrow netcdf curl wget podofo
+sudo pacman -S yay base-devel r gdal pandoc
 ```
 
 ```bash
-yay -S --aur wgrib wgrib2 udunits
+yay -S wgrib wgrib2 udunits
 ```
 
-### Ubuntu 24.04.3 LTS server (minimal):
+### Ubuntu 24.04 LTS
+> [!NOTE] 
+> Tested on Ubuntu 24.04.3 LTS server (minimal)
 
 ```bash
 sudo apt install build-essential cmake r-base curl libssl-dev libgdal-dev libudunits2-dev python3-venv pandoc
@@ -91,22 +95,25 @@ make
 sudo make install
 ```
 
-### R Packages (all distros):
+## Requirements (R packages)
+
+### All distros
 
 ```R
-required.packages <- c("arrow", "flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "assertthat", "ini", "collapse", "ncdf4", "raster", "rvest", "fields", "GEOmap", "MBA", "XML", "uuid")
+required.packages <- c("flexdashboard", "lubridate", "DescTools", "spatstat.utils", "scales", "ggplot2", "TSrepr", "data.table", "cluster", "clusterCrit", "zoo", "RColorBrewer", "stringr", "reshape", "ggpubr", "gridExtra", "attempt", "dplyr", "viridis", "assertthat", "ini", "collapse", "ncdf4", "raster", "rvest", "fields", "GEOmap", "MBA", "XML", "uuid")
 new.packages <- required.packages[!(required.packages %in% installed.packages()[,"Package"])]
 if(length(new.packages)) install.packages(new.packages)
 ```
 
-It might take a while. **Do it again if anything wrong happened.** Then
+It might take a while. **Do it again if anything wrong happened.** Then:
+
 ```R
 install.packages("https://cran.r-project.org/src/contrib/Archive/rNOMADS/rNOMADS_2.5.3.tar.gz",
                  repos=NULL, method="libcurl")
 ```
 ## Set up (0)
 
-### Set up python3 virtual env
+### Set up python3 virtual env:
 
 You need to be at the root of `gribs-analysis` directory.
 
