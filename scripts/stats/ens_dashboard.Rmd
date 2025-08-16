@@ -103,10 +103,9 @@ trans_axes_tsol <- function(orig) {
 }
 
 
-barwidth = c(rep(4, 56))
-barwidth_gefs = c(rep(2, 63), rep(4, 24))
-barwidth_ecmwf = c(rep(2, 45), rep(4, 33))
-
+barwidth = c(rep(2, 40), rep(4, 36))
+barwidth_gefs = c(rep(2, 56), rep(4, 28))
+barwidth_ecmwf = c(rep(2, 40), rep(4, 36))
 
 
 
@@ -185,17 +184,63 @@ names(pp_unif) <- c("runs", "variable", "value")
 maps_limits <-
   c(as.character(seq(0, 0.9, 0.1)), as.character(seq(1, 100)))
 
-pp_unif_orig <- pp_unif
+pp_unif_gefs <- pp_unif[which(grepl("GEFS", pp_unif$runs)),]
+
+
+pp_unif_ecmwf <- pp_unif[which(grepl("ECMWF", pp_unif$runs)),]
+
 
 pp_unif <- pp_unif[order(pp_unif$runs),]
 
 for (i in seq(1,nrow(pp_unif))){
-  if (as.integer(format(as.POSIXct(pp_unif$variable[i]),"%H"))  %in% seq(3,21,6) ) {
-    pp_unif$value[i+1] = pp_unif$value[i+1] + pp_unif$value[i] 
-  }
+    if (as.POSIXct(pp_unif$variable[i]) > as.POSIXct(date_var) + hours(144)) {
+      if (as.integer(format(as.POSIXct(pp_unif$variable[i]),"%H"))  %in% seq(3,21,6) ) {
+        pp_unif$value[i-1] = pp_unif$value[i-1] + pp_unif$value[i] 
+      }
+    }
 }
 
-pp_unif <- pp_unif[-which(as.integer(format(as.POSIXct(pp_unif$variable),"%H"))  %in% seq(3,21,6)),]
+pp_unif <- pp_unif[-which(as.POSIXct(pp_unif$variable) > as.POSIXct(date_var) + hours(144) & as.integer(format(as.POSIXct(pp_unif$variable),"%H"))  %in% seq(3,21,6)),]
+
+
+
+
+
+pp_unif_gefs <- pp_unif_gefs[order(pp_unif_gefs$runs),]
+
+for (i in seq(1,nrow(pp_unif_gefs))){
+    if (as.POSIXct(pp_unif_gefs$variable[i]) > as.POSIXct(date_var) + hours(192)) {
+      if (as.integer(format(as.POSIXct(pp_unif_gefs$variable[i]),"%H"))  %in% seq(3,21,6) ) {
+        pp_unif_gefs$value[i-1] = pp_unif_gefs$value[i-1] + pp_unif_gefs$value[i] 
+      }
+    }
+}
+
+pp_unif_gefs <- pp_unif_gefs[-which(as.POSIXct(pp_unif_gefs$variable) > as.POSIXct(date_var) + hours(192) & as.integer(format(as.POSIXct(pp_unif_gefs$variable),"%H"))  %in% seq(3,21,6)),]
+
+
+
+
+pp_unif_ecmwf <- pp_unif_ecmwf[order(pp_unif_ecmwf$runs),]
+
+for (i in seq(1,nrow(pp_unif_ecmwf))){
+    if (as.POSIXct(pp_unif_ecmwf$variable[i]) > as.POSIXct(date_var) + hours(144)) {
+      if (as.integer(format(as.POSIXct(pp_unif_ecmwf$variable[i]),"%H"))  %in% seq(3,21,6) ) {
+        pp_unif_ecmwf$value[i-1] = pp_unif_ecmwf$value[i-1] + pp_unif_ecmwf$value[i] 
+      }
+    }
+}
+
+pp_unif_ecmwf <- pp_unif_ecmwf[-which(as.POSIXct(pp_unif_ecmwf$variable) > as.POSIXct(date_var) + hours(144) & as.integer(format(as.POSIXct(pp_unif_ecmwf$variable),"%H"))  %in% seq(3,21,6)),]
+
+
+
+
+
+
+
+
+
 
 
 pp_unif$value[which(pp_unif$value < 1)] <-
@@ -205,11 +250,25 @@ pp_unif$value[which(pp_unif$value > 1)] <-
 pp_unif$value[which(pp_unif$value > 30)] <- 30
 
 
-pp_unif_orig$value[which(pp_unif_orig$value < 1)] <-
-  round(pp_unif_orig$value[which(pp_unif_orig$value < 1)], 1)
-pp_unif_orig$value[which(pp_unif_orig$value > 1)] <-
-  round_any(pp_unif_orig$value[which(pp_unif_orig$value > 1)], 1)
-pp_unif_orig$value[which(pp_unif_orig$value > 30)] <- 30
+
+pp_unif_gefs$value[which(pp_unif_gefs$value < 1)] <-
+  round(pp_unif_gefs$value[which(pp_unif_gefs$value < 1)], 1)
+pp_unif_gefs$value[which(pp_unif_gefs$value > 1)] <-
+  round_any(pp_unif_gefs$value[which(pp_unif_gefs$value > 1)], 1)
+pp_unif_gefs$value[which(pp_unif_gefs$value > 30)] <- 30
+
+
+
+pp_unif_ecmwf$value[which(pp_unif_ecmwf$value < 1)] <-
+  round(pp_unif_ecmwf$value[which(pp_unif_ecmwf$value < 1)], 1)
+pp_unif_ecmwf$value[which(pp_unif_ecmwf$value > 1)] <-
+  round_any(pp_unif_ecmwf$value[which(pp_unif_ecmwf$value > 1)], 1)
+pp_unif_ecmwf$value[which(pp_unif_ecmwf$value > 30)] <- 30
+
+
+
+
+
 
 
 pp_props_all <-
@@ -235,8 +294,11 @@ names(pp_probs_all) <- paste(rep("V", 110), seq(1, 110), sep = "")
 
 
 
+
+
+
 pp_props_gefs <-
-  prop.table(table(pp_unif_orig[which(grepl("GEFS", pp_unif_orig$runs)), "variable"], pp_unif_orig[which(grepl("GEFS", pp_unif_orig$runs)), "value"]), margin =
+  prop.table(table(pp_unif_gefs$variable, pp_unif_gefs$value), margin =
                1)
 
 pp_props_gefs[which(is.na(pp_props_gefs))] = 0
@@ -256,25 +318,18 @@ pp_props_gefs <- pp_props_gefs[, as.character(maps_limits)]
 pp_probs_gefs = t(apply(pp_props_gefs, 1, revcumsum))
 colnames(pp_probs_gefs) <- colnames(pp_props_gefs)
 pp_probs_gefs <- as.data.frame.matrix(pp_probs_gefs)
-
-
-
-
-if (length(the_dates) != length(pp_props_gefs[, 1])) {
-  pp_probs_gefs[, 1] <-
-    sort(unique(c(pp_unif_orig$variable[grepl("GEFS", pp_unif_orig$runs)])))
-} else {
-  pp_probs_gefs[, 1] <- the_dates
-}
-
+pp_probs_gefs[, 1] <- row.names(pp_probs_gefs)
 pp_probs_gefs <- pp_probs_gefs[, as.character(maps_limits)]
 names(pp_probs_gefs) <- paste(rep("V", 110), seq(1, 110), sep = "")
 
 
 
 
+
+
+
 pp_props_ecmwf <-
-  prop.table(table(pp_unif_orig[which(grepl("ECMWF", pp_unif_orig$runs)), "variable"], pp_unif_orig[which(grepl("ECMWF", pp_unif_orig$runs)), "value"]), margin =
+  prop.table(table(pp_unif_ecmwf$variable, pp_unif_ecmwf$value), margin =
                1)
 
 pp_props_ecmwf[which(is.na(pp_props_ecmwf))] = 0
@@ -294,19 +349,10 @@ pp_props_ecmwf <- pp_props_ecmwf[, as.character(maps_limits)]
 pp_probs_ecmwf = t(apply(pp_props_ecmwf, 1, revcumsum))
 colnames(pp_probs_ecmwf) <- colnames(pp_props_ecmwf)
 pp_probs_ecmwf <- as.data.frame.matrix(pp_probs_ecmwf)
-
-
-
-
-if (length(the_dates) != length(pp_props_ecmwf[, 1])) {
-  pp_probs_ecmwf[, 1] <-
-    sort(unique(c(pp_unif_orig$variable[grepl("ECMWF", pp_unif_orig$runs)])))
-} else {
-  pp_probs_ecmwf[, 1] <- the_dates
-}
-
+pp_probs_ecmwf[, 1] <- row.names(pp_probs_ecmwf)
 pp_probs_ecmwf <- pp_probs_ecmwf[, as.character(maps_limits)]
 names(pp_probs_ecmwf) <- paste(rep("V", 110), seq(1, 110), sep = "")
+
 
 
 ```
@@ -350,11 +396,16 @@ pp_probs_ecmwf <-
   pp_probs_ecmwf[which(row.names(pp_probs_ecmwf) <= the_dates[length(the_dates)]),]
 
 
-pp_probs_all$V1 <- c(as_datetime(pp_probs_all$V1[1:56]) + hours(3))
 
-pp_probs_gefs$V1 <- c(as_datetime(pp_probs_gefs$V1[1:63]) + minutes(90),as_datetime(pp_probs_gefs$V1[64:87]) + hours(3))
 
-pp_probs_ecmwf$V1 <- c(as_datetime(pp_probs_ecmwf$V1[1:45]) + minutes(90),as_datetime(pp_probs_ecmwf$V1[46:78]) + hours(3))
+
+
+
+pp_probs_all$V1 <- c(as_datetime(pp_probs_ecmwf$V1[1:40]) + minutes(90),as_datetime(pp_probs_ecmwf$V1[41:76]) + hours(3))
+
+pp_probs_gefs$V1 <- c(as_datetime(pp_probs_gefs$V1[1:56]) + minutes(90),as_datetime(pp_probs_gefs$V1[57:84]) + hours(3))
+
+pp_probs_ecmwf$V1 <- c(as_datetime(pp_probs_ecmwf$V1[1:40]) + minutes(90),as_datetime(pp_probs_ecmwf$V1[41:76]) + hours(3))
 
 pp_probs_all$V1 <- as.POSIXct(pp_probs_all$V1, tz="UTC")
 pp_probs_gefs$V1 <- as.POSIXct(pp_probs_gefs$V1, tz="UTC")
