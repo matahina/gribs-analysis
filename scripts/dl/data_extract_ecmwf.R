@@ -2,7 +2,7 @@
 
 args = commandArgs(trailingOnly = TRUE)
 
-# args[1] Day Ago
+# args[1] Date YYYYMMDD
 
 library(rNOMADS)
 library(stringr)
@@ -68,8 +68,7 @@ for (name in names(config)) {
   }
 }
 
-extractdate <-
-  str_replace_all(Sys.Date() - as.integer(args[1]), "-", "")
+extractdate <- args[1]
 
 the_dates <- c()
 geops <- c()

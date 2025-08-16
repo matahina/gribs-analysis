@@ -2,7 +2,7 @@
 
 args = commandArgs(trailingOnly = TRUE)
 
-# args[1] Day Ago
+# args[1] Date YYYYMMDD
 # args[2] Model
 
 library(rNOMADS)
@@ -69,8 +69,7 @@ for (name in names(config)) {
   }
 }
 
-extractdate <-
-  str_replace_all(Sys.Date() - as.integer(args[1]), "-", "")
+extractdate <- args[1]
 
 donneesrun <- data.frame(
   dates = character(),

@@ -12,11 +12,11 @@ output:
 
 # commandArgs(trailingOnly=T)[1] Location Name
 # commandArgs(trailingOnly=T)[2] Profile Name
-# commandArgs(trailingOnly=T)[3] Day Ago
+# commandArgs(trailingOnly=T)[3] Date YYYYMMDD
 # commandArgs(trailingOnly=T)[4] TZ
 
 prof_name = commandArgs(trailingOnly = T)[2]
-day_ago = as.integer(commandArgs(trailingOnly = T)[3])
+date_var = commandArgs(trailingOnly = T)[3]
 the_tz = commandArgs(trailingOnly = T)[4]
 
 library(flexdashboard)
@@ -43,9 +43,6 @@ library(stringr)
 ```
 
 ```{r}
-
-date_var <- Sys.Date() - day_ago
-
 
 YEAR <- as.integer(format(Sys.time(), "%Y"))
 

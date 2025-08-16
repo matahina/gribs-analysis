@@ -2,7 +2,7 @@
 
 # $1 : Model
 # $2 : Run
-# $3 : Day ago
+# $3 : Date YYYYMMDD
 
 export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
 
@@ -12,18 +12,16 @@ export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $DIR
 
-DATE=`date +%Y%m%d -d $3" day ago"`
-
-echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 ECMWF DL Start - "$2"z "$DATE"" >> ../../data/logs/"$DATE".log
-test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "ECMWF DL Start" "$2z $DATE"
+echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 ECMWF DL Start - "$2"z "$3"" >> ../../data/logs/"$3".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "ECMWF DL Start" "$2z $3"
 
 ######################################
 ## GRIB2 Downloads
 ######################################
 source ../../ecmwf_env/bin/activate
-python3 get_ecmwf.py $DATE $2
+python3 get_ecmwf.py $3 $2
 deactivate
-python3 split_ecmwf.py $DATE $2
+python3 split_ecmwf.py $3 $2
 
 
 ######################################
@@ -47,8 +45,8 @@ fi
 ## Clear files
 ######################################
 
-echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 ECMWF DL Done - "$2"z "$DATE"" >> ../../data/logs/"$DATE".log
-test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "ECMWF DL Done" "$2z $DATE"
-echo "" >> ../../data/logs/"$DATE".log
-echo "" >> ../../data/logs/"$DATE".log
+echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 ECMWF DL Done - "$2"z "$3"" >> ../../data/logs/"$3".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "ECMWF DL Done" "$2z $3"
+echo "" >> ../../data/logs/"$3".log
+echo "" >> ../../data/logs/"$3".log
 

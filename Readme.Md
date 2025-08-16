@@ -196,14 +196,14 @@ This is for a server in Europe/Paris tz zone:
 20 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "12" "1" "dl" "noaa"
 20 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "18" "1" "dl" "noaa"
 ## STATS
-30 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_1" "stats" "noaa"
-31 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_2" "stats" "noaa"
-32 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_3" "stats" "noaa"
-33 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "1" "Profile_4" "stats" "noaa"
-30 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_1" "stats" "noaa"
-31 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_2" "stats" "noaa"
-32 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_3" "stats" "noaa"
-33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "1" "Profile_4" "stats" "noaa"
+30 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "Profile_1" "1" "stats" "noaa"
+31 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "Profile_2" "1" "stats" "noaa"
+32 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "Profile_3" "1" "stats" "noaa"
+33 3 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ens" "Profile_4" "1" "stats" "noaa"
+30 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "Profile_1" "1" "stats" "noaa"
+31 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "Profile_2" "1" "stats" "noaa"
+32 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "Profile_3" "1" "stats" "noaa"
+33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "Profile_4" "1" "stats" "noaa"
 ```
 
 Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents another script to start by being queued.
@@ -215,11 +215,13 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 ./gribs_launch.sh [ARG1] [ARG2] [ARG3] [ARG4] [ARG5]
 ```
 
-`[ARG1]` depends on ARG4, see below.
+*A wrapper for main scripts `noaa_dl.sh`, `ecmwf_dl` and `noaa_stats.sh`. It will then launch `[ARG_5]_[ARG_4].sh`*
 
-`[ARG2]` depends on ARG4, see below.
+`[ARG1]` depends on ARG4 and ARG5, it will input the same args as `[ARG_5]_[ARG_4].sh`
 
-`[ARG3]` depends on ARG4, see below.
+`[ARG2]` depends on ARG4 and ARG5, it will input the same args as `[ARG_5]_[ARG_4].sh`
+
+`[ARG3]` is for the day of either run (for downloading), or set of runs (for stats dashboard). Just use an integer: `0` for today, `1` for the day before, etc.
 
 `[ARG4]` is either `dl` or `stats`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
 
@@ -227,25 +229,37 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 
 
 ```
-./noaa_dl.sh [MODEL_NAME] [MODEL_RUN] [DAY_AGO]
+./noaa_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
 ```
 
 `[MODEL_NAME]` is one of the 4 models considered previously : `gefs` `gem` `fnmoc` `cfs`.
 
 `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
 
-`[DAY_AGO]` is for the day of the run. If you want to download a run from 4 days ago, set `4`. If you download a run the same day it has been done, set `0`. If you download a run that was done the day before, it can be because it takes a while to be available or because you're in a different time zone, set `1`.
+`[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
 
 
 ```
-./noaa_stats.sh [SET] [DAY_AGO] [PROFILE]
+./ecmwf_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
 ```
 
-`[SET]` is either `ens` (gem+gefs+fnmoc) or `cfs`.
+`[MODEL_NAME]` has one choice at the moment : `ecmwf`.
 
-`[DAY_AGO]` is for the day of the runs. You should set `1` to get dashboard of all runs of previous day.
+`[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `12`. Leading zero is important. ECMWF runs from 06Z and 18Z aren't working with this script at the moment.
+
+`[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
+
+
+```
+./noaa_stats.sh [SET] [PROFILE] [DATE]
+```
+
+`[SET]` is either `ens` (gem+gefs+fnmoc) or `cfs`. It will cover all runs from the specificied DATE.
 
 `[PROFILE]` is one of the profiles you set in ini file, by example `Profile_1`.
+
+`[DATE]` is for the date of the set. You need to put a date, either today or another day before (for catching an older set by example), in this format: `YYYYMMDD`.
+
 
 ### Availability of runs
 
