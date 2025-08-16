@@ -157,9 +157,7 @@ When the setting `area = yes` in enabled, it tells the scripts to download one g
 
 ### Get NCEP reanalysis long-term data means
 
-Check if [NOAA service](https://psl.noaa.gov/thredds/catalog.html) is available before...
-
-Then run:
+Check if [NOAA service](https://psl.noaa.gov/thredds/catalog.html) is available before... Then run:
 
 ```bash
 ./scripts/dl/norms_dl.sh "Profile_1"
@@ -206,16 +204,17 @@ This is for a server in Europe/Paris tz zone:
 33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "Profile_4" "1" "stats" "noaa"
 ```
 
-Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents another script to start by being queued.
+Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents another script from start by being queued.
 
-### Command args
+### Main scripts and args
 
+**gribs_launch.sh**
+
+*A wrapper for main scripts `noaa_dl.sh`, `ecmwf_dl` and `noaa_stats.sh`. It will then launch `[ARG_5]_[ARG_4].sh`*
 
 ```
 ./gribs_launch.sh [ARG1] [ARG2] [ARG3] [ARG4] [ARG5]
 ```
-
-*A wrapper for main scripts `noaa_dl.sh`, `ecmwf_dl` and `noaa_stats.sh`. It will then launch `[ARG_5]_[ARG_4].sh`*
 
 `[ARG1]` depends on ARG4 and ARG5, it will input the same args as `[ARG_5]_[ARG_4].sh`
 
@@ -228,6 +227,10 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 `[ARG5]` is either `noaa` or `ecmwf`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
 
 
+**noaa_dl.sh**
+
+*For downloading runs from NOAA models.*
+
 ```
 ./noaa_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
 ```
@@ -239,6 +242,10 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 `[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
 
 
+**ecmwf_dl.sh**
+
+*For downloading runs from ECMWF models.*
+
 ```
 ./ecmwf_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
 ```
@@ -249,6 +256,10 @@ Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents anoth
 
 `[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
 
+
+**noaa_stats.sh**
+
+*For generating dashboards. Whatever data is from NOAA or ECMWF.*
 
 ```
 ./noaa_stats.sh [SET] [PROFILE] [DATE]
