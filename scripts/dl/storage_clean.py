@@ -38,6 +38,18 @@ for anciens in matching:
 sfiles = glob.glob('./filter*')
 for junk in sfiles:
     os.remove(junk.replace("./",""))
+
+
+os.chdir("../ecmwf/")
+
+sfiles = glob.glob('./*.grib2')
+matching = [s for s in sfiles if old in s]
+
+for anciens in matching:
+    os.remove(anciens.replace("./",""))
+sfiles = glob.glob('./filter*')
+for junk in sfiles:
+    os.remove(junk.replace("./",""))
     
 
 if date.today().strftime("%d") == "10":

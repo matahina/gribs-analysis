@@ -2,6 +2,7 @@
 
 # $1 : Profile
 
+export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
 
 ######################################
 ## Get Dir from where script is executed and Date to set correct pathways
