@@ -1807,7 +1807,7 @@ cluster_page <- function(name, the_scens, first_page)
             nrow(the_scens)
           ))
         
-        if (grepl("pp",name)) {
+        if (!grepl("pp",name)) {
           myplots[[clust]] <- myplots[[clust]]  +
             geom_line(
               data = norms_profile [(norms_profile$date >= the_dates [1]) &
