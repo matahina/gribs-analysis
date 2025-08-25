@@ -41,7 +41,7 @@ library(attempt)
 library(dplyr)
 ```
 
-```{r}
+```{r load_data}
 
 norms_df <- read.csv(sprintf("../../assets/norms_%s/norms_df_%s.csv", prof_name, prof_name))
 
@@ -137,7 +137,7 @@ get_data <- function(date, model) {
 
 
 
-```{r}
+```{r load_data2}
 allruns <- get_data(str_replace_all(date_var, "-", ""), "gefs")
 allruns <-
   merge(allruns,
@@ -175,7 +175,7 @@ the_dates <-
 
 
 
-```{r}
+```{r load_pp}
 
 pp_unif <- allruns[, c(1, 2, 6)]
 pp_unif <- na.omit(pp_unif)
@@ -360,7 +360,7 @@ names(pp_probs_ecmwf) <- paste(rep("V", 110), seq(1, 110), sep = "")
 
 
 
-```{r}
+```{r load_pp2}
 
 
 plotruns <- allruns[, c(1, 2, 3, 4, 5)]
@@ -419,6 +419,13 @@ the_dates <- as_datetime(the_dates)
 
 
 
+
+```
+
+
+
+
+```{r prepare_plots}
 plot_z500all <-
   ggplot(plotruns, aes(dates, geop)) + geom_count(aes(
     size = ..prop..,
@@ -458,7 +465,7 @@ plot_z500all <-
     "Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z FNMOC 00z12z ECMWF 00z12z  %s",
     date_var
   )) +
-  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "hgt",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -500,7 +507,7 @@ plot_z500gefs <-
       labels = seq(480, 620, 20)
     )
   ) + ggtitle(sprintf("Z500 _ ENS GEFS 00z06z12z18z  %s", date_var)) +
-geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "hgt",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -544,7 +551,7 @@ plot_z500ecmwf <-
       labels = seq(480, 620, 20)
     )
   ) + ggtitle(sprintf("Z500 _ ENS ECMWF 00z12z  %s", date_var)) +
-geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "hgt",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -610,7 +617,7 @@ plot_t850all <- plot_t850all +
     colour = tempalt
   )) +
   scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits = c(-26, 32)) +
-  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "t850",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -672,7 +679,7 @@ plot_t850gefs <- plot_t850gefs +
     colour = tempalt
   )) +
   scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits = c(-26, 32)) +
-  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "t850",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -735,7 +742,7 @@ plot_t850ecmwf <- plot_t850ecmwf +
     colour = tempalt
   )) +
   scale_colour_gradientn(colours = unname(unlist(t850_cols)), limits = c(-26, 32)) +
-  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "t850",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -747,7 +754,7 @@ plot_t850ecmwf <- plot_t850ecmwf +
 
 ```
 
-```{r}
+```{r prepare_plots2}
 
 
 
@@ -815,7 +822,7 @@ plot_t2mall <-
     colour = tempsol
   )) +
   scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits = c(-16, 50)) +
-  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+  scale_alpha() + geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "t2m",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -886,7 +893,7 @@ plot_t2mgefs <-
     colour = tempsol
   )) +
   scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits = c(-16, 50)) +
-  scale_alpha() +  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+  scale_alpha() +  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "t2m",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -963,7 +970,7 @@ plot_t2mecmwf <-
     colour = tempsol
   )) +
   scale_colour_gradientn(colours = unname(unlist(t2m_cols)), limits = c(-16, 50)) +
-  scale_alpha() +  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
+  scale_alpha() +  geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
                                                   & norms_profile$type == "t2m",],
                            aes(x = date, y = value, group = 1),
                            color = "gray")
@@ -985,14 +992,14 @@ plot_t2mecmwf <-
 
 ### GEFS - GEM - FNMOC - ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot1_36, fig.width=10, fig.height=5}
 
 plot_z500all
 ```
 
 ### GEFS - GEM - FNMOC - ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot2_36, fig.width=10, fig.height=5}
 
 plot_t850all
 ```
@@ -1001,7 +1008,7 @@ plot_t850all
 
 ### GEFS > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot3_36, fig.width=10, fig.height=5}
 
 plot_z500gefs
 ```
@@ -1010,7 +1017,7 @@ plot_z500gefs
 
 ### GEFS > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot4_36, fig.width=10, fig.height=5}
 
 plot_t850gefs
 ```
@@ -1023,14 +1030,14 @@ plot_t850gefs
 
 ### GEFS - GEM - FNMOC - ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot5_36, fig.width=10, fig.height=5}
 
 plot_t850all
 ```
 
 ### GEFS - GEM - FNMOC - ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot6_36, fig.width=10, fig.height=5}
 
 plot_t2mall
 ```
@@ -1039,7 +1046,7 @@ plot_t2mall
 
 ### GEFS > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot7_36, fig.width=10, fig.height=5}
 
 plot_t850gefs
 ```
@@ -1048,7 +1055,7 @@ plot_t850gefs
 
 ### GEFS > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot8_36, fig.width=10, fig.height=5}
 
 plot_t2mgefs
 ```
@@ -1065,14 +1072,14 @@ plot_t2mgefs
 
 ### GEFS - GEM - FNMOC - ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot9_36, fig.width=10, fig.height=5}
 
 plot_z500all
 ```
 
 ### GEFS - GEM - FNMOC - ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot10_36, fig.width=10, fig.height=5}
 
 plot_t2mall
 ```
@@ -1081,7 +1088,7 @@ plot_t2mall
 
 ### GEFS > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot11_36, fig.width=10, fig.height=5}
 
 plot_z500gefs
 ```
@@ -1090,7 +1097,7 @@ plot_z500gefs
 
 ### GEFS > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot12_36, fig.width=10, fig.height=5}
 
 plot_t2mgefs
 ```
@@ -1107,14 +1114,14 @@ plot_t2mgefs
 
 ### GEFS - GEM - FNMOC - ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot13_36, fig.width=10, fig.height=5}
 
 plot_z500all
 ```
 
 ### GEFS - GEM - FNMOC - ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot14_36, fig.width=10, fig.height=5}
 
 plot_t850all
 ```
@@ -1123,7 +1130,7 @@ plot_t850all
 
 ### ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot15_36, fig.width=10, fig.height=5}
 
 plot_z500ecmwf
 ```
@@ -1132,7 +1139,7 @@ plot_z500ecmwf
 
 ### ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot16_36, fig.width=10, fig.height=5}
 
 plot_t850ecmwf
 ```
@@ -1145,14 +1152,14 @@ plot_t850ecmwf
 
 ### GEFS - GEM - FNMOC - ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot17_36, fig.width=10, fig.height=5}
 
 plot_t850all
 ```
 
 ### GEFS - GEM - FNMOC - ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot18_36, fig.width=10, fig.height=5}
 
 plot_t2mall
 ```
@@ -1161,7 +1168,7 @@ plot_t2mall
 
 ### ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot19_36, fig.width=10, fig.height=5}
 
 plot_t850ecmwf
 ```
@@ -1170,7 +1177,7 @@ plot_t850ecmwf
 
 ### ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot20_36, fig.width=10, fig.height=5}
 
 plot_t2mecmwf
 ```
@@ -1187,14 +1194,14 @@ plot_t2mecmwf
 
 ### GEFS - GEM - FNMOC - ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot21_36, fig.width=10, fig.height=5}
 
 plot_z500all
 ```
 
 ### GEFS - GEM - FNMOC - ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot22_36, fig.width=10, fig.height=5}
 
 plot_t2mall
 ```
@@ -1203,7 +1210,7 @@ plot_t2mall
 
 ### ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot23_36, fig.width=10, fig.height=5}
 
 plot_z500ecmwf
 ```
@@ -1212,7 +1219,7 @@ plot_z500ecmwf
 
 ### ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot24_36, fig.width=10, fig.height=5}
 
 plot_t2mecmwf
 ```
@@ -1230,14 +1237,14 @@ plot_t2mecmwf
 
 ### GEFS > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot25_36, fig.width=10, fig.height=5}
 
 plot_z500gefs
 ```
 
 ### GEFS > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot26_36, fig.width=10, fig.height=5}
 
 plot_t850gefs
 ```
@@ -1246,7 +1253,7 @@ plot_t850gefs
 
 ### ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot27_36, fig.width=10, fig.height=5}
 
 plot_z500ecmwf
 ```
@@ -1255,7 +1262,7 @@ plot_z500ecmwf
 
 ### ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot28_36, fig.width=10, fig.height=5}
 
 plot_t850ecmwf
 ```
@@ -1268,14 +1275,14 @@ plot_t850ecmwf
 
 ### GEFS > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot29_36, fig.width=10, fig.height=5}
 
 plot_t850gefs
 ```
 
 ### GEFS > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot30_36, fig.width=10, fig.height=5}
 
 plot_t2mgefs
 ```
@@ -1284,7 +1291,7 @@ plot_t2mgefs
 
 ### ECMWF > t850 + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot31_36, fig.width=10, fig.height=5}
 
 plot_t850ecmwf
 ```
@@ -1293,7 +1300,7 @@ plot_t850ecmwf
 
 ### ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot32_36, fig.width=10, fig.height=5}
 
 plot_t2mecmwf
 ```
@@ -1310,14 +1317,14 @@ plot_t2mecmwf
 
 ### GEFS > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot33_36, fig.width=10, fig.height=5}
 
 plot_z500gefs
 ```
 
 ### GEFS > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot34_36, fig.width=10, fig.height=5}
 
 plot_t2mgefs
 ```
@@ -1326,7 +1333,7 @@ plot_t2mgefs
 
 ### ECMWF > z500
 
-```{r fig.width=10, fig.height=5}
+```{r plot35_36, fig.width=10, fig.height=5}
 
 plot_z500ecmwf
 ```
@@ -1335,7 +1342,7 @@ plot_z500ecmwf
 
 ### ECMWF > t2m + PP
 
-```{r fig.width=10, fig.height=5}
+```{r plot36_36, fig.width=10, fig.height=5}
 
 plot_t2mecmwf
 ```
@@ -1351,7 +1358,7 @@ plot_t2mecmwf
 
 
 
-```{r, echo=F, warning=F, error=F, message=F, results="hide"}
+```{r pdf_ens1, echo=F, warning=F, error=F, message=F, results="hide"}
 pdf(sprintf("../../data/gefs/ens_unif-%s_%s.pdf",str_replace_all(date_var, "-", ""),prof_name),height=18,width=16)
 grid.arrange(plot_z500all,plot_z500gefs,plot_t850all,plot_t850gefs,plot_t2mall,plot_t2mgefs)
 dev.off()
@@ -1362,7 +1369,7 @@ dev.off()
 
 
 
-```{r, echo=F, warning=F, error=F, message=F, results="hide"}
+```{r pdf_ens2, echo=F, warning=F, error=F, message=F, results="hide"}
 pdf(sprintf("../../data/ecmwf/ens_unif-%s_%s.pdf",str_replace_all(date_var, "-", ""),prof_name),height=18,width=16)
 grid.arrange(plot_z500all,plot_z500ecmwf,plot_t850all,plot_t850ecmwf,plot_t2mall,plot_t2mecmwf)
 dev.off()
@@ -1370,9 +1377,11 @@ dev.off()
 
 
 
-# Clusters z500
 
-```{r}
+
+
+
+```{r load_z500scens}
 z500_unif <- allruns[, c(1:3)]
 z500_unif <- z500_unif[which(z500_unif$dates >= the_dates[1]), ]
 
@@ -1403,13 +1412,13 @@ if (length(which(rowSums(is.na(z500_scens[, 2:ncol(z500_scens)])) == ncol(z500_s
 
 if (length(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) - 7)])) > 2)) > 0) {
   if (nrow(z500_scens[, 2:(ncol(z500_scens) - 7)]) !=
-      nrow(z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) 
+      nrow(z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens)
                                                              - 7)])) > 2)), 2:(ncol(z500_scens) - 7)])) {
     z500_scens <-
       z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) - 7)])) > 2)), ]
   } else {
     z500_scens[, 2:(ncol(z500_scens) - 7)] <-
-      z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens) 
+      z500_scens[-c(which(rowSums(is.na(z500_scens[, 2:(ncol(z500_scens)
                                                         - 7)])) > 2)), 2:(ncol(z500_scens) - 7)]
   }
 }
@@ -1429,431 +1438,16 @@ z500_scens <- na.omit(z500_scens[, 1:limit])
 
 
 
-```{r}
 
 
-z500x <- repr_matrix(
-  z500_scens[, -c(1)],
-  func = repr_featrend,
-  args = list(
-    func = maxC,
-    pieces = 8,
-    order = 12
-  ),
-  normalise = TRUE,
-  func_norm = norm_z
-)
 
 
 
-clusterings <- lapply(c(2:8), function(x)
-  clara(z500x, x))
 
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(
-    z500x,
-    as.integer(clusterings[[x]]$clustering),
-    c("Davies_Bouldin")
-  ))
 
 
-criteriaDB <- unlist(unname(DB_values))
-names(criteriaDB) <- seq(1, length(criteriaDB))
+```{r load_t850scens}
 
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(z500x, as.integer(clusterings[[x]]$clustering),
-              c("Dunn")))
-
-
-criteriaD <- unlist(unname(DB_values))
-names(criteriaD) <- seq(1, length(criteriaD))
-
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(
-    z500x,
-    as.integer(clusterings[[x]]$clustering),
-    c("Calinski_Harabasz")
-  ))
-
-
-criteriaCH <- unlist(unname(DB_values))
-names(criteriaCH) <- seq(1, length(criteriaCH))
-
-
-score <- rep(0, length(criteriaDB))
-score[as.integer(names(sort(criteriaDB)))] <-
-  score + seq(length(criteriaDB), 1)
-score[as.integer(names(sort(criteriaCH, decreasing = T)))] <-
-  score + seq(length(criteriaDB), 1)
-score[as.integer(names(sort(criteriaD, decreasing = T)))] <-
-  score + seq(length(criteriaDB), 1)
-names(score) <- seq(2, length(criteriaCH) + 1)
-
-
-numb <- as.numeric(names(sort(score, decreasing = T)))[1]
-```
-
-
-
-
-```{r}
-
-
-
-myplots_za <- list()
-
-ordre <- clusterings[[numb - 1]]$clusinfo[, 1]
-names(ordre) <- seq(1, length(ordre))
-
-
-for (clust in seq(1, 8)) {
-  myplots_za[[clust]] <- ggplot()
-  if (clust <= numb) {
-    elems <-
-      which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
-        ordre, decreasing = T
-      ))[clust]))
-    
-    
-    the_data <-
-      melt(as.data.frame(z500_scens[elems, ]), id = c("runs"))
-    
-    the_data$ID <- the_data$runs
-    
-    
-    
-    stats <- data.frame(
-      DATE = unique(the_data$variable),
-      q25 = unname(unlist(lapply(
-        z500_scens[elems, -c(1)], mean
-      ))) - unname(unlist(lapply(z500_scens[elems, -c(1)], sd))),
-      med = unname(unlist(lapply(
-        z500_scens[elems, -c(1)], mean
-      ))),
-      q75 = unname(unlist(lapply(
-        z500_scens[elems, -c(1)], mean
-      ))) + unname(unlist(lapply(z500_scens[elems, -c(1)], sd)))
-    )
-    the_data$variable <- as_datetime(the_data$variable)
-    stats$DATE <- as_datetime(stats$DATE)
-    
-    myplots_za[[clust]] <-
-      
-      ggplot(stats, aes(x = DATE)) +
-      geom_line(
-        data = the_data,
-        aes(x = variable, y = value, group = ID),
-        alpha = 0.80,
-        size = 0.8 ,
-        color = "grey30"
-      ) +
-      geom_ribbon(aes(
-        ymin = q25,
-        ymax = q75,
-        group = 1
-      ),
-      alpha = 0.60,
-      fill = "grey70") +
-      geom_line(
-        aes(y = med, group = 1),
-        alpha = 0.80,
-        size = 0.8,
-        color = "red"
-      ) +
-      theme_linedraw() + theme(
-        plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.title = element_blank(),
-        legend.position = "none",
-        panel.background = element_rect(
-          fill = "black",
-          colour = "black",
-          size = 0,
-          linetype = "solid"
-        ),
-        axis.text.x = element_text(angle = 90)
-      ) +
-      scale_x_datetime(
-        expand = c(0, 0),
-        date_breaks = "1 day",
-        date_labels = "%d %b",
-                   timezone = the_tz,
-                   limits = c(the_dates[1], the_dates[1] + days(14))
-      ) + scale_y_continuous(
-        expand = c(0, 0),
-        breaks = seq(480, 620, 20),
-        labels = seq(480, 620, 20),
-        limits = c(480, 620)
-      ) +
-      ggtitle(sprintf(
-        "Cluster %s (%s scénarios sur %s)",
-        clust,
-        length(elems),
-        nrow(z500_scens)
-      )) + 
-      geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
-                                                  & norms_profile$type == "hgt",],
-                           aes(x = date, y = value, group = 1),
-        color = "white",
-        linetype = "dashed"
-      ) 
-    
-    
-  }
-}
-
-
-```
-
-## Col1
-
-### z500 > Cluster 1
-
-```{r}
- myplots_za[[1]]
-```
-
-
-### z500 > Cluster 2
-
-```{r}
- myplots_za[[2]]
-```
-
-## Col2
-
-### z500 > Cluster 3
-
-```{r}
- myplots_za[[3]]
-```
-
-
-
-
-### z500 > Cluster 4
-
-```{r}
- myplots_za[[4]]
-```
-
-## Col3
-
-
-### z500 > Cluster 5
-
-```{r}
- myplots_za[[5]]
-```
-
-
-### z500 > Cluster 6
-
-```{r}
- myplots_za[[6]]
-```
-
-
-
-## Col4
-
-### z500 > Cluster 7
-
-```{r}
- myplots_za[[7]]
-```
-
-
-### z500 > Cluster 8
-
-```{r}
- myplots_za[[8]]
-```
-
-
-
-## Col5
-
-### HeatMap
-
-```{r}
-ze <- c(
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = "")
-)
-ze_s <- c(
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("06z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2 + 50),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("18z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2 + 50)
-)
-
-cl <- rep(NA, 20 * 8 + 30 * 4 + 50 * 4)
-
-for (clust in seq(1, numb)) {
-  elems <-
-    which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
-      ordre, decreasing = T
-    ))[clust]))
-  cl[match(row.names(z500_scens[elems, ]), ze)] <- clust
-}
-
-map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
-
-a <-
-  ggplot(map[which(str_detect(map[, 1], "GEFS")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "GEFS"))])) + ggtitle("GEFS")
-
-b <-
-  ggplot(map[which(str_detect(map[, 1], "ECMWF")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "ECMWF"))])) + ggtitle("ECMWF")
-
-c <-
-  ggplot(map[which(str_detect(map[, 1], "GEM")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "GEM"))])) + ggtitle("GEM")
-
-d <-
-  ggplot(map[which(str_detect(map[, 1], "FNMOC")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "FNMOC"))])) + ggtitle("FNMOC")
-
-
-myplots_za[[9]] <-
-  ggarrange(a,
-            b,
-            c,
-            d,
-            ncol = 4,
-            common.legend = TRUE,
-            legend = "bottom")
-myplots_za[[9]]
-```
-
-### Tracé d'effondrement
-
-```{r}
-myplots_za[[10]] <-
-  ggplot(data.table(Clusters = 2:8, Scores = -unlist(score)),
-         aes(Clusters, Scores)) +
-  geom_line(size = 1) +
-  geom_point(size = 3) +
-  theme_bw() + scale_x_continuous(breaks = seq(2, 8)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5, face = "bold")) + ggtitle("z500")
-myplots_za[[10]]
-```
-
-
-
-# Clusters t850
-
-
-```{r}
- 
 
 t850_unif <- allruns[, c(1, 2, 4)]
 t850_unif <- t850_unif[which(t850_unif$dates >= the_dates[1]), ]
@@ -1910,424 +1504,17 @@ t850_scens <- na.omit(t850_scens[, 1:limit])
 
 
 
-```{r}
 
 
 
-t850x <- repr_matrix(
-  t850_scens[, -c(1)],
-  func = repr_featrend,
-  args = list(
-    func = maxC,
-    pieces = 8,
-    order = 12
-  ),
-  normalise = TRUE,
-  func_norm = norm_z
-)
 
 
 
-clusterings <- lapply(c(2:8), function(x)
-  clara(t850x, x))
 
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(
-    t850x,
-    as.integer(clusterings[[x]]$clustering),
-    c("Davies_Bouldin")
-  ))
 
 
-criteriaDB <- unlist(unname(DB_values))
-names(criteriaDB) <- seq(1, length(criteriaDB))
 
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(t850x, as.integer(clusterings[[x]]$clustering),
-              c("Dunn")))
-
-
-criteriaD <- unlist(unname(DB_values))
-names(criteriaD) <- seq(1, length(criteriaD))
-
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(
-    t850x,
-    as.integer(clusterings[[x]]$clustering),
-    c("Calinski_Harabasz")
-  ))
-
-
-criteriaCH <- unlist(unname(DB_values))
-names(criteriaCH) <- seq(1, length(criteriaCH))
-
-score <- rep(0, length(criteriaDB))
-score[as.integer(names(sort(criteriaDB)))] <-
-  score + seq(length(criteriaDB), 1)
-score[as.integer(names(sort(criteriaCH, decreasing = T)))] <-
-  score + seq(length(criteriaDB), 1)
-score[as.integer(names(sort(criteriaD, decreasing = T)))] <-
-  score + seq(length(criteriaDB), 1)
-names(score) <- seq(2, length(criteriaCH) + 1)
-
-numb <- as.numeric(names(sort(score, decreasing = T)))[1]
-```
-
-```{r}
-
-
-myplots_ta <- list()
-
-ordre <- clusterings[[numb - 1]]$clusinfo[, 1]
-names(ordre) <- seq(1, length(ordre))
-
-for (clust in seq(1, 8)) {
-  myplots_ta[[clust]] <- ggplot()
-  if (clust <= numb) {
-    elems <-
-      which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
-        ordre, decreasing = T
-      ))[clust]))
-    
-    
-    the_data <-
-      melt(as.data.frame(t850_scens[elems, ]), id = c("runs"))
-    
-    the_data$ID <- the_data$runs
-    
-    stats <- data.frame(
-      DATE = unique(the_data$variable),
-      q25 = unname(unlist(lapply(
-        t850_scens[elems, -c(1)], mean
-      ))) - unname(unlist(lapply(t850_scens[elems, -c(1)], sd))),
-      med = unname(unlist(lapply(
-        t850_scens[elems, -c(1)], mean
-      ))),
-      q75 = unname(unlist(lapply(
-        t850_scens[elems, -c(1)], mean
-      ))) + unname(unlist(lapply(t850_scens[elems, -c(1)], sd)))
-    )
-    the_data$variable <- as_datetime(the_data$variable)
-    stats$DATE <- as_datetime(stats$DATE)
-    
-    myplots_ta[[clust]] <-
-      ggplot(stats, aes(x = DATE)) +
-      geom_line(
-        data = the_data,
-        aes(x = variable, y = value, group = ID),
-        alpha = 0.80,
-        size = 0.8 ,
-        color = "grey30"
-      ) +
-      geom_ribbon(aes(
-        ymin = q25,
-        ymax = q75,
-        group = 1
-      ),
-      alpha = 0.60,
-      fill = "grey70") +
-      geom_line(
-        aes(y = med, group = 1),
-        alpha = 0.80,
-        size = 0.8,
-        color = "red"
-      ) +
-      theme_linedraw() + theme(
-        plot.title = element_text(hjust = 0.5, face = "bold"),
-        axis.title = element_blank(),
-        legend.position = "none",
-        panel.background = element_rect(
-          fill = "black",
-          colour = "black",
-          size = 0,
-          linetype = "solid"
-        ),
-        axis.text.x = element_text(angle = 90)
-      ) + scale_x_datetime(
-        expand = c(0, 0),
-        date_breaks = "1 day",
-        date_labels = "%d %b",
-                   timezone = the_tz,
-                   limits = c(the_dates[1], the_dates[1] + days(14))
-      ) +
-      scale_y_continuous(
-        expand = c(0, 0),
-        breaks = seq(-30, 40, 10),
-        labels = seq(-30, 40, 10),
-        limits = c(-30, 40)
-      ) +
-      ggtitle(sprintf(
-        "Cluster %s (%s scénarios sur %s)",
-        clust,
-        length(elems),
-        nrow(t850_scens)
-      )) + 
-      geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) ) 
-                                                  & norms_profile$type == "t850",],
-                           aes(x = date, y = value, group = 1),
-        color = "white",
-        linetype = "dashed"
-      ) 
-    
-  }
-}
-
-```
-
-
-## Col1
-
-### t850 > Cluster 1
-
-```{r}
- myplots_ta[[1]]
-```
-
-
-### t850 > Cluster 2
-
-```{r}
- myplots_ta[[2]]
-```
-
-## Col2
-
-### t850 > Cluster 3
-
-```{r}
- myplots_ta[[3]]
-```
-
-
-
-
-### t850 > Cluster 4
-
-```{r}
- myplots_ta[[4]]
-```
-
-## Col3
-
-### t850 > Cluster 5
-
-```{r}
- myplots_ta[[5]]
-```
-
-
-### t850 > Cluster 6
-
-```{r}
- myplots_ta[[6]]
-```
-
-
-## Col4
-
-
-### t850 > Cluster 7
-
-```{r}
- myplots_ta[[7]]
-```
-
-
-### t850 > Cluster 8
-
-```{r}
- myplots_ta[[8]]
-```
-
-
-
-
-## Col5
-
-
-### HeatMap
-
-```{r}
-ze <- c(
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = "")
-)
-ze_s <- c(
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("06z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2 + 50),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("18z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2 + 50)
-)
-
-cl <- rep(NA, 20 * 8 + 30 * 4 + 50 * 4)
-
-for (clust in seq(1, numb)) {
-  elems <-
-    which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
-      ordre, decreasing = T
-    ))[clust]))
-  cl[match(row.names(t850_scens[elems, ]), ze)] <- clust
-}
-
-map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
-
-
-a <-
-  ggplot(map[which(str_detect(map[, 1], "GEFS")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "GEFS"))])) + ggtitle("GEFS")
-
-b <-
-  ggplot(map[which(str_detect(map[, 1], "ECMWF")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "ECMWF"))])) + ggtitle("ECMWF")
-
-c <-
-  ggplot(map[which(str_detect(map[, 1], "GEM")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "GEM"))])) + ggtitle("GEM")
-
-d <-
-  ggplot(map[which(str_detect(map[, 1], "FNMOC")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "FNMOC"))])) + ggtitle("FNMOC")
-
-myplots_ta[[9]] <-
-  ggarrange(a,
-            b,
-            c,
-            d,
-            ncol = 4,
-            common.legend = TRUE,
-            legend = "bottom")
-myplots_ta[[9]]
-```
-
-### Tracé d'effondrement
-
-```{r}
-myplots_ta[[10]] <-
-  ggplot(data.table(Clusters = 2:8, Scores = -unlist(score)),
-         aes(Clusters, Scores)) +
-  geom_line(size = 1) +
-  geom_point(size = 3) +
-  theme_bw() + scale_x_continuous(breaks = seq(2, 8)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5, face = "bold")) + ggtitle("t850")
-myplots_ta[[10]]
-```
-
-
-
-
-
-
-# Clusters PP
-
-
-```{r}
+```{r load_ppscens}
 
 
 pp_unif <- allruns[, c(1, 2, 6)]
@@ -2384,163 +1571,481 @@ pp_scens <- na.omit(pp_scens[, 1:limit])
 ```
 
 
-
-
-```{r}
-
-
-ppx <- repr_matrix(
-  pp_scens[, -c(1)],
-  func = repr_featrend,
-  args = list(
-    func = maxC,
-    pieces = 8,
-    order = 12
-  ),
-  normalise = TRUE,
-  func_norm = norm_z
-)
-
-
-clusterings <- lapply(c(2:8), function(x)
-  clara(ppx, x))
-
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(
-    ppx,
-    as.integer(clusterings[[x]]$clustering),
-    c("Davies_Bouldin")
-  ))
-
-
-criteriaDB <- unlist(unname(DB_values))
-names(criteriaDB) <- seq(1, length(criteriaDB))
-
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(ppx, as.integer(clusterings[[x]]$clustering),
-              c("Dunn")))
-
-
-criteriaD <- unlist(unname(DB_values))
-names(criteriaD) <- seq(1, length(criteriaD))
-
-DB_values <- sapply(seq_along(clusterings), function(x)
-  intCriteria(
-    ppx,
-    as.integer(clusterings[[x]]$clustering),
-    c("Calinski_Harabasz")
-  ))
-
-
-criteriaCH <- unlist(unname(DB_values))
-names(criteriaCH) <- seq(1, length(criteriaCH))
-
-score <- rep(0, length(criteriaDB))
-score[as.integer(names(sort(criteriaDB)))] <-
-  score + seq(length(criteriaDB), 1)
-score[as.integer(names(sort(criteriaCH, decreasing = T)))] <-
-  score + seq(length(criteriaDB), 1)
-score[as.integer(names(sort(criteriaD, decreasing = T)))] <-
-  score + seq(length(criteriaDB), 1)
-names(score) <- seq(2, length(criteriaCH) + 1)
+```{r clustering_funcs}
 
 
 
-numb <- as.numeric(names(sort(score, decreasing = T)))[1]
-```
+scens_to_clust <- function(the_unif_scens)
+{
+  scensx <- repr_matrix(
+    the_unif_scens[, -c(1)],
+    func = repr_featrend,
+    args = list(
+      func = maxC,
+      pieces = 8,
+      order = 12
+    ),
+    normalise = TRUE,
+    func_norm = norm_z
+  )
+  
+  
+  clusterings <- lapply(c(2:8), function(x)
+    clara(scensx, x))
+  
+  DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(
+      scensx,
+      as.integer(clusterings[[x]]$clustering),
+      c("Davies_Bouldin")
+    ))
+  
+  
+  criteriaDB <- unlist(unname(DB_values))
+  names(criteriaDB) <- seq(1, length(criteriaDB))
+  
+  DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(scensx, as.integer(clusterings[[x]]$clustering), c("Dunn")))
+  
+  
+  criteriaD <- unlist(unname(DB_values))
+  names(criteriaD) <- seq(1, length(criteriaD))
+  
+  DB_values <- sapply(seq_along(clusterings), function(x)
+    intCriteria(
+      scensx,
+      as.integer(clusterings[[x]]$clustering),
+      c("Calinski_Harabasz")
+    ))
+  
+  
+  criteriaCH <- unlist(unname(DB_values))
+  names(criteriaCH) <- seq(1, length(criteriaCH))
+  
+  score <- rep(0, length(criteriaDB))
+  score[as.integer(names(sort(criteriaDB)))] <-
+    score + seq(length(criteriaDB), 1)
+  score[as.integer(names(sort(criteriaCH, decreasing = T)))] <-
+    score + seq(length(criteriaDB), 1)
+  score[as.integer(names(sort(criteriaD, decreasing = T)))] <-
+    score + seq(length(criteriaDB), 1)
+  names(score) <- seq(2, length(criteriaCH) + 1)
+  
+  
+  
+  numb_def <- as.numeric(names(sort(score, decreasing = T)))[1]
+  
+  
+  return(list(numb_def, clusterings, score))
+}
 
-```{r}
 
 
-myplots_pa <- list()
 
-ordre <- clusterings[[numb - 1]]$clusinfo[, 1]
-names(ordre) <- seq(1, length(ordre))
 
-for (clust in seq(1, 8)) {
-  myplots_pa[[clust]] <- ggplot()
-  if (clust <= numb) {
-    elems <-
-      which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
-        ordre, decreasing = T
-      ))[clust]))
+cluster_page <- function(name, the_scens, first_page)
+  
+{
+  if (name == "z500") {
+    the_breaks = seq(480, 620, 20)
+    the_labels = seq(480, 620, 20)
+    the_limits = c(480, 620)
+    the_norm_type = "hgt"
+  }
+  
+  
+  if (name == "t850") {
+    the_breaks = seq(-30, 40, 10)
+    the_labels = seq(-30, 40, 10)
+    the_limits = c(-30, 40)
+    the_norm_type = name
+  }
+  
+  
+  if (name == "pp") {
+    the_breaks = c(seq(0, 1, .5), seq(2, 5, 1), seq(10, 30, 5))
+    the_labels = c(seq(0, 1, .5), seq(2, 5, 1), seq(10, 25, 5), "30+")
+    the_limits = c(0, 30)
+  }
+  
+  results <- scens_to_clust(the_scens)
+  
+  numb_def <- results[[1]]
+  clusterings <- results[[2]]
+  score <- results[[3]]
+  
+  if (first_page) {
+    name <- paste0("Clusters ", name)
+  }
+  
+  for (i in seq(2, 8)) {
+    numb <- i
+    
+    if (numb == numb_def) {
+      cat("# Defaut (n=",
+          (as.character(numb)),
+          ') {data-navmenu="',
+          name,
+          '"}',
+          sep = "")
+      
+      cat("\n\n")
+    } else {
+      cat("\n\n")
+      cat("# n=",
+          (as.character(i)),
+          ' {data-navmenu="',
+          name,
+          '"}',
+          sep = "")
+      
+      cat("\n\n")
+    }
     
     
-    the_data <-
-      melt(as.data.frame(pp_scens[elems, ]), id = c("runs"))
+    myplots <- list()
     
-    the_data$ID <- the_data$runs
+    ordre <- clusterings[[numb - 1]]$clusinfo[, 1]
+    names(ordre) <- seq(1, length(ordre))
     
-    stats <- data.frame(
-      DATE = unique(the_data$variable),
-      q25 = unname(unlist(lapply(pp_scens[elems, -c(1)], mean))) - unname(unlist(lapply(pp_scens[elems, -c(1)], sd))),
-      med = unname(unlist(lapply(pp_scens[elems, -c(1)], mean))),
-      q75 = unname(unlist(lapply(pp_scens[elems, -c(1)], mean))) + unname(unlist(lapply(pp_scens[elems, -c(1)], sd)))
+    for (clust in seq(1, 8)) {
+      myplots[[clust]] <- ggplot()
+      if (clust <= numb) {
+        elems <-
+          which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
+            ordre, decreasing = T
+          ))[clust]))
+        
+        
+        the_data <-
+          melt(as.data.frame(the_scens[elems, ]), id = c("runs"))
+        
+        the_data$ID <- the_data$runs
+        
+        stats <- data.frame(
+          DATE = unique(the_data$variable),
+          q25 = unname(unlist(lapply(
+            the_scens[elems, -c(1)], mean
+          ))) - unname(unlist(lapply(
+            the_scens[elems, -c(1)], sd
+          ))),
+          med = unname(unlist(lapply(
+            the_scens[elems, -c(1)], mean
+          ))),
+          q75 = unname(unlist(lapply(
+            the_scens[elems, -c(1)], mean
+          ))) + unname(unlist(lapply(
+            the_scens[elems, -c(1)], sd
+          )))
+        )
+        if (name == "pp") {
+          stats [which(stats$q25 < 0), "q25"] <- 0
+          stats [which(stats$q25 > 29.9), "q25"] <- 29.9
+          stats [which(stats$med > 29.9), "med"] <- 29.9
+          stats [which(stats$q75 > 29.9), "q75"] <- 29.9
+          
+          
+          the_data [which(the_data$value > 29.9), "value"] <- 29.9
+        }
+        
+        the_data$variable <- as_datetime(the_data$variable)
+        stats$DATE <- as_datetime(stats$DATE)
+        myplots[[clust]] <-
+          ggplot(stats, aes(x = DATE)) +
+          geom_line(
+            data = the_data,
+            aes(
+              x = variable,
+              y = value,
+              group = ID
+            ),
+            alpha = 0.80,
+            size = 0.8 ,
+            color = "grey30"
+          ) +
+          geom_ribbon(aes(
+            ymin = q25,
+            ymax = q75,
+            group = 1
+          ),
+          alpha = 0.60,
+          fill = "grey70") +
+          geom_line(
+            aes(y = med, group = 1),
+            alpha = 0.80,
+            size = 0.8,
+            color = "red"
+          ) +
+          theme_linedraw() + theme(
+            plot.title = element_text(hjust = 0.5, face = "bold"),
+            axis.title = element_blank(),
+            legend.position = "none",
+            panel.background = element_rect(
+              fill = "black",
+              colour = "black",
+              size = 0,
+              linetype = "solid"
+            ),
+            axis.text.x = element_text(angle = 90)
+          ) +   scale_x_datetime(
+            expand = c(0, 0),
+            date_breaks = "1 day",
+            date_labels = "%d %b",
+            timezone = the_tz,
+            limits = c(the_dates[1], the_dates[1] + days(14))
+          ) +
+          scale_y_continuous(
+            expand = c(0, 0),
+            breaks =  the_breaks,
+            labels =  the_labels,
+            limits = the_limits
+          ) +
+          ggtitle(sprintf(
+            "Cluster %s (%s scénarios sur %s)",
+            clust,
+            length(elems),
+            nrow(the_scens)
+          ))
+        
+        if (name != "pp") {
+          myplots[[clust]] <- myplots[[clust]]  +
+            geom_line(
+              data = norms_profile [(norms_profile$date >= the_dates [1]) &
+                                      (norms_profile$date < (the_dates [1] + days(15)))
+                                    &
+                                      norms_profile$type == the_norm_type, ],
+              aes(
+                x = date,
+                y = value,
+                group = 1
+              ),
+              color = "white",
+              linetype = "dashed"
+            )
+        }
+        
+      }
+    }
+    
+    for (j in seq(2, 8, 2)) {
+      cat("## Col", as.character(j / 2))
+      
+      cat("\n\n")
+      
+      cat("###", name, "> Cluster ", as.character((j - 1)))
+      
+      cat("\n\n")
+      print(myplots[[j - 1]])
+      
+      cat("\n\n")
+      
+      cat("###", name, "> Cluster ", as.character((j)))
+      
+      cat("\n\n")
+      print(myplots[[j]])
+      
+      cat("\n\n")
+    }
+    
+    cat("## Col5")
+    
+    cat("\n\n")
+    
+    
+    cat("### HeatMap")
+    
+    cat("\n\n")
+    
+    
+    ze <- c(
+      paste(rep(sprintf(
+        "GEFS %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "ECMWF %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "GEM %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "FNMOC %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "GEFS %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "ECMWF %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "GEM %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "FNMOC %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "GEFS %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "ECMWF %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "GEM %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "FNMOC %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "GEFS %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "ECMWF %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "GEM %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
+      paste(rep(sprintf(
+        "FNMOC %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
+      )), str_pad(seq(1, 20), 2, pad = "0"), sep = "")
+    )
+    ze_s <- c(
+      paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
+      paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
+      paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
+      paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
+      paste("06z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
+      rep("", 20 * 2 + 50),
+      paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
+      paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
+      paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
+      paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
+      paste("18z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
+      paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
+      rep("", 20 * 2 + 50)
     )
     
-    stats [which(stats$q25 < 0), "q25"] <- 0
-    stats [which(stats$q25 > 29.9), "q25"] <- 29.9
-    stats [which(stats$med > 29.9), "med"] <- 29.9
-    stats [which(stats$q75 > 29.9), "q75"] <- 29.9
+    cl <- rep(NA, 20 * 8 + 30 * 4 + 50 * 4)
+    
+    for (clust in seq(1, numb)) {
+      elems <-
+        which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
+          ordre, decreasing = T
+        ))[clust]))
+      cl[match(row.names(the_scens[elems, ]), ze)] <- clust
+    }
+    
+    map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
     
     
-    the_data [which(the_data$value > 29.9), "value"] <- 29.9
-    the_data$variable <- as_datetime(the_data$variable)
-    stats$DATE <- as_datetime(stats$DATE)
-    myplots_pa[[clust]] <-
-      ggplot(stats, aes(x = DATE)) +
-      geom_line(
-        data = the_data,
-        aes(x = variable, y = value, group = ID),
-        alpha = 0.80,
-        size = 0.8 ,
-        color = "grey30"
-      ) +
-      geom_ribbon(aes(
-        ymin = q25,
-        ymax = q75,
-        group = 1
-      ),
-      alpha = 0.60,
-      fill = "grey70") +
-      geom_line(
-        aes(y = med, group = 1),
-        alpha = 0.80,
-        size = 0.8,
-        color = "red"
-      ) +
-      theme_linedraw() + theme(
+    a <-
+      ggplot(map[which(str_detect(map[, 1], "GEFS")), ], aes(x = 1, y = rev(SCENS))) +
+      geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
+        panel.grid.major = element_blank(),
         plot.title = element_text(hjust = 0.5, face = "bold"),
         axis.title = element_blank(),
-        legend.position = "none",
-        panel.background = element_rect(
-          fill = "black",
-          colour = "black",
-          size = 0,
-          linetype = "solid"
-        ),
-        axis.text.x = element_text(angle = 90)
-      ) +   scale_x_datetime(
-        expand = c(0, 0),
-        date_breaks = "1 day",
-        date_labels = "%d %b",
-                   timezone = the_tz,
-                   limits = c(the_dates[1], the_dates[1] + days(14))
+        legend.position = "right"
       ) +
-      scale_y_continuous(
-        expand = c(0, 0),
-        breaks =  c(seq(0, 1, .5), seq(2, 5, 1), seq(10, 30, 5)),
-        labels =  c(seq(0, 1, .5), seq(2, 5, 1), seq(10, 25, 5), "30+"),
-        limits = c(0, 30)
+      scale_fill_manual(
+        limits = factor(c(1:numb)),
+        values = brewer.pal(n = 12, name = "Paired")[1:numb],
+        name = "Clusters"
+      ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
+                                                                                  rev(ze_s[which(str_detect(map[, 1], "GEFS"))])) + ggtitle("GEFS")
+    
+    b <-
+      ggplot(map[which(str_detect(map[, 1], "ECMWF")), ], aes(x = 1, y = rev(SCENS))) +
+      geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
+        panel.grid.major = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        axis.title = element_blank(),
+        legend.position = "right"
       ) +
-      ggtitle(sprintf(
-        "Cluster %s (%s scénarios sur %s)",
-        clust,
-        length(elems),
-        nrow(pp_scens)
-      ))
+      scale_fill_manual(
+        limits = factor(c(1:numb)),
+        values = brewer.pal(n = 12, name = "Paired")[1:numb],
+        name = "Clusters"
+      ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
+                                                                                  rev(ze_s[which(str_detect(map[, 1], "ECMWF"))])) + ggtitle("ECMWF")
+    
+    c <-
+      ggplot(map[which(str_detect(map[, 1], "GEM")), ], aes(x = 1, y = rev(SCENS))) +
+      geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
+        panel.grid.major = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        axis.title = element_blank(),
+        legend.position = "right"
+      ) +
+      scale_fill_manual(
+        limits = factor(c(1:numb)),
+        values = brewer.pal(n = 12, name = "Paired")[1:numb],
+        name = "Clusters"
+      ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
+                                                                                  rev(ze_s[which(str_detect(map[, 1], "GEM"))])) + ggtitle("GEM")
+    
+    d <-
+      ggplot(map[which(str_detect(map[, 1], "FNMOC")), ], aes(x = 1, y = rev(SCENS))) +
+      geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
+        panel.grid.major = element_blank(),
+        plot.title = element_text(hjust = 0.5, face = "bold"),
+        axis.title = element_blank(),
+        legend.position = "right"
+      ) +
+      scale_fill_manual(
+        limits = factor(c(1:numb)),
+        values = brewer.pal(n = 12, name = "Paired")[1:numb],
+        name = "Clusters"
+      ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
+                                                                                  rev(ze_s[which(str_detect(map[, 1], "FNMOC"))])) + ggtitle("FNMOC")
+    
+    
+    myplots[[9]] <-
+      ggarrange(
+        a,
+        b,
+        c,
+        d,
+        ncol = 4,
+        common.legend = TRUE,
+        legend = "bottom"
+      )
+    print(myplots[[9]])
+    
+    cat("\n\n")
+    
+    
+    cat("### Tracé d'effondrement")
+    
+    cat("\n\n")
+    
+    
+    myplots[[10]] <-
+      ggplot(data.table(Clusters = 2:8, Scores = -unlist(score)),
+             aes(Clusters, Scores)) +
+      geom_line(size = 1) +
+      geom_point(size = 3) +
+      theme_bw() + scale_x_continuous(breaks = seq(2, 8)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5, face = "bold")) + ggtitle("pp")
+    print(myplots[[10]])
+    
+    cat("\n\n")
+    
+    
+    
+    if (numb == numb_def) {
+      defplots <- myplots
+    }
+    
     
   }
+  
+  return(defplots)
 }
 
 
@@ -2548,278 +2053,31 @@ for (clust in seq(1, 8)) {
 ```
 
 
-## Col1
-
-### pp > Cluster 1
-
-```{r}
- myplots_pa[[1]]
-```
-
-
-### pp > Cluster 2
-
-```{r}
- myplots_pa[[2]]
-```
-
-## Col2
-
-### pp > Cluster 3
-
-```{r}
- myplots_pa[[3]]
-```
 
 
 
 
-### pp > Cluster 4
 
-```{r}
- myplots_pa[[4]]
-```
-
-## Col3
-
-### pp > Cluster 5
-
-```{r}
- myplots_pa[[5]]
-```
+```{r cluster_page_gen, results="asis"}
 
 
-### pp > Cluster 6
+myplots_z500 <- cluster_page("z500",z500_scens,TRUE)
 
-```{r}
- myplots_pa[[6]]
-```
+myplots_t850 <- cluster_page("t850",t850_scens,TRUE)
 
 
-## Col4
-
-
-### pp > Cluster 7
-
-```{r}
- myplots_pa[[7]]
-```
-
-
-### pp > Cluster 8
-
-```{r}
- myplots_pa[[8]]
-```
+myplots_pp <- cluster_page("pp",pp_scens,TRUE)
 
 
 
-
-## Col5
-
-
-### HeatMap
-
-```{r}
-ze <- c(
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(0), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(6), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(12), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEFS %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 30), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "ECMWF %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 50), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "GEM %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = ""),
-  paste(rep(sprintf(
-    "FNMOC %s sc", format(date_var + hours(18), "%Y-%m-%d %H:%M:%S")
-  )), str_pad(seq(1, 20), 2, pad = "0"), sep = "")
-)
-ze_s <- c(
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("00z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("06z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2 + 50),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 50), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("12z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 20), 2, pad = "0"), sep = ""),
-  paste("18z sc", str_pad(seq(1, 1), 2, pad = "0"), sep = ""),
-  paste(rep("    sc"), str_pad(seq(2, 30), 2, pad = "0"), sep = ""),
-  rep("", 20 * 2 + 50)
-)
-
-cl <- rep(NA, 20 * 8 + 30 * 4 + 50 * 4)
-
-for (clust in seq(1, numb)) {
-  elems <-
-    which(clusterings[[numb - 1]]$clustering == as.integer(names(sort(
-      ordre, decreasing = T
-    ))[clust]))
-  cl[match(row.names(pp_scens[elems, ]), ze)] <- clust
-}
-
-map <- data.frame(SCENS = ze, CLUST = as.factor(cl))
-
-
-a <-
-  ggplot(map[which(str_detect(map[, 1], "GEFS")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "GEFS"))])) + ggtitle("GEFS")
-
-b <-
-  ggplot(map[which(str_detect(map[, 1], "ECMWF")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "ECMWF"))])) + ggtitle("ECMWF")
-
-c <-
-  ggplot(map[which(str_detect(map[, 1], "GEM")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "GEM"))])) + ggtitle("GEM")
-
-d <-
-  ggplot(map[which(str_detect(map[, 1], "FNMOC")), ], aes(x = 1, y = rev(SCENS))) +
-  geom_tile(aes(fill = CLUST)) + theme_linedraw() + theme(
-    panel.grid.major = element_blank(),
-    plot.title = element_text(hjust = 0.5, face = "bold"),
-    axis.title = element_blank(),
-    legend.position = "right"
-  ) +
-  scale_fill_manual(
-    limits = factor(c(1:numb)),
-    values = brewer.pal(n = 12, name = "Paired")[1:numb],
-    name = "Clusters"
-  ) + scale_x_continuous(expand = c(0, 0), breaks = c()) + scale_y_discrete(labels =
-                                                                              rev(ze_s[which(str_detect(map[, 1], "FNMOC"))])) + ggtitle("FNMOC")
-
-
-myplots_pa[[9]] <-
-  ggarrange(a,
-            b,
-            c,
-            d,
-            ncol = 4,
-            common.legend = TRUE,
-            legend = "bottom")
-myplots_pa[[9]]
-```
-
-### Tracé d'effondrement
-
-```{r}
-myplots_pa[[10]] <-
-  ggplot(data.table(Clusters = 2:8, Scores = -unlist(score)),
-         aes(Clusters, Scores)) +
-  geom_line(size = 1) +
-  geom_point(size = 3) +
-  theme_bw() + scale_x_continuous(breaks = seq(2, 8)) + theme_linedraw() + theme(plot.title = element_text(hjust = 0.5, face = "bold")) + ggtitle("pp")
-myplots_pa[[10]]
 ```
 
 
 
 
 
+```{r pdf_clust, echo=F, warning=F, error=F, message=F, results="hide"}
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-```{r, echo=F, warning=F, error=F, message=F, results="hide"}
 pdf(
   sprintf(
     "../../data/gefs/ens_cluster_unif-%s_%s.pdf",
@@ -2828,8 +2086,12 @@ pdf(
   height = 23,
   width = 15
 )
-do.call(grid.arrange, c(myplots_za, ncol = 2, nrow = 5))
-do.call(grid.arrange, c(myplots_ta, ncol = 2, nrow = 5))
-do.call(grid.arrange, c(myplots_pa, ncol = 2, nrow = 5))
+do.call(grid.arrange, c(myplots_z500, ncol = 2, nrow = 5))
+do.call(grid.arrange, c(myplots_t850, ncol = 2, nrow = 5))
+do.call(grid.arrange, c(myplots_pp, ncol = 2, nrow = 5))
 dev.off()
+
+
 ```
+
+
