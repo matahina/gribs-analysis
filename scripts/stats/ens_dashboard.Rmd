@@ -117,6 +117,10 @@ get_data <- function(date, model) {
     thetable <- as.data.frame(t(c(NA, NA, NA, NA, NA, NA, NA)))
   }
   
+  if (nrow(thetable) == 0) {
+    thetable <- as.data.frame(t(c(NA, NA, NA, NA, NA, NA, NA)))
+  }
+  
   names(thetable) <-
     c("runs",
       "dates",
