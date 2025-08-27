@@ -1738,7 +1738,7 @@ cluster_page <- function(name, the_scens, first_page)
             the_scens[elems, -c(1)], sd
           )))
         )
-        if (name == "pp") {
+        if (grepl("pp",name)) {
           stats [which(stats$q25 < 0), "q25"] <- 0
           stats [which(stats$q25 > 29.9), "q25"] <- 29.9
           stats [which(stats$med > 29.9), "med"] <- 29.9
