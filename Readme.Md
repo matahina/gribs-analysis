@@ -30,10 +30,10 @@ When everything is set up and running, generated dashboards are available in roo
 
 | **Ensemblists**          | **Long-Term**            |
 |---|---|
-| [Metz](https://matahina.ddns.net/weather/ens_dashboard_Profile_1.html)              |  [Metz](https://matahina.ddns.net/weather/cfs_dashboard_Profile_1.html)            |
-| [Abidjan](https://matahina.ddns.net/weather/ens_dashboard_Profile_2.html)           |  [Abidjan](https://matahina.ddns.net/weather/cfs_dashboard_Profile_2.html)         |
-| [Johannesburg](https://matahina.ddns.net/weather/ens_dashboard_Profile_3.html)      |  [Johannesburg](https://matahina.ddns.net/weather/cfs_dashboard_Profile_3.html)    |
-| [Cape Town](https://matahina.ddns.net/weather/ens_dashboard_Profile_4.html)         |  [Cape Town](https://matahina.ddns.net/weather/cfs_dashboard_Profile_4.html)       |
+| [Metz](https://matahina.ovh/weather/ens_dashboard_Profile_1.html)              |  [Metz](https://matahina.ovh/weather/cfs_dashboard_Profile_1.html)            |
+| [Abidjan](https://matahina.ovh/weather/ens_dashboard_Profile_2.html)           |  [Abidjan](https://matahina.ovh/weather/cfs_dashboard_Profile_2.html)         |
+| [Johannesburg](https://matahina.ovh/weather/ens_dashboard_Profile_3.html)      |  [Johannesburg](https://matahina.ovh/weather/cfs_dashboard_Profile_3.html)    |
+| [Cape Town](https://matahina.ovh/weather/ens_dashboard_Profile_4.html)         |  [Cape Town](https://matahina.ovh/weather/cfs_dashboard_Profile_4.html)       |
 
 
 ## Requirements (Distro packages)
