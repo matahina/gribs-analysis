@@ -108,7 +108,7 @@ if(length(new.packages)) install.packages(new.packages)
 It might take a while. **Do it again if anything wrong happened.** Then:
 
 ```R
-install.packages("https://cran.r-project.org/src/contrib/Archive/rNOMADS/rNOMADS_2.5.3.tar.gz",
+install.packages("http://cran.r-project.org/src/contrib/Archive/rNOMADS/rNOMADS_2.5.3.tar.gz",
                  repos=NULL, method="libcurl")
 ```
 ## Set up (0)
