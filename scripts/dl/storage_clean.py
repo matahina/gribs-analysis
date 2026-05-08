@@ -58,13 +58,16 @@ for junk in sfiles:
     os.remove(junk.replace("./",""))
     
 
-if date.today().strftime("%d") == "10":
-    os.chdir("../cfs")
-    sfiles = glob.glob('./*.grb2')
-    lastmonth = (date.today()- timedelta(days=16)).strftime("%Y%m")
+os.chdir("../cfs")
+sfiles = glob.glob('./*.grb2')
+merge_matching = []
+for i in range(15):
+    lastmonth = (date.today()- timedelta(days=i)).strftime("%Y%m%d")
     matching = [s for s in sfiles if lastmonth in s]
-    for anciens in matching:
-        os.remove(anciens.replace("./",""))
-    sfiles = glob.glob('./filter*')
-    for junk in sfiles:
-        os.remove(junk.replace("./",""))
+    merge_matching = merge_matching + matching
+anciens = [x for x in sfiles if x not in merge_matching]
+for elem in anciens:
+    os.remove(elem.replace("./",""))
+sfiles = glob.glob('./filter*')
+for junk in sfiles:
+    os.remove(junk.replace("./",""))
