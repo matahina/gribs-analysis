@@ -5,7 +5,6 @@ data/
 /scripts/dl/storage_clean_*.py
 /mount.sh
 /scripts/libs/notify_ssh.sh
-/scripts/dl/lock.txt
 /.Rhistory
 /mount-profiles.sh
 /assets/norms/norm.csv
@@ -21,3 +20,4 @@ data/
 /cfs_dashboard_Profile_4.html
 /ens_dashboard_Profile_4.html
 /scripts/dl/data_extract_cfs5.R
+/scripts/stats/my.inv
