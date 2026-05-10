@@ -20,6 +20,8 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $DIR
 
+test -f ../../spack/share/spack/setup-env.sh && . ../../spack/share/spack/setup-env.sh
+
 DATE=`date +%Y%m%d -d $3" day ago"`
 
 str="$(ls ongoing)"
