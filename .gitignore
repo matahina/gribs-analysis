@@ -14,6 +14,7 @@ data/
 /ens_dashboard_Profile_*.html
 /cfs_dashboard_Profile_*.html
 /scripts/dl/my.inv
+/scripts/dl/lock.txt
 /umount.sh
 /data
 /scripts/libs/.Rhistory
