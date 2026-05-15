@@ -57,8 +57,8 @@ sudo apt install libudunits2-dev cmake libssl-dev build-essential python3-venv p
 <details>
 
 <summary>wgrib2 via spack</summary>
-> [!NOTE] 
-> ECMWF gribs cannot be read with the binary shipped by spack (ERROR 42)
+
+**ECMWF gribs cannot be read with the binary shipped by spack (ERROR 42).**
 
 
 ```bash
@@ -84,10 +84,6 @@ spack install g2c +aec +png wgrib2 +aec +png +g2c_low #+netcdf
 <details>
 
 <summary>wgrib2 compiled locally</summary>
-> [!NOTE] 
-> ECMWF gribs cannot be read with the binary shipped by spack (ERROR 42)
-
-
 
 ```bash
 wget -O ip.zip `curl https://api.github.com/repos/NOAA-EMC/NCEPLIBS-ip/releases | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['zipball_url'])"`
@@ -168,7 +164,7 @@ cd gribs-analysis
 # Stay inside directory
 ```
 
-### Set up python3 virtual env:
+### Set up python3 virtual env
 
 ```bash
 python3 -m venv ecmwf_env
@@ -200,7 +196,7 @@ Edit the file `magic_config.ini`. The original one is explicit enough to underst
 
 If you have more than 2 profiles, you must set `area = yes` in *\[General\]* section. Otherwise, you can set in to `area = no`.
 
-When the setting `area = yes` in enabled, it tells the scripts to download one grib of this subset area instead of several gribs from different locations. NOAA might block your IP if you download too much grib files for individual locations.
+When the setting `area = yes` in enabled, it tells the scripts to download one grib of this subset area instead of several gribs from different locations. NOAA might block your IP if you download too many grib files at the same time.
 
 ### Get NCEP reanalysis long-term data means
 
