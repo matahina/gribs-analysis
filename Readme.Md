@@ -1,6 +1,6 @@
 # Gribs-Analysis
 
-**25.08**
+**25.09.1**
 
 > [!NOTE] 
 > This program is designed to work on Linux, on a server.
@@ -38,9 +38,7 @@ When everything is set up and running, generated dashboards are available in roo
 
 ## Requirements (Distro packages)
 
-### Manjaro 25.0
-> [!NOTE] 
-> Tested on manjaro-kde-25.0.6-250730-linux612
+### Arch-based
 
 ```bash
 sudo pacman -S yay base-devel r gdal pandoc
@@ -50,50 +48,101 @@ sudo pacman -S yay base-devel r gdal pandoc
 yay -S wgrib wgrib2 udunits
 ```
 
-### Ubuntu 24.04 LTS
+### Debian 13
+
+```bash
+sudo apt install libudunits2-dev cmake libssl-dev build-essential python3-venv pandoc libuv1-dev r-base curl libgdal-dev
+```
+
+<details>
+
+<summary>wgrib2 via spack</summary>
 > [!NOTE] 
-> Tested on Ubuntu 24.04.3 LTS server (minimal)
+> ECMWF gribs cannot be read with the binary shipped by spack (ERROR 42)
+
 
 ```bash
-sudo apt install build-essential cmake r-base curl libssl-dev libgdal-dev libudunits2-dev python3-venv pandoc
+cd gribs-analysis
+
+git clone --depth=2 https://github.com/spack/spack.git
+
+# For bash/zsh/sh
+. spack/share/spack/setup-env.sh
+
+# For tcsh/csh
+source spack/share/spack/setup-env.csh
+
+# For fish
+. spack/share/spack/setup-env.fish
+
+# not working with ecmwf, even with uncommented variant
+spack install g2c +aec +png wgrib2 +aec +png +g2c_low #+netcdf
 ```
 
-For [wgrib](https://www.cpc.ncep.noaa.gov/products/wesley/wgrib.html):
-```bash
-wget https://ftp.cpc.ncep.noaa.gov/wd51we/wgrib/wgrib.tar
-mkdir wgrib
-tar -xvf wgrib.tar -C wgrib
-rm wgrib.tar
-cd wgrib
-make
-sudo cp wgrib /usr/local/bin/
-```
+</details>
 
-For [wgrib2](https://github.com/NOAA-EMC/wgrib2):
-    
-First, up-to-date version of `libg2c`
+<details>
+
+<summary>wgrib2 compiled locally</summary>
+> [!NOTE] 
+> ECMWF gribs cannot be read with the binary shipped by spack (ERROR 42)
+
+
+
 ```bash
-wget https://github.com/NOAA-EMC/NCEPLIBS-g2c/archive/refs/tags/v2.2.0.zip
-unzip v2.2.0.zip 
-rm v2.2.0.zip 
-cd NCEPLIBS-g2c-2.2.0/
-mkdir build
-cd build
-cmake .. -DUSE_OpenJPEG=ON -DUSE_Jasper=OFF -DCMAKE_INSTALL_PREFIX="/usr/local/"
-cmake --build ./ --parallel 4
-sudo cmake --install ./
-```
-Then `wgrib2`
-```bash
-wget https://github.com/NOAA-EMC/wgrib2/archive/refs/tags/v3.7.0.zip
-unzip v3.7.0.zip
-rm v3.7.0.zip
-cd wgrib2-3.7.0/
+wget -O ip.zip `curl https://api.github.com/repos/NOAA-EMC/NCEPLIBS-ip/releases | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['zipball_url'])"`
+unzip ip.zip
+mv NOAA-EMC-NCEPLIBS-ip* NCEPLIBS-ip
+rm ip.zip
+cmake -DCMAKE_INSTALL_PREFIX="~/.local" -S NCEPLIBS-ip -B NCEPLIBS-ip/build
+#cmake -DCMAKE_INSTALL_PREFIX="~/.local" -DCMAKE_Fortran_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=3 -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -S NCEPLIBS-ip -B NCEPLIBS-ip/build
+cmake --build NCEPLIBS-ip/build --parallel 4
+ctest --test-dir NCEPLIBS-ip/build --parallel 4
+cmake --install NCEPLIBS-ip/build
+rm -R NCEPLIBS-ip
+
+wget -O g2c.zip `curl https://api.github.com/repos/NOAA-EMC/NCEPLIBS-g2c/releases | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['zipball_url'])"`
+unzip g2c.zip
+mv NOAA-EMC-NCEPLIBS-g2c* NCEPLIBS-g2c
+rm g2c.zip
+cmake -DUSE_PNG=ON -DUSE_AEC=ON -DUSE_OpenJPEG=ON -DUSE_Jasper=OFF -DCMAKE_INSTALL_PREFIX="~/.local" -S NCEPLIBS-g2c -B NCEPLIBS-g2c/build
+# cmake -DCMAKE_C_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -fexceptions -Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -DUSE_PNG=ON -DUSE_AEC=ON -DUSE_OpenJPEG=ON -DUSE_Jasper=OFF -DCMAKE_INSTALL_PREFIX="~/.local" -S NCEPLIBS-g2c -B NCEPLIBS-g2c/build
+cmake --build NCEPLIBS-g2c/build --parallel 4
+ctest --test-dir NCEPLIBS-g2c/build --parallel 4
+cmake --install NCEPLIBS-g2c/build
+rm -R NCEPLIBS-g2c
+
+wget -O wgrib2.zip `curl https://api.github.com/repos/NOAA-EMC/wgrib2/releases | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['zipball_url'])"`
+unzip wgrib2.zip
+mv NOAA-EMC-wgrib2* wgrib2
+rm wgrib2.zip
+cd wgrib2/
 mkdir build && cd build
-cmake .. -DUSE_AEC=on -DUSE_G2CLIB_HIGH=on -DUSE_G2CLIB_LOW=on -DCMAKE_INSTALL_PREFIX="/usr/local"
+cmake .. -DCMAKE_PREFIX_PATH="~/.local/lib" -DUSE_NETCDF=ON -DUSE_IPOLATES=ON -DUSE_G2CLIB_HIGH=on -DUSE_G2CLIB_LOW=on -DCMAKE_INSTALL_PREFIX="~/.local"
+# cmake .. -DCMAKE_PREFIX_PATH="~/.local/lib" -DCMAKE_Fortran_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=3 -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -DUSE_NETCDF=ON -DUSE_IPOLATES=ON -DCMAKE_C_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -fexceptions -Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -DUSE_G2CLIB_HIGH=on -DUSE_G2CLIB_LOW=on -DCMAKE_INSTALL_PREFIX="~/.local"
 make
-sudo make install
+make install
+cd ../../
+rm -R wgrib2
+
+## bash
+echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/" >> ~/.bashrc
+echo "export PATH=$PATH:~/.local/bin/" >> ~/.bashrc
+echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/" >> ~/.profile
+echo "PATH=$PATH:~/.local/bin/" >> ~/.profile
+
+## fish
+# fish_add_path ~/.local/bin
+# set -Ux LD_LIBRARY_PATH ~/.local/lib/
+# echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/" >> ~/.profile
+# echo "PATH=$PATH:~/.local/bin/" >> ~/.profile
 ```
+
+
+</details>
+
+
+
 
 ## Requirements (R packages)
 
@@ -111,11 +160,15 @@ It might take a while. **Do it again if anything wrong happened.** Then:
 install.packages("http://cran.r-project.org/src/contrib/Archive/rNOMADS/rNOMADS_2.5.3.tar.gz",
                  repos=NULL, method="libcurl")
 ```
-## Set up (0)
+
+## Set up
+
+```bash
+cd gribs-analysis
+# Stay inside directory
+```
 
 ### Set up python3 virtual env:
-
-You need to be at the root of `gribs-analysis` directory.
 
 ```bash
 python3 -m venv ecmwf_env
@@ -124,11 +177,7 @@ pip install ecmwf-opendata
 deactivate
 ```
 
-## Set up (1)
-
-### Data directory
-
-You need to be at the root of `gribs-analysis` directory.
+### Set up data directory
 
 ```bash
 mkdir data
@@ -143,11 +192,7 @@ cd ../scripts/dl
 echo "FREE" > lock.txt
 ```
 
-## Set up (2): Profiles
-
 ### Config file
-
-You need to be at the root of `gribs-analysis` directory.
 
 You can run this program for different locations. Grib files are downloaded according to a subset area for each location based on given coordinates.
 
@@ -167,13 +212,13 @@ Check if [NOAA service](https://psl.noaa.gov/thredds/catalog.html) is available 
 
 Repeat for each profile. Change the profile name given as argument according to the names in `magic_config.ini`.
 
-## Set up (3): Crontab
+### Crontab
 
-The same user who runs this program has installed R packages and will edit crontab with `crontab -e`.
+The same user who runs this program and did install R packages will edit crontab with `crontab -e`.
 
-### Example
+<details>
 
-This is for a server in Europe/Paris tz zone:
+<summary>Example for a server in Europe/Paris tz zone</summary>
 
 ```
 ## GEFS
@@ -206,7 +251,21 @@ This is for a server in Europe/Paris tz zone:
 33 8 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "cfs" "Profile_4" "1" "stats" "noaa"
 ```
 
+</details>
+
 Two scripts can't run at the same time. Calling `gribs_launch.sh` prevents another script from start by being queued.
+
+See below for explanations about scripts to put in crontab and when data is available.
+
+### Bonus files
+
+You can create two other files to fit your needs:
+
+- `[YOUR PATH!!]/gribs-analysis/scripts/libs/notify_ssh.sh` If it exists, it will be called when `noaa_dl.sh` and `noaa_stats.sh` start and end. By example, to send via ssh a notify-osd message to your computer to see your server is running this program.
+
+- `[YOUR PATH!!]/gribs-analysis/scripts/libs/publish_dashboards.sh` If it exists, it will be called when `noaa_stats.sh` ends. By example, to move your dashboard in */var/www/* if your server is also hosting a website (or to move them via ssh-ftp to another server).
+
+## Understanding of scripts and data sources
 
 ### Main scripts and args
 
@@ -311,13 +370,6 @@ For Europe/Paris, DST time is considered. You can do -1h during winter but you w
 
 FNMOC 12z is often available much later than expected (last grib files for h+360 can appear at 23:45UTC on NOAA servers).
 
-## Set up (4): Bonus files
-
-You can create two other files to fit your needs :
-
-- `[YOUR PATH!!]/gribs-analysis/scripts/libs/notify_ssh.sh` If it exists, it will be called when `noaa_dl.sh` and `noaa_stats.sh` start and end. By example, to send via ssh a notify-osd message to your computer to see your server is running this program.
-
-- `[YOUR PATH!!]/gribs-analysis/scripts/libs/publish_dashboards.sh` If it exists, it will be called when `noaa_stats.sh` ends. By example, to move your dashboard in */var/www/* if your server is also hosting a website (or to move them via ssh-ftp to another server).
 
 ## License
 This bunch of crap code lines is GPL, free, public domain, have fun with it!!!
