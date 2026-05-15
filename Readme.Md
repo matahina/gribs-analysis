@@ -139,6 +139,8 @@ mkdir gefs
 mkdir gem
 mkdir logs
 mkdir ecmwf
+cd ../scripts/dl
+echo "FREE" > lock.txt
 ```
 
 ## Set up (2): Profiles

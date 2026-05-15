@@ -119,7 +119,7 @@ for (z in seq(0, 12, 12)) {
         
         extra <- NA
 
-        if (!is.data.frame(tada)) {
+        if (!is.data.frame(tada) && !is.null(tada$model.run.date)) {
         
         extra <- BuildProfile(tada,
                               as.numeric(profiles[which(profiles$name == location), "lon"]),
@@ -160,7 +160,7 @@ for (z in seq(0, 12, 12)) {
         
         extrb <- NA
 
-        if (!is.data.frame(tadb)) {
+        if (!is.data.frame(tadb) && !is.null(tadb$model.run.date)) {
 
         
         
@@ -205,7 +205,7 @@ for (z in seq(0, 12, 12)) {
         
         extrc <- NA
 
-        if (!is.data.frame(tadc)) {
+        if (!is.data.frame(tadc) && !is.null(tadc$model.run.date)) {
 
         
         extrc <- BuildProfile(tadc,
@@ -246,7 +246,7 @@ for (z in seq(0, 12, 12)) {
         
         extrd <- NA
 
-        if (!is.data.frame(tadd)) {
+        if (!is.data.frame(tadd) && !is.null(tadd$model.run.date)) {
 
         
         extrd <- BuildProfile(tadd,

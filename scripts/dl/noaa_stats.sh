@@ -4,7 +4,8 @@
 # $2 : Profile
 # $3 : Date YYYYMMDD
 
-export LD_LIBRARY_PATH=/lib:/usr/lib:/usr/local/lib
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/:/lib:/usr/lib:/usr/local/lib
+export PATH=$PATH:~/.local/bin/
 
 ######################################
 ## Get Dir from where script is executed and Date to set correct pathways
