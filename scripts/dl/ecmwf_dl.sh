@@ -22,8 +22,6 @@ test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "ECMWF DL Start" "$2z $
 source ../../ecmwf_env/bin/activate
 python3 get_ecmwf.py $3 $2
 deactivate
-python3 split_ecmwf.py $3 $2
-
 
 ######################################
 ## GRIB2 Extract Data
@@ -38,8 +36,9 @@ fi
 if [ $EXTR == "Yes" ]
 then
     echo $EXTR
-    Rscript data_extract_ecmwf.R $3
-    rm my.inv
+    test -f "../../cfgrib/bin/activate" && . ../../cfgrib/bin/activate
+    python3 data_extract.py $3 $1
+    test deactivate && deactivate
 fi
 
 ######################################

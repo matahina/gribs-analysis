@@ -45,8 +45,9 @@ fi
 if [ $EXTR == "Yes" ]
 then
     echo $EXTR
-    Rscript data_extract.R $3 $1
-    rm my.inv
+    test -f "../../cfgrib/bin/activate" && . ../../cfgrib/bin/activate
+    python3 data_extract.py $3 $1
+    test deactivate && deactivate
 fi
 
 ######################################

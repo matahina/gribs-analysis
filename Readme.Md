@@ -1,6 +1,6 @@
 # Gribs-Analysis
 
-**25.09.1**
+**26.05 beta**
 
 > [!NOTE] 
 > This program is designed to work on Linux, on a server.
@@ -40,6 +40,8 @@ When everything is set up and running, generated dashboards are available in roo
 
 ### Arch-based
 
+cfgrib (venv) and xarray (package)
+
 ```bash
 sudo pacman -S yay base-devel r gdal pandoc
 ```
@@ -51,7 +53,7 @@ yay -S wgrib wgrib2 udunits
 ### Debian 13
 
 ```bash
-sudo apt install libudunits2-dev cmake libssl-dev build-essential python3-venv pandoc libuv1-dev r-base curl libgdal-dev
+sudo apt install libudunits2-dev cmake libssl-dev build-essential python3-venv pandoc libuv1-dev r-base curl libgdal-dev python3-xarray python3-cfgrib
 ```
 
 <details>
