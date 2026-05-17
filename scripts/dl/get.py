@@ -88,9 +88,9 @@ def west_east(lon,we):
     if result_east > 360:
         result_east = 360
     if we == "w":
-        return result_west
+        return str(result_west)
     if we == "e":
-        return result_east
+        return str(result_east)
 
 model_date = str(sys.argv[1])
 model_run = str(sys.argv[2])

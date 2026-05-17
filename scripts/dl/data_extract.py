@@ -54,12 +54,12 @@ def north(lat):
     result = (round(float(lat) * 2) / 2 )
     if result > 90:
         result = 90
-    return str(result)
+    return result
 def south(lat):
     result = (round(float(lat) * 2) / 2 )-0.5
     if result < -90:
         result = -90
-    return str(result)
+    return result
 def west_east(lon,we):
     result_west = (round(float(lon) * 2) / 2 )-0.5
     if result_west < 0:
@@ -240,7 +240,7 @@ for z in range(0, last_z+1, step_z):
 
             elif model_name == "ecmwf":
 
-                grbfile = "../../data/ecmwf/%s%02ddata_hgt.grib2" % (model_date, model_run)
+                grbfile = "../../data/ecmwf/%s%02ddata_hgt.grib2" % (model_date, int(model_run))
                 extract_a = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': []})
 
                 if Path(grbfile).is_file():
@@ -249,29 +249,31 @@ for z in range(0, last_z+1, step_z):
                             ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
-                                for pert in range(1,51,1):
+                                for pert in range(1,51,10):
+                                    the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
                                     print("sc: "+str(pert))
-                                    try:
-                                        df_a = ds_grib.gh.sel(longitude=location[1], latitude=location[0], method='nearest',number=pert).to_dataframe()
-                                        df_a["runs"] = str(df_a["time"].iloc[0]) + " sc%02d" % (pert)
-                                        df_a["dates"] = df_a["valid_time"]
-                                        df_a["profile"] = prof_name
-                                        df_a["geop"] = df_a["gh"] / 10
-                                        extract = df_a[["runs","dates","profile","geop"]]
-                                    except:
-                                        extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': []})
+                                    for the_pert in range(pert,pert+10,1):
+                                        try:
+                                            df_a = the_df_a.iloc[df_a.index.get_level_values('number') == the_pert]
+                                            df_a["runs"] = str(df_a["time"].iloc[0]) + " sc%02d" % (pert)
+                                            df_a["dates"] = df_a["valid_time"]
+                                            df_a["profile"] = prof_name
+                                            df_a["geop"] = df_a["gh"] / 10
+                                            extract = df_a[["runs","dates","profile","geop"]]
+                                        except:
+                                            extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': []})
 
-                                    frames = [extract,extract_a]
-                                    try:
-                                        new_extract_a = pd.concat([df for df in frames if not df.empty], ignore_index=True)
-                                        extract_a = new_extract_a
-                                    except:
-                                        pass
+                                        frames = [extract,extract_a]
+                                        try:
+                                            new_extract_a = pd.concat([df for df in frames if not df.empty], ignore_index=True)
+                                            extract_a = new_extract_a
+                                        except:
+                                            pass
                         except:
                             pass
                 print (extract_a)
 
-                grbfile = "../../data/ecmwf/%s%02ddata_talt.grib2" % (model_date, model_run)
+                grbfile = "../../data/ecmwf/%s%02ddata_talt.grib2" % (model_date, int(model_run))
                 extract_b = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempalt': []})
 
                 if Path(grbfile).is_file():
@@ -280,29 +282,31 @@ for z in range(0, last_z+1, step_z):
                             ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
-                                for pert in range(1,51,1):
+                                for pert in range(1,51,10):
+                                    the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
                                     print("sc: "+str(pert))
-                                    try:
-                                        df_b = ds_grib.t.sel(longitude=location[1], latitude=location[0], method='nearest',number=pert).to_dataframe()
-                                        df_b["runs"] = str(df_b["time"].iloc[0]) + " sc%02d" % (pert)
-                                        df_b["dates"] = df_b["valid_time"]
-                                        df_b["profile"] = prof_name
-                                        df_b["tempalt"] = df_b["t"] -273.15
-                                        extract = df_b[["runs","dates","profile","tempalt"]]
-                                    except:
-                                        extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempalt': []})
+                                    for the_pert in range(pert,pert+10,1):
+                                        try:
+                                            df_b = the_df_b.iloc[df_b.index.get_level_values('number') == the_pert]
+                                            df_b["runs"] = str(df_b["time"].iloc[0]) + " sc%02d" % (pert)
+                                            df_b["dates"] = df_b["valid_time"]
+                                            df_b["profile"] = prof_name
+                                            df_b["tempalt"] = df_b["t"] -273.15
+                                            extract = df_b[["runs","dates","profile","tempalt"]]
+                                        except:
+                                            extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempalt': []})
 
-                                    frames = [extract,extract_b]
-                                    try:
-                                        new_extract_b = pd.concat([df for df in frames if not df.empty], ignore_index=True)
-                                        extract_b = new_extract_b
-                                    except:
-                                        pass
+                                        frames = [extract,extract_b]
+                                        try:
+                                            new_extract_b = pd.concat([df for df in frames if not df.empty], ignore_index=True)
+                                            extract_b = new_extract_b
+                                        except:
+                                            pass
                         except:
                             pass
 
 
-                grbfile = "../../data/ecmwf/%s%02ddata_tsolpp.grib2" % (model_date, model_run)
+                grbfile = "../../data/ecmwf/%s%02ddata_tsolpp.grib2" % (model_date, int(model_run))
                 extract_c = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': [], 'precs': []})
 
                 if Path(grbfile).is_file():
@@ -311,25 +315,27 @@ for z in range(0, last_z+1, step_z):
                             ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
-                                for pert in range(1,51,1):
+                                for pert in range(1,51,10):
+                                    the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
                                     print("sc: "+str(pert))
-                                    try:
-                                        df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=pert).to_dataframe()
-                                        df_c["runs"] = str(df_c["time"].iloc[0]) + " sc%02d" % (pert)
-                                        df_c["dates"] = df_c["valid_time"]
-                                        df_c["profile"] = prof_name
-                                        df_c["tempsol"] = df_c["t2m"] -273.15
-                                        df_c["precs"] = df_c["tp"] * 3600 * 6
-                                        extract = df_c[["runs","dates","profile","tempsol","precs"]]
-                                    except:
-                                        extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': [], 'precs': []})
+                                    for the_pert in range(pert,pert+10,1):
+                                        try:
+                                            df_c = the_df_c.iloc[df_c.index.get_level_values('number') == the_pert]
+                                            df_c["runs"] = str(df_c["time"].iloc[0]) + " sc%02d" % (pert)
+                                            df_c["dates"] = df_c["valid_time"]
+                                            df_c["profile"] = prof_name
+                                            df_c["tempsol"] = df_c["t2m"] -273.15
+                                            df_c["precs"] = df_c["tp"] * 3600 * 6
+                                            extract = df_c[["runs","dates","profile","tempsol","precs"]]
+                                        except:
+                                            extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': [], 'precs': []})
 
-                                    frames = [extract,extract_c]
-                                    try:
-                                        new_extract_c = pd.concat([df for df in frames if not df.empty], ignore_index=True)
-                                        extract_c = new_extract_c
-                                    except:
-                                        pass
+                                        frames = [extract,extract_c]
+                                        try:
+                                            new_extract_c = pd.concat([df for df in frames if not df.empty], ignore_index=True)
+                                            extract_c = new_extract_c
+                                        except:
+                                            pass
                         except:
                             pass
 
