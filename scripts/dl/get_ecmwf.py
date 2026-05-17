@@ -46,7 +46,7 @@ for retries in range(1,50):
         break
     except:
         try:
-            client.retrieve(
+            resume = client.retrieve(
                 date=model_date,
                 time=model_run,
                 step=list(range(0,144,3))+list(range(144,366,6)),
@@ -73,7 +73,7 @@ for retries in range(1,50):
         break
     except:
         try:
-            client.retrieve(
+            resume = client.retrieve(
                 date=model_date,
                 time=model_run,
                 step=list(range(0,144,3))+list(range(144,366,6)),
