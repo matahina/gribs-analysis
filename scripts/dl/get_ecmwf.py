@@ -1,7 +1,7 @@
 #! /usr/bin/python3
 
 import os,sys
-
+import time
 
 
 model_date = str(sys.argv[1])
@@ -9,44 +9,82 @@ model_run = str(sys.argv[2])
 
 from ecmwf.opendata import Client
 
-client = Client(source="ecmwf")
+client = Client(source="azure")
 
 os.chdir("../../data/ecmwf/")
 
-try:
-    client.retrieve(
-        date=model_date,
-        time=model_run,
-        step=list(range(0,144,3))+list(range(144,366,6)),
-        stream="enfo",
-        type="pf",
-        param=["2t", "tp"],
-        target=str(sys.argv[1])+str(sys.argv[2])+"data_tsolpp.grib2",
-    )
-    client.retrieve(
-        date=model_date,
-        time=model_run,
-        step=list(range(0,144,3))+list(range(144,366,6)),
-        stream="enfo",
-        type="pf",
-        param=["gh"],
-        levelist=[500],
-        target=str(sys.argv[1])+str(sys.argv[2])+"data_hgt.grib2",
-    )
-    client.retrieve(
-        date=model_date,
-        time=model_run,
-        step=list(range(0,144,3))+list(range(144,366,6)),
-        stream="enfo",
-        type="pf",
-        param=["t"],
-        levelist=[850],
-        target=str(sys.argv[1])+str(sys.argv[2])+"data_talt.grib2",
-    )
-except Exception as error:
-    with open('../logs/'+model_date+'.log', 'a') as errlog:
-        errlog.write('Error: ',error)
-        errlog.write('\n')
+dled = False
+for retries in range(1,50):
+    if dled:
+        break
+    try:
+        client.retrieve(
+            date=model_date,
+            time=model_run,
+            step=list(range(0,144,3))+list(range(144,366,6)),
+            stream="enfo",
+            type="pf",
+            param=["gh"],
+            levelist=[500],
+            target=str(sys.argv[1])+str(sys.argv[2])+"data_hgt.grib2",
+        )
+        dled = True
+    except Exception as error:
+        dled = False
+        with open('../logs/'+model_date+'.log', 'a') as errlog:
+            errlog.write('ERROR: '+error)
+            errlog.write('\n')
+        time.sleep(100)
+
+dled = False
+for retries in range(1,50):
+    if dled:
+        break
+    try:
+        client.retrieve(
+            date=model_date,
+            time=model_run,
+            step=list(range(0,144,3))+list(range(144,366,6)),
+            stream="enfo",
+            type="pf",
+            param=["t"],
+            levelist=[850],
+            target=str(sys.argv[1])+str(sys.argv[2])+"data_talt.grib2",
+        )
+        dled = True
+    except Exception as error:
+        dled = False
+        with open('../logs/'+model_date+'.log', 'a') as errlog:
+            errlog.write('ERROR: '+error)
+            errlog.write('\n')
+        time.sleep(100)
+
+dled = False
+for retries in range(1,50):
+    if dled:
+        break
+    try:
+        client.retrieve(
+            date=model_date,
+            time=model_run,
+            step=list(range(0,144,3))+list(range(144,366,6)),
+            stream="enfo",
+            type="pf",
+            param=["2t", "tp"],
+            target=str(sys.argv[1])+str(sys.argv[2])+"data_tsolpp.grib2",
+        )
+        dled = True
+    except Exception as error:
+        dled = False
+        with open('../logs/'+model_date+'.log', 'a') as errlog:
+            errlog.write('ERROR: '+error)
+            errlog.write('\n')
+        time.sleep(100)
+
+
+
+
+
 
 
 
