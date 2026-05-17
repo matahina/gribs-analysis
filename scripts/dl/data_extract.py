@@ -74,6 +74,8 @@ def west_east(lon,we):
 
 model_date = str(sys.argv[1])
 model_name = str(sys.argv[2])
+if len(sys.argv) > 3:
+    model_run = str(sys.argv[3])
 
 donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'tempsol': [], 'precs': []})
 
@@ -100,6 +102,8 @@ if model_name == "cfs":
 if model_name == "ecmwf":
     last_sc = 50
     the_range = [1]
+    last_z = 0
+
 
 first_try = True
 for z in range(0, last_z+1, step_z):
@@ -236,7 +240,7 @@ for z in range(0, last_z+1, step_z):
 
             elif model_name == "ecmwf":
 
-                grbfile = "../../data/ecmwf/%s%02ddata_hgt.grib2" % (model_date, z)
+                grbfile = "../../data/ecmwf/%s%02ddata_hgt.grib2" % (model_date, model_run)
                 extract_a = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': []})
 
                 if Path(grbfile).is_file():
@@ -267,7 +271,7 @@ for z in range(0, last_z+1, step_z):
                             pass
                 print (extract_a)
 
-                grbfile = "../../data/ecmwf/%s%02ddata_talt.grib2" % (model_date, z)
+                grbfile = "../../data/ecmwf/%s%02ddata_talt.grib2" % (model_date, model_run)
                 extract_b = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempalt': []})
 
                 if Path(grbfile).is_file():
@@ -298,7 +302,7 @@ for z in range(0, last_z+1, step_z):
                             pass
 
 
-                grbfile = "../../data/ecmwf/%s%02ddata_tsolpp.grib2" % (model_date, z)
+                grbfile = "../../data/ecmwf/%s%02ddata_tsolpp.grib2" % (model_date, model_run)
                 extract_c = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': [], 'precs': []})
 
                 if Path(grbfile).is_file():
@@ -401,11 +405,15 @@ for z in range(0, last_z+1, step_z):
                 except:
                     pass
 
+the_mode='w'
+the_header=True
 
+if model_name == "ecmwf":
+    if model_run == "12":
+        the_mode='a'
+        the_header=False
 
-donneesjour.to_csv("../../data/%s/%s-%s.csv" % (model_name, model_name, model_date), index=False)
-
-import os
+donneesjour.to_csv("../../data/%s/%s-%s.csv" % (model_name, model_name, model_date), index=False, mode=the_mode, header=the_header)
 
 dir_name = "../../data/%s/" % (model_name)
 liste = os.listdir(dir_name)

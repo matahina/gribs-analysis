@@ -14,7 +14,8 @@ client = Client(source="azure")
 os.chdir("../../data/ecmwf/")
 
 for retries in range(1,50):
-    try resume:
+    try:
+        resume
         break
     except:
         try:
@@ -34,13 +35,14 @@ for retries in range(1,50):
                 errlog.write('\n')
             time.sleep(100)
 
-try resume:
+try:
     del resume
 except:
     pass
 
 for retries in range(1,50):
-    try resume:
+    try:
+        resume
         break
     except:
         try:
@@ -60,13 +62,14 @@ for retries in range(1,50):
                 errlog.write('\n')
             time.sleep(100)
 
-try resume:
+try:
     del resume
 except:
     pass
 
 for retries in range(1,50):
-    try resume:
+    try:
+        resume
         break
     except:
         try:
