@@ -100,7 +100,7 @@ if model_name == "cfs":
 
 
 if model_name == "ecmwf":
-    last_sc = 50
+    last_sc = 1
     the_range = [1]
     last_z = 0
 
