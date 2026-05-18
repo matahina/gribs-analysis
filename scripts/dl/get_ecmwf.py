@@ -9,8 +9,6 @@ model_run = str(sys.argv[2])
 
 from ecmwf.opendata import Client
 
-client = Client(source="azure")
-
 os.chdir("../../data/ecmwf/")
 
 for retries in range(1,50):
@@ -19,6 +17,7 @@ for retries in range(1,50):
         break
     except:
         try:
+            client = Client(source="azure")
             resume = client.retrieve(
                 date=model_date,
                 time=model_run,
@@ -46,6 +45,7 @@ for retries in range(1,50):
         break
     except:
         try:
+            client = Client(source="azure")
             resume = client.retrieve(
                 date=model_date,
                 time=model_run,
@@ -73,6 +73,7 @@ for retries in range(1,50):
         break
     except:
         try:
+            client = Client(source="azure")
             resume = client.retrieve(
                 date=model_date,
                 time=model_run,
