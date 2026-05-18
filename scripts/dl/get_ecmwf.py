@@ -29,9 +29,9 @@ for retries in range(1,50):
                 levelist=[500],
                 target=str(sys.argv[1])+str(sys.argv[2])+"data_hgt.grib2",
             )
-        except Exception as error:
+        except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(error)
+                errlog.write("error")
                 errlog.write('\n')
             time.sleep(100)
 
@@ -56,9 +56,9 @@ for retries in range(1,50):
                 levelist=[850],
                 target=str(sys.argv[1])+str(sys.argv[2])+"data_talt.grib2",
             )
-        except Exception as error:
+        except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(error)
+                errlog.write("error")
                 errlog.write('\n')
             time.sleep(100)
 
@@ -82,9 +82,9 @@ for retries in range(1,50):
                 param=["2t", "tp"],
                 target=str(sys.argv[1])+str(sys.argv[2])+"data_tsolpp.grib2",
             )
-        except Exception as error:
+        except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write(error)
+                errlog.write("error")
                 errlog.write('\n')
             time.sleep(100)
 
