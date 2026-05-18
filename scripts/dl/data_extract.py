@@ -71,7 +71,7 @@ if model_name == "cfs":
 
 
 if model_name == "ecmwf":
-    last_z = 0
+    last_z = 12
     step_z = 12
     last_sc = 50
 
@@ -232,12 +232,12 @@ match model_name:
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
-                                the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
+                                the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
                                 print("sc: "+str(pert))
                                 for the_pert in range(pert,pert+10,1):
                                     try:
-                                        df_a = the_df_a.iloc[df_a.index.get_level_values('number') == the_pert]
-                                        df_a["runs"] = str(df_a["time"].iloc[0]) + " sc%02d" % (pert)
+                                        df_a = the_df_a.iloc[the_df_a.index.get_level_values('number') == the_pert]
+                                        df_a["runs"] = str(df_a["time"].iloc[0]) + " sc%02d" % (the_pert)
                                         df_a["dates"] = df_a["valid_time"]
                                         df_a["profile"] = prof_name
                                         df_a["geop"] = df_a["gh"] / 10
@@ -265,12 +265,12 @@ match model_name:
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
-                                the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
+                                the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
                                 print("sc: "+str(pert))
                                 for the_pert in range(pert,pert+10,1):
                                     try:
-                                        df_b = the_df_b.iloc[df_b.index.get_level_values('number') == the_pert]
-                                        df_b["runs"] = str(df_b["time"].iloc[0]) + " sc%02d" % (pert)
+                                        df_b = the_df_b.iloc[the_df_b.index.get_level_values('number') == the_pert]
+                                        df_b["runs"] = str(df_b["time"].iloc[0]) + " sc%02d" % (the_pert)
                                         df_b["dates"] = df_b["valid_time"]
                                         df_b["profile"] = prof_name
                                         df_b["tempalt"] = df_b["t"] -273.15
@@ -298,12 +298,12 @@ match model_name:
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
-                                the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
+                                the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
                                 print("sc: "+str(pert))
                                 for the_pert in range(pert,pert+10,1):
                                     try:
-                                        df_c = the_df_c.iloc[df_c.index.get_level_values('number') == the_pert]
-                                        df_c["runs"] = str(df_c["time"].iloc[0]) + " sc%02d" % (pert)
+                                        df_c = the_df_c.iloc[the_df_c.index.get_level_values('number') == the_pert]
+                                        df_c["runs"] = str(df_c["time"].iloc[0]) + " sc%02d" % (the_pert)
                                         df_c["dates"] = df_c["valid_time"]
                                         df_c["profile"] = prof_name
                                         df_c["tempsol"] = df_c["t2m"] -273.15
