@@ -1,12 +1,15 @@
 # Gribs-Analysis
 
-**26.05 beta**
+**26.05 RC1**
 
 > [!NOTE] 
 > This program is designed to work on Linux, on a server.
 >
 > You need Python, Bash, R and Cron.
-
+>
+> It is currently known working on a VPS running Debian 13 with 4 CPU cores, 8GB RAM and 100GB disk space reserved for `data` directory.
+>
+> wgrib use is now questionnable as python-xarray with cfgrib works fine ; norms only need netcdf
 
 ## What it does
 
@@ -49,6 +52,7 @@ sudo pacman -S yay base-devel r gdal pandoc
 ```bash
 yay -S wgrib wgrib2 udunits
 ```
+
 
 ### Debian 13
 
