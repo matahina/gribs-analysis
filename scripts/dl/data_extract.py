@@ -211,7 +211,7 @@ match model_name:
     case "ecmwf":
         for z in range(0, last_z+1, step_z):
             print("z: "+str(z))
-            grbfile = "../../data/ecmwf/%s%02ddata_hgt.grib2" % (model_date, int(model_run))
+            grbfile = "../../data/ecmwf/%s%02ddata_hgt.grib2" % (model_date, z)
             extract_a = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': []})
 
             if Path(grbfile).is_file():
@@ -244,7 +244,7 @@ match model_name:
                         pass
             print (extract_a)
 
-            grbfile = "../../data/ecmwf/%s%02ddata_talt.grib2" % (model_date, int(model_run))
+            grbfile = "../../data/ecmwf/%s%02ddata_talt.grib2" % (model_date, z)
             extract_b = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempalt': []})
 
             if Path(grbfile).is_file():
@@ -277,7 +277,7 @@ match model_name:
                         pass
 
 
-            grbfile = "../../data/ecmwf/%s%02ddata_tsolpp.grib2" % (model_date, int(model_run))
+            grbfile = "../../data/ecmwf/%s%02ddata_tsolpp.grib2" % (model_date, z)
             extract_c = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': [], 'precs': []})
 
             if Path(grbfile).is_file():
