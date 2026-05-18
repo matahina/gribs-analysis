@@ -31,7 +31,7 @@ for retries in range(1,50):
             )
         except Exception as error:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write('ERROR: '+error)
+                errlog.write(error)
                 errlog.write('\n')
             time.sleep(100)
 
@@ -58,7 +58,7 @@ for retries in range(1,50):
             )
         except Exception as error:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write('ERROR: '+error)
+                errlog.write(error)
                 errlog.write('\n')
             time.sleep(100)
 
@@ -84,7 +84,7 @@ for retries in range(1,50):
             )
         except Exception as error:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
-                errlog.write('ERROR: '+error)
+                errlog.write(error)
                 errlog.write('\n')
             time.sleep(100)
 
