@@ -26,20 +26,20 @@ deactivate
 ######################################
 ## GRIB2 Extract Data
 ######################################
-# EXTR="No"
-#
-# if [ $2 == "12" ]
-# then
-#         EXTR="Yes"
-# fi
-#
-# if [ $EXTR == "Yes" ]
-# then
+EXTR="No"
+
+if [ $2 == "12" ]
+then
+        EXTR="Yes"
+fi
+
+if [ $EXTR == "Yes" ]
+then
     echo $EXTR
     test -f "../../cfgrib/bin/activate" && . ../../cfgrib/bin/activate
-    python3 data_extract.py $3 $1 $2
+    python3 data_extract.py $3 $1
     test deactivate && deactivate
-# fi
+fi
 
 ######################################
 ## Clear files
