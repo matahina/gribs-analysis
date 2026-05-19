@@ -339,7 +339,7 @@ match model_name:
                                         df_d["runs"] = str(df_d["time"].iloc[0]) + " sc%02d" % (the_pert)
                                         df_d["dates"] = df_d["valid_time"]
                                         df_d["profile"] = prof_name
-                                        df_d["precs"] = df_d["tp"] * 3600 * 6
+                                        df_d["precs"] = df_d["tp"]
                                         extract = df_d[["runs","dates","profile","precs"]]
                                     except:
                                         extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'precs': []})
