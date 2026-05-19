@@ -288,8 +288,8 @@ match model_name:
                         pass
 
 
-            grbfile = "../../data/ecmwf/%s%02ddata_tsolpp.grib2" % (model_date, z)
-            extract_c = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': [], 'precs': []})
+            grbfile = "../../data/ecmwf/%s%02ddata_tsol.grib2" % (model_date, z)
+            extract_c = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': []})
 
             if Path(grbfile).is_file():
                 if os.path.getsize(grbfile) > 0:
@@ -307,10 +307,9 @@ match model_name:
                                         df_c["dates"] = df_c["valid_time"]
                                         df_c["profile"] = prof_name
                                         df_c["tempsol"] = df_c["t2m"] -273.15
-                                        df_c["precs"] = df_c["tp"] * 3600 * 6
-                                        extract = df_c[["runs","dates","profile","tempsol","precs"]]
+                                        extract = df_c[["runs","dates","profile","tempsol"]]
                                     except:
-                                        extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': [], 'precs': []})
+                                        extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': []})
 
                                     frames = [extract,extract_c]
                                     try:
@@ -321,8 +320,44 @@ match model_name:
                     except:
                         pass
 
+
+            grbfile = "../../data/ecmwf/%s%02ddata_pp.grib2" % (model_date, z)
+            extract_d = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'precs': []})
+
+            if Path(grbfile).is_file():
+                if os.path.getsize(grbfile) > 0:
+                    try:
+                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                        for prof_name, location in profiles.items():
+                            print("prof_name: "+str(prof_name))
+                            for pert in range(1,last_sc+1,10):
+                                the_df_d = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
+                                print("sc: "+str(pert))
+                                for the_pert in range(pert,pert+10,1):
+                                    try:
+                                        df_d = the_df_d.iloc[the_df_d.index.get_level_values('number') == the_pert]
+                                        df_d["runs"] = str(df_d["time"].iloc[0]) + " sc%02d" % (the_pert)
+                                        df_d["dates"] = df_d["valid_time"]
+                                        df_d["profile"] = prof_name
+                                        df_d["precs"] = df_d["tp"] * 3600 * 6
+                                        extract = df_d[["runs","dates","profile","precs"]]
+                                    except:
+                                        extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'precs': []})
+
+                                    frames = [extract,extract_d]
+                                    try:
+                                        new_extract_d = pd.concat([df for df in frames if not df.empty], ignore_index=True)
+                                        extract_d = new_extract_d
+                                    except:
+                                        pass
+                    except:
+                        pass
+
+
             donneesrun_a = pd.merge(extract_a, extract_b, on=["runs", "dates", "profile"], how = 'outer')
-            donneesrun = pd.merge(extract_c, donneesrun_a, on=["runs", "dates", "profile"], how = 'outer')
+            donneesrun_b = pd.merge(extract_c, extract_d, on=["runs", "dates", "profile"], how = 'outer')
+
+            donneesrun = pd.merge(donneesrun_a, donneesrun_b, on=["runs", "dates", "profile"], how = 'outer')
 
             if first_try:
                 donneesjour = donneesrun

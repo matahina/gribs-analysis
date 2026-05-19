@@ -80,8 +80,35 @@ for retries in range(1,50):
                 step=list(range(0,144,3))+list(range(144,366,6)),
                 stream="enfo",
                 type="pf",
-                param=["2t", "tp"],
-                target=str(sys.argv[1])+str(sys.argv[2])+"data_tsolpp.grib2",
+                param=["tp"],
+                target=str(sys.argv[1])+str(sys.argv[2])+"data_pp.grib2",
+            )
+        except:
+            with open('../logs/'+model_date+'.log', 'a') as errlog:
+                errlog.write("error")
+                errlog.write('\n')
+            time.sleep(100)
+
+try:
+    del resume
+except:
+    pass
+
+for retries in range(1,50):
+    try:
+        resume
+        break
+    except:
+        try:
+            client = Client(source="azure")
+            resume = client.retrieve(
+                date=model_date,
+                time=model_run,
+                step=list(range(0,144,3))+list(range(144,366,6)),
+                stream="enfo",
+                type="pf",
+                param=["2t"],
+                target=str(sys.argv[1])+str(sys.argv[2])+"data_tsol.grib2",
             )
         except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
