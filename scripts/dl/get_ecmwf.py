@@ -26,7 +26,7 @@ for retries in range(1,50):
                 type="pf",
                 param=["gh"],
                 levelist=[500],
-                target=str(sys.argv[1])+str(sys.argv[2])+"data_hgt.grib2",
+                target=model_date+model_run+"data_hgt.grib2",
             )
         except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
@@ -54,7 +54,7 @@ for retries in range(1,50):
                 type="pf",
                 param=["t"],
                 levelist=[850],
-                target=str(sys.argv[1])+str(sys.argv[2])+"data_talt.grib2",
+                target=model_date+model_run+"data_talt.grib2",
             )
         except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
@@ -81,7 +81,7 @@ for retries in range(1,50):
                 stream="enfo",
                 type="pf",
                 param=["tp"],
-                target=str(sys.argv[1])+str(sys.argv[2])+"data_pp.grib2",
+                target=model_date+model_run+"data_pp.grib2",
             )
         except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
@@ -108,7 +108,7 @@ for retries in range(1,50):
                 stream="enfo",
                 type="pf",
                 param=["2t"],
-                target=str(sys.argv[1])+str(sys.argv[2])+"data_tsol.grib2",
+                target=model_date+model_run+"data_tsol.grib2",
             )
         except:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
