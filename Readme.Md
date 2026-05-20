@@ -1,6 +1,6 @@
 # Gribs-Analysis
 
-**26.05 RC1**
+**26.05 RC2**
 
 > [!NOTE] 
 > This program is designed to work on Linux, on a server.
@@ -182,6 +182,7 @@ deactivate
 ### Set up data directory
 
 ```bash
+mkdir publishery
 mkdir data
 cd data
 mkdir cfs
