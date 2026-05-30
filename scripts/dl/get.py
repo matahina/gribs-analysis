@@ -169,10 +169,6 @@ if model_name != "cfs":
                     'lev_2_m_above_ground' : 'on',
                     'lev_500_mb' : 'on',
                     'lev_850_mb' : 'on',
-                    'lev_surface' : 'on',
-                    'var_APCP' : 'on',
-                    'var_HGT' : 'on',
-                    'var_TMP' : 'on',
                     'subregion' : '',
                     'toplat' : config['General']['top_lat'],
                     'leftlon' : config['General']['left_lon'],
@@ -180,6 +176,14 @@ if model_name != "cfs":
                     'bottomlat' : config['General']['bottom_lat']
                         }
 
+                if model_name != "fnmoc":
+                    post_body_a = post_body
+                    post_body = post_body_a | {
+                        'var_APCP' : 'on',
+                        'var_HGT' : 'on',
+                        'var_TMP' : 'on',
+                        'lev_surface' : 'on'
+                            }
 
 
                 postfields = urllib.parse.urlencode(post_body)
