@@ -8,6 +8,7 @@ import configparser
 import sys, os
 import pandas as pd
 from pathlib import Path
+import cfgrib
 
 config = configparser.ConfigParser()
 config.read('../../magic_config.ini')
@@ -398,7 +399,8 @@ match model_name:
                         if Path(grbfile).is_file():
                             if os.path.getsize(grbfile) > 0:
                                 try:
-                                    ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                                    ds_grib = xr.merge(cfgrib.open_datasets(grbfile), combine_attrs='override') # because grib files from fnmoc are heterogeneous
+                                    # ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
                                     try:
                                         var_hgt = float(ds_grib.gh.sel(longitude=location[1], latitude=location[0], isobaricInhPa=500, method='nearest').data) /10
                                     except:
