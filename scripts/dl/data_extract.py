@@ -233,7 +233,7 @@ match model_name:
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
-                                the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
+                                the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
                                 print("sc: "+str(pert))
                                 for the_pert in range(pert,pert+10,1):
                                     try:
@@ -266,7 +266,7 @@ match model_name:
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
-                                the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
+                                the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
                                 print("sc: "+str(pert))
                                 for the_pert in range(pert,pert+10,1):
                                     try:
@@ -299,7 +299,7 @@ match model_name:
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
-                                the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
+                                the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
                                 print("sc: "+str(pert))
                                 for the_pert in range(pert,pert+10,1):
                                     try:
@@ -332,7 +332,7 @@ match model_name:
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
-                                the_df_d = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=list(range(pert,pert+10))).to_dataframe()
+                                the_df_d = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
                                 print("sc: "+str(pert))
                                 for the_pert in range(pert,pert+10,1):
                                     try:
