@@ -365,17 +365,17 @@ match model_name:
             donneesrun = pd.merge(donneesrun_a, donneesrun_b, on=["runs", "dates", "profile"], how = 'outer')
 
             if first_try:
-                donneesjour = donneesrun
+                predonneesjour = donneesrun
                 first_try = False
             else:
-                frames = [donneesjour, donneesrun]
+                frames = [predonneesjour, donneesrun]
                 try:
                     new_donneesjour = pd.concat([df for df in frames if not df.empty], ignore_index=True)
-                    donneesjour = new_donneesjour
+                    predonneesjour = new_donneesjour
                 except:
                     pass
 
-            first_try = True
+        first_try = True
 
         for z in range(0, last_z+1, step_z):
             print("z: "+str(z))
