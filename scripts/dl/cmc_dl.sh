@@ -1,0 +1,51 @@
+#! /bin/bash
+
+# $1 : Model
+# $2 : Run
+# $3 : Date YYYYMMDD
+
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/:/lib:/usr/lib:/usr/local/lib
+export PATH=$PATH:~/.local/bin/
+
+######################################
+## Get Dir from where script is executed and Date to set correct pathways
+######################################
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
+cd $DIR
+
+echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 CMC DL Start - "$2"z "$3"" >> ../../data/logs/"$3".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "CMC DL Start" "$2z $3"
+
+######################################
+## GRIB2 Downloads
+######################################
+python3 get_cmc.py $3 $2
+
+######################################
+## GRIB2 Extract Data
+######################################
+EXTR="No"
+
+
+if [ $2 == "12" ]
+then
+        EXTR="Yes"
+fi
+
+if [ $EXTR == "Yes" ]
+then
+    echo $EXTR
+    test -f "../../cfgrib/bin/activate" && . ../../cfgrib/bin/activate
+    python3 data_extract.py $3 $1
+    test deactivate && deactivate
+fi
+
+######################################
+## Clear files
+######################################
+
+echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 CMC DL Done - "$2"z "$3"" >> ../../data/logs/"$3".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "CMC DL Done" "$2z $3"
+echo "" >> ../../data/logs/"$3".log
+echo "" >> ../../data/logs/"$3".log
+

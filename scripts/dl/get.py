@@ -176,7 +176,7 @@ if model_name != "cfs":
                     'bottomlat' : config['General']['bottom_lat']
                         }
 
-                if model_name != "fnmoc":
+                if model_name == "gefs":
                     post_body_a = post_body
                     post_body = post_body_a | {
                         'var_APCP' : 'on',
