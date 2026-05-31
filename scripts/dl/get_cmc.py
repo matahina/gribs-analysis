@@ -66,7 +66,7 @@ n_pert = 21
 for param in ["HGT_ISBL_0500", "TMP_ISBL_0850", "TMP_TGL_2m", "APCP_SFC_0"]:
     for ech in list(range(0,193,3)) + list(range(198,385,6)):
 
-        full_url = "https://dd.weather.gc.ca/"+model_date+"/WXO-DD/ensemble/geps/grib2/raw/"+model_run+"/"+"{:03d}".format(ech)+"/CMC_geps-raw_"+param+"_latlon0p5x0p5_"+model_date++model_run+"_P"+"{:03d}".format(ech)+"_allmbrs.grib2"
+        full_url = "https://dd.weather.gc.ca/"+model_date+"/WXO-DD/ensemble/geps/grib2/raw/"+model_run+"/"+"{:03d}".format(ech)+"/CMC_geps-raw_"+param+"_latlon0p5x0p5_"+model_date+model_run+"_P"+"{:03d}".format(ech)+"_allmbrs.grib2"
 
         print(file_name)
 
