@@ -387,7 +387,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}})
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}}, decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 # print("prof_name: "+str(prof_name))
                                 the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
@@ -419,7 +419,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}})
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}}, decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
                                 the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
@@ -451,7 +451,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}})
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}}, decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
                                 the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
@@ -483,7 +483,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}})
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}}, decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
                                 the_df_d = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
