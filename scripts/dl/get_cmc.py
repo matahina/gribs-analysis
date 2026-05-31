@@ -68,6 +68,7 @@ for param in ["HGT_ISBL_0500", "TMP_ISBL_0850", "TMP_TGL_2m", "APCP_SFC_0"]:
 
         full_url = "https://dd.weather.gc.ca/"+model_date+"/WXO-DD/ensemble/geps/grib2/raw/"+model_run+"/"+"{:03d}".format(ech)+"/CMC_geps-raw_"+param+"_latlon0p5x0p5_"+model_date+model_run+"_P"+"{:03d}".format(ech)+"_allmbrs.grib2"
 
+        file_name = param+"."+"{:03d}".format(ech)+"."+model_date+""+model_run+".daily.grb2"
         print(file_name)
 
         i = 0
