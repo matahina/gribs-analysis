@@ -9,6 +9,7 @@ import sys, os
 import pandas as pd
 from pathlib import Path
 import cfgrib
+pd.options.mode.chained_assignment = None # comment to get all warnings
 
 config = configparser.ConfigParser()
 config.read('../../magic_config.ini')
