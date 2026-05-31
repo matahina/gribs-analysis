@@ -341,6 +341,9 @@ match model_name:
                                         df_d["dates"] = df_d["valid_time"]
                                         df_d["profile"] = prof_name
                                         df_d["precs"] = df_d["tp"]
+                                        df_d['precs'] = df_d['precs'].diff().fillna(df_d['precs'].iloc[0])
+                                        if ds_grib.tp.units == 'm':
+                                            df_d['precs'] = df_d['precs'] * 1000
                                         extract = df_d[["runs","dates","profile","precs"]]
                                     except:
                                         extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'precs': []})
