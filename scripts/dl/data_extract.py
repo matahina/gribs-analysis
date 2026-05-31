@@ -421,10 +421,10 @@ match model_name:
                         try:
                             ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}}, decode_timedelta=False)
                             for prof_name, location in profiles.items():
-                                print("prof_name: "+str(prof_name))
+                                # print("prof_name: "+str(prof_name))
                                 the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
                                 for the_pert in range(0,last_sc+1,1):
-                                    print("sc: "+str(the_pert))
+                                    # print("sc: "+str(the_pert))
                                     try:
                                         df_b = the_df_b.iloc[the_df_b.index.get_level_values('number') == the_pert]
                                         df_b["runs"] = str(df_b["time"].iloc[0]) + " sc%02d" % (the_pert)
@@ -453,10 +453,10 @@ match model_name:
                         try:
                             ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}}, decode_timedelta=False)
                             for prof_name, location in profiles.items():
-                                print("prof_name: "+str(prof_name))
+                                # print("prof_name: "+str(prof_name))
                                 the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
                                 for the_pert in range(0,last_sc+1,1):
-                                    print("sc: "+str(the_pert))
+                                    # print("sc: "+str(the_pert))
                                     try:
                                         df_c = the_df_c.iloc[the_df_c.index.get_level_values('number') == the_pert]
                                         df_c["runs"] = str(df_c["time"].iloc[0]) + " sc%02d" % (the_pert)
@@ -485,10 +485,10 @@ match model_name:
                         try:
                             ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}}, decode_timedelta=False)
                             for prof_name, location in profiles.items():
-                                print("prof_name: "+str(prof_name))
+                                # print("prof_name: "+str(prof_name))
                                 the_df_d = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
                                 for the_pert in range(0,last_sc+1,1):
-                                    print("sc: "+str(the_pert))
+                                    # print("sc: "+str(the_pert))
                                     try:
                                         df_d = the_df_d.iloc[the_df_d.index.get_level_values('number') == the_pert]
                                         df_d["runs"] = str(df_d["time"].iloc[0]) + " sc%02d" % (the_pert)
