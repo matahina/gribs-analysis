@@ -380,7 +380,7 @@ match model_name:
             print("z: "+str(z))
             for ech in the_range:
                 print("ech: "+str(ech))
-                grbfile = "../../data/gem/HGT_ISBL_0500.%03d%s%02d.grib2" % (ech, model_date, z)
+                grbfile = "../../data/gem/HGT_ISBL_0500.%03d.%s%02d.grib2" % (ech, model_date, z)
                 extract_a = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': []})
 
                 if Path(grbfile).is_file():
