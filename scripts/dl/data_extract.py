@@ -94,7 +94,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
                                 try:
@@ -124,7 +124,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
                                 try:
@@ -153,7 +153,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
                                 try:
@@ -182,7 +182,7 @@ match model_name:
                 if Path(grbfile).is_file():
                     if os.path.getsize(grbfile) > 0:
                         try:
-                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                            ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                             for prof_name, location in profiles.items():
                                 print("prof_name: "+str(prof_name))
                                 try:
@@ -230,7 +230,7 @@ match model_name:
             if Path(grbfile).is_file():
                 if os.path.getsize(grbfile) > 0:
                     try:
-                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
@@ -263,7 +263,7 @@ match model_name:
             if Path(grbfile).is_file():
                 if os.path.getsize(grbfile) > 0:
                     try:
-                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
@@ -296,7 +296,7 @@ match model_name:
             if Path(grbfile).is_file():
                 if os.path.getsize(grbfile) > 0:
                     try:
-                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
@@ -329,7 +329,7 @@ match model_name:
             if Path(grbfile).is_file():
                 if os.path.getsize(grbfile) > 0:
                     try:
-                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                        ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                         for prof_name, location in profiles.items():
                             print("prof_name: "+str(prof_name))
                             for pert in range(1,last_sc+1,10):
@@ -556,7 +556,7 @@ match model_name:
                             if os.path.getsize(grbfile) > 0:
                                 try:
                                     ds_grib = xr.merge(cfgrib.open_datasets(grbfile), combine_attrs='override') # because grib files from fnmoc are heterogeneous
-                                    # ds_grib = xr.open_dataset(grbfile, engine="cfgrib")
+                                    # ds_grib = xr.open_dataset(grbfile, engine="cfgrib", decode_timedelta=False)
                                     try:
                                         var_hgt = float(ds_grib.gh.sel(longitude=location[1], latitude=location[0], isobaricInhPa=500, method='nearest').data) /10
                                     except:
