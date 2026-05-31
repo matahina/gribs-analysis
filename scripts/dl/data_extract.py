@@ -526,25 +526,25 @@ match model_name:
                     except:
                         pass
 
-            first_try = True
+        first_try = True
 
-            for z in range(0, last_z+1, step_z):
-                print("z: "+str(z))
-                for prof_name, location in profiles.items():
-                    print("prof_name: "+str(prof_name))
-                    for sc in range(1,last_sc+1,1):
-                        subdata = predonneesjour.loc[predonneesjour["runs"].str.contains("%02d:00:00 sc%02d" % (z, sc)) & predonneesjour["profile"].str.contains(prof_name)]
-                        subdata['precs'] = subdata['precs'].diff().fillna(subdata['precs'].iloc[0])
-                        if first_try:
-                            donneesjour = subdata
-                            first_try = False
-                        else:
-                            frames = [donneesjour, subdata]
-                            try:
-                                new_donneesjour = pd.concat([df for df in frames if not df.empty], ignore_index=True)
-                                donneesjour = new_donneesjour
-                            except:
-                                pass
+        for z in range(0, last_z+1, step_z):
+            print("z: "+str(z))
+            for prof_name, location in profiles.items():
+                print("prof_name: "+str(prof_name))
+                for sc in range(1,last_sc+1,1):
+                    subdata = predonneesjour.loc[predonneesjour["runs"].str.contains("%02d:00:00 sc%02d" % (z, sc)) & predonneesjour["profile"].str.contains(prof_name)]
+                    subdata['precs'] = subdata['precs'].diff().fillna(subdata['precs'].iloc[0])
+                    if first_try:
+                        donneesjour = subdata
+                        first_try = False
+                    else:
+                        frames = [donneesjour, subdata]
+                        try:
+                            new_donneesjour = pd.concat([df for df in frames if not df.empty], ignore_index=True)
+                            donneesjour = new_donneesjour
+                        except:
+                            pass
 
 
 
