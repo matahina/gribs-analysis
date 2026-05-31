@@ -58,13 +58,13 @@ if model_name == "gefs":
     last_z = 18
     step_z = 6
     last_sc = 30
-    the_range = list(range(0, 193, 3)) + list(range(198, 385, 6))
+    the_range = list(range(3, 193, 3)) + list(range(198, 385, 6))
 
 if model_name == "gem" or model_name == "fnmoc":
     last_z = 12
     step_z = 12
     last_sc = 20
-    the_range = list(range(0, 193, 3)) + list(range(198, 385, 6))
+    the_range = list(range(3, 193, 3)) + list(range(198, 385, 6))
 
 if model_name == "cfs":
     last_z = 18
@@ -375,6 +375,27 @@ match model_name:
                 except:
                     pass
 
+            first_try = True
+
+        for z in range(0, last_z+1, step_z):
+            print("z: "+str(z))
+            for prof_name, location in profiles.items():
+                print("prof_name: "+str(prof_name))
+                for sc in range(1,last_sc+1,1):
+                    subdata = predonneesjour.loc[predonneesjour["runs"].str.contains("%02d:00:00 sc%02d" % (z, sc)) & predonneesjour["profile"].str.contains(prof_name)]
+                    subdata['precs'] = subdata['precs'].diff().fillna(subdata['precs'].iloc[0])
+                    if first_try:
+                        donneesjour = subdata
+                        first_try = False
+                    else:
+                        frames = [donneesjour, subdata]
+                        try:
+                            new_donneesjour = pd.concat([df for df in frames if not df.empty], ignore_index=True)
+                            donneesjour = new_donneesjour
+                        except:
+                            pass
+
+
 
     case "gem":
         for z in range(0, last_z+1, step_z):
@@ -391,7 +412,7 @@ match model_name:
                             for prof_name, location in profiles.items():
                                 # print("prof_name: "+str(prof_name))
                                 the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
-                                for the_pert in range(0,last_sc+1,1):
+                                for the_pert in range(1,last_sc+1,1):
                                     # print("sc: "+str(the_pert))
                                     try:
                                         df_a = the_df_a.iloc[the_df_a.index.get_level_values('number') == the_pert]
@@ -423,7 +444,7 @@ match model_name:
                             for prof_name, location in profiles.items():
                                 # print("prof_name: "+str(prof_name))
                                 the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
-                                for the_pert in range(0,last_sc+1,1):
+                                for the_pert in range(1,last_sc+1,1):
                                     # print("sc: "+str(the_pert))
                                     try:
                                         df_b = the_df_b.iloc[the_df_b.index.get_level_values('number') == the_pert]
@@ -455,7 +476,7 @@ match model_name:
                             for prof_name, location in profiles.items():
                                 # print("prof_name: "+str(prof_name))
                                 the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
-                                for the_pert in range(0,last_sc+1,1):
+                                for the_pert in range(1,last_sc+1,1):
                                     # print("sc: "+str(the_pert))
                                     try:
                                         df_c = the_df_c.iloc[the_df_c.index.get_level_values('number') == the_pert]
@@ -487,7 +508,7 @@ match model_name:
                             for prof_name, location in profiles.items():
                                 # print("prof_name: "+str(prof_name))
                                 the_df_d = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
-                                for the_pert in range(0,last_sc+1,1):
+                                for the_pert in range(1,last_sc+1,1):
                                     # print("sc: "+str(the_pert))
                                     try:
                                         df_d = the_df_d.iloc[the_df_d.index.get_level_values('number') == the_pert]
@@ -495,7 +516,6 @@ match model_name:
                                         df_d["dates"] = df_d["valid_time"]
                                         df_d["profile"] = prof_name
                                         df_d["precs"] = df_d["unknown"]
-                                        df_d['precs'] = df_d['precs'].diff().fillna(df_d['precs'].iloc[0])
                                         extract = df_d[["runs","dates","profile","precs"]]
                                     except:
                                         extract = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'precs': []})
