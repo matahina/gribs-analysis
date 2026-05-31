@@ -70,6 +70,7 @@ for param in ["HGT_ISBL_0500", "TMP_ISBL_0850", "TMP_TGL_2m", "APCP_SFC_0"]:
 
         file_name = param+"."+"{:03d}".format(ech)+"."+model_date+""+model_run+".daily.grb2"
         print(file_name)
+        print(full_url)
 
         i = 0
         do_loop = True
@@ -84,7 +85,7 @@ for param in ["HGT_ISBL_0500", "TMP_ISBL_0850", "TMP_TGL_2m", "APCP_SFC_0"]:
 
                 if server_size == "0":
                     with open('../logs/'+model_date+'.log', 'a') as errlog:
-                        errlog.write(model_name+"   "+file_name+'   Server size is null so file might not exist or access forbidden!\n')
+                        errlog.write("   "+file_name+'   Server size is null so file might not exist or access forbidden!\n')
                     print('Server size is null so file might not exist or access forbidden!')
                 while str(dl_size) != server_size:
                     response = urllib.request.urlretrieve(
@@ -99,16 +100,16 @@ for param in ["HGT_ISBL_0500", "TMP_ISBL_0850", "TMP_TGL_2m", "APCP_SFC_0"]:
                     j = j +1
                     if j >1:
                         with open('../logs/'+model_date+'.log', 'a') as errlog:
-                            errlog.write(model_name+"   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+'\n')
-                            errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
+                            errlog.write("   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+'\n')
+                            errlog.write("   "+file_name+' Will retry'+'\n')
                         print(' Expected: '+server_size+' Retrieved: '+str(dl_size))
                         print(" Will retry")
                         do_loop = True
                         break
                     if j >100:
                         with open('../logs/'+model_date+'.log', 'a') as errlog:
-                            errlog.write(model_name+"   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+'\n')
-                            errlog.write(model_name+"   "+file_name+" WON'T RETRY!!\n")
+                            errlog.write("   "+file_name+' Expected: '+server_size+' Retrieved: '+str(dl_size)+'\n')
+                            errlog.write("   "+file_name+" WON'T RETRY!!\n")
                         print(' Expected: '+server_size+' Retrieved: '+str(dl_size))
                         print(" WON'T RETRY!!")
                         do_loop = False
@@ -117,24 +118,24 @@ for param in ["HGT_ISBL_0500", "TMP_ISBL_0850", "TMP_TGL_2m", "APCP_SFC_0"]:
                     do_loop = False
             except urllib.error.HTTPError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(model_name+"   "+file_name+' Error code: '+str(e.code)+'\n')
+                    errlog.write("   "+file_name+' Error code: '+str(e.code)+'\n')
                 print('Error code: ', e.code)
                 do_loop = False
             except urllib.error.URLError as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(model_name+"   "+file_name+' Reason: '+ str(e.reason)+'\n')
+                    errlog.write("   "+file_name+' Reason: '+ str(e.reason)+'\n')
                 print('Reason: ', e.reason)
                 if ("incomplete" in e.reason) or ("timed out" in e.reason):
                     with open('../logs/'+model_date+'.log', 'a') as errlog:
-                        errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
+                        errlog.write("   "+file_name+' Will retry'+'\n')
                     print(' Will retry')
                     do_loop = True
                 else:
                     do_loop = False
             except http.client.RemoteDisconnected as e:
                 with open('../logs/'+model_date+'.log', 'a') as errlog:
-                    errlog.write(model_name+"   "+file_name+' Reason: '+ str(e)+'\n')
-                    errlog.write(model_name+"   "+file_name+' Will retry'+'\n')
+                    errlog.write("   "+file_name+' Reason: '+ str(e)+'\n')
+                    errlog.write("   "+file_name+' Will retry'+'\n')
                 print('Reason: ', e)
                 print(" Will retry")
                 do_loop = True
