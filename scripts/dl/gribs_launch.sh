@@ -5,7 +5,7 @@
 # $2 : Run (00 / 06 / 12 / 18) depending on Model
 # $3 : Day ago (integer)
 # $4 : Type (dl)
-# $5 : Source (noaa / ecmwf)
+# $5 : Source (noaa / ecmwf / cmc)
 
 ## IF LAUNCH FOR STATS type
 # $1 : Set (ens / cfs)
