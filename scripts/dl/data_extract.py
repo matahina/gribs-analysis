@@ -389,10 +389,10 @@ match model_name:
                         try:
                             ds_grib = xr.open_dataset(grbfile, engine="cfgrib", backend_kwargs={'filter_by_keys': {'dataType': 'pf'}})
                             for prof_name, location in profiles.items():
-                                print("prof_name: "+str(prof_name))
+                                # print("prof_name: "+str(prof_name))
                                 the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').to_dataframe()
                                 for the_pert in range(0,last_sc+1,1):
-                                    print("sc: "+str(the_pert))
+                                    # print("sc: "+str(the_pert))
                                     try:
                                         df_a = the_df_a.iloc[the_df_a.index.get_level_values('number') == the_pert]
                                         df_a["runs"] = str(df_a["time"].iloc[0]) + " sc%02d" % (the_pert)
