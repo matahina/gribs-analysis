@@ -412,7 +412,7 @@ match model_name:
                             pass
                 print (extract_a)
 
-                grbfile = "../../data/gem/TMP_ISBL_0850.%03d%s%02d.grib2" % (ech, model_date, z)
+                grbfile = "../../data/gem/TMP_ISBL_0850.%03d.%s%02d.grib2" % (ech, model_date, z)
                 extract_b = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempalt': []})
 
                 if Path(grbfile).is_file():
@@ -444,7 +444,7 @@ match model_name:
                             pass
 
 
-                grbfile = "../../data/gem/TMP_TGL_2m.%03d%s%02d.grib2" % (ech, model_date, z)
+                grbfile = "../../data/gem/TMP_TGL_2m.%03d.%s%02d.grib2" % (ech, model_date, z)
                 extract_c = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'tempsol': []})
 
                 if Path(grbfile).is_file():
@@ -476,7 +476,7 @@ match model_name:
                             pass
 
 
-                grbfile = "../../data/gem/APCP_SFC_0.%03d%s%02d.grib2" % (ech, model_date, z)
+                grbfile = "../../data/gem/APCP_SFC_0.%03d.%s%02d.grib2" % (ech, model_date, z)
                 extract_d = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'precs': []})
 
                 if Path(grbfile).is_file():
