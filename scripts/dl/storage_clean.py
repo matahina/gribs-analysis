@@ -61,7 +61,7 @@ for junk in sfiles:
 os.chdir("../cfs")
 sfiles = glob.glob('./*.grb2')
 merge_matching = []
-for i in range(15):
+for i in range(10):
     lastmonth = (date.today()- timedelta(days=i)).strftime("%Y%m%d")
     matching = [s for s in sfiles if lastmonth in s]
     merge_matching = merge_matching + matching
