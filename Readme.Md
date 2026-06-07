@@ -17,7 +17,7 @@ It retrieves grib files from 4 different weather prediction models from NOAA and
 
 GEFS, FNMOC and GEM are ensemblist models. The different scenarios are downloaded, not the deterministic nor the control ones. Data is extracted into csv files. Grib files from n-2 day are removed everyday.
 
-CFS is long-term model. Time grib data is downloaded. Every 10th of the month, grib files from n-1 month are removed.
+CFS is long-term model. Time grib data is downloaded. Grib files from n-10 day are removed everyday.
 
 For ensemblist models, a dashboard is computed with basic time series clustering of the scenarios from the previous day forecasts (up to 200 scenarios).
 
