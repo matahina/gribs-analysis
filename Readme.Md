@@ -232,7 +232,7 @@ You can create two other files to fit your needs:
 ./cmc_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
 ```
 
-- `[MODEL_NAME]` has one choice at the moment : `cmc`.
+- `[MODEL_NAME]` has one choice at the moment : `gem`.
 
 - `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `12`. Leading zero is important. GEM only runs at 00Z and 12Z.
 
