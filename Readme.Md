@@ -109,6 +109,15 @@ mkdir gefs
 mkdir gem
 mkdir logs
 mkdir ecmwf
+cd ../
+mkdir vault
+cd vault
+mkdir cfs
+mkdir fnmoc
+mkdir gefs
+mkdir gem
+mkdir logs
+mkdir ecmwf
 cd ../scripts/dl
 echo "FREE" > lock.txt
 ```
@@ -267,6 +276,17 @@ You can create two other files to fit your needs:
 - `[PROFILE]` is one of the profiles you set in ini file, by example `Profile_1`.
 
 - `[DATE]` is for the date of the set. You need to put a date, either today or another day before (for catching an older set by example), in this format: `YYYYMMDD`.
+
+
+**storage_vault.sh**
+
+*Move old data from `data` to `vault`.*
+
+```
+./storage_vault.sh [YEAR]
+```
+
+- `[YEAR]` as `2025`, `2024`, etc.
 
 
 ### Availability of runs
