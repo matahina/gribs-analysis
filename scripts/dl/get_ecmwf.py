@@ -11,7 +11,7 @@ from ecmwf.opendata import Client
 
 os.chdir("../../data/ecmwf/")
 
-for the_step in list(range(0,144,3))+list(range(144,366,6)):
+for the_step in list(range(3,144,3))+list(range(144,366,6)):
     for retries in range(1,50):
         try:
             resume
@@ -37,6 +37,7 @@ for the_step in list(range(0,144,3))+list(range(144,366,6)):
 
     try:
         del resume
+        del client
     except:
         pass
 
@@ -65,6 +66,7 @@ for the_step in list(range(0,144,3))+list(range(144,366,6)):
 
     try:
         del resume
+        del client
     except:
         pass
 
@@ -92,6 +94,7 @@ for the_step in list(range(0,144,3))+list(range(144,366,6)):
 
     try:
         del resume
+        del client
     except:
         pass
 
