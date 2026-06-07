@@ -1,6 +1,6 @@
 # Gribs-Analysis
 
-**26.05 RC2**
+**26.06**
 
 > [!NOTE] 
 > This program is designed to work on Linux, on a server.
@@ -9,7 +9,7 @@
 >
 > It is currently known working on a VPS running Debian 13 with 4 CPU cores, 8GB RAM and 100GB disk space reserved for `data` directory.
 >
-> wgrib use is now questionnable as python-xarray with cfgrib works fine ; norms only need netcdf
+
 
 ## What it does
 
@@ -43,10 +43,8 @@ When everything is set up and running, generated dashboards are available in roo
 
 ### Arch-based
 
-cfgrib (venv) and xarray (package)
-
 ```bash
-sudo pacman -S yay base-devel r gdal pandoc
+sudo pacman -S yay base-devel r gdal pandoc python-xarray
 ```
 
 ```bash
@@ -60,92 +58,6 @@ yay -S wgrib wgrib2 udunits
 sudo apt install libudunits2-dev cmake libssl-dev build-essential python3-venv pandoc libuv1-dev r-base curl libgdal-dev python3-xarray python3-cfgrib
 ```
 
-<details>
-
-<summary>wgrib2 via spack</summary>
-
-**ECMWF gribs cannot be read with the binary shipped by spack (ERROR 42).**
-
-
-```bash
-cd gribs-analysis
-
-git clone --depth=2 https://github.com/spack/spack.git
-
-# For bash/zsh/sh
-. spack/share/spack/setup-env.sh
-
-# For tcsh/csh
-source spack/share/spack/setup-env.csh
-
-# For fish
-. spack/share/spack/setup-env.fish
-
-# not working with ecmwf, even with uncommented variant
-spack install g2c +aec +png wgrib2 +aec +png +g2c_low #+netcdf
-```
-
-</details>
-
-<details>
-
-<summary>wgrib2 compiled locally</summary>
-
-```bash
-wget -O ip.zip `curl https://api.github.com/repos/NOAA-EMC/NCEPLIBS-ip/releases | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['zipball_url'])"`
-unzip ip.zip
-mv NOAA-EMC-NCEPLIBS-ip* NCEPLIBS-ip
-rm ip.zip
-cmake -DCMAKE_INSTALL_PREFIX="~/.local" -S NCEPLIBS-ip -B NCEPLIBS-ip/build
-#cmake -DCMAKE_INSTALL_PREFIX="~/.local" -DCMAKE_Fortran_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=3 -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -S NCEPLIBS-ip -B NCEPLIBS-ip/build
-cmake --build NCEPLIBS-ip/build --parallel 4
-ctest --test-dir NCEPLIBS-ip/build --parallel 4
-cmake --install NCEPLIBS-ip/build
-rm -R NCEPLIBS-ip
-
-wget -O g2c.zip `curl https://api.github.com/repos/NOAA-EMC/NCEPLIBS-g2c/releases | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['zipball_url'])"`
-unzip g2c.zip
-mv NOAA-EMC-NCEPLIBS-g2c* NCEPLIBS-g2c
-rm g2c.zip
-cmake -DUSE_PNG=ON -DUSE_AEC=ON -DUSE_OpenJPEG=ON -DUSE_Jasper=OFF -DCMAKE_INSTALL_PREFIX="~/.local" -S NCEPLIBS-g2c -B NCEPLIBS-g2c/build
-# cmake -DCMAKE_C_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -fexceptions -Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -DUSE_PNG=ON -DUSE_AEC=ON -DUSE_OpenJPEG=ON -DUSE_Jasper=OFF -DCMAKE_INSTALL_PREFIX="~/.local" -S NCEPLIBS-g2c -B NCEPLIBS-g2c/build
-cmake --build NCEPLIBS-g2c/build --parallel 4
-ctest --test-dir NCEPLIBS-g2c/build --parallel 4
-cmake --install NCEPLIBS-g2c/build
-rm -R NCEPLIBS-g2c
-
-wget -O wgrib2.zip `curl https://api.github.com/repos/NOAA-EMC/wgrib2/releases | python3 -c "import sys, json; print(json.load(sys.stdin)[0]['zipball_url'])"`
-unzip wgrib2.zip
-mv NOAA-EMC-wgrib2* wgrib2
-rm wgrib2.zip
-cd wgrib2/
-mkdir build && cd build
-cmake .. -DCMAKE_PREFIX_PATH="~/.local/lib" -DUSE_NETCDF=ON -DUSE_IPOLATES=ON -DUSE_G2CLIB_HIGH=on -DUSE_G2CLIB_LOW=on -DCMAKE_INSTALL_PREFIX="~/.local"
-# cmake .. -DCMAKE_PREFIX_PATH="~/.local/lib" -DCMAKE_Fortran_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -Wp,-D_FORTIFY_SOURCE=3 -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -DUSE_NETCDF=ON -DUSE_IPOLATES=ON -DCMAKE_C_FLAGS="-march=native -mtune=native -O3 -pipe -fno-plt -fexceptions -Wp,-D_FORTIFY_SOURCE=3 -Wformat -Werror=format-security -fstack-clash-protection -fcf-protection -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer" -DUSE_G2CLIB_HIGH=on -DUSE_G2CLIB_LOW=on -DCMAKE_INSTALL_PREFIX="~/.local"
-make
-make install
-cd ../../
-rm -R wgrib2
-
-## bash
-echo "export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/" >> ~/.bashrc
-echo "export PATH=$PATH:~/.local/bin/" >> ~/.bashrc
-echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/" >> ~/.profile
-echo "PATH=$PATH:~/.local/bin/" >> ~/.profile
-
-## fish
-# fish_add_path ~/.local/bin
-# set -Ux LD_LIBRARY_PATH ~/.local/lib/
-# echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH:~/.local/lib/" >> ~/.profile
-# echo "PATH=$PATH:~/.local/bin/" >> ~/.profile
-```
-
-
-</details>
-
-
-
-
 ## Requirements (R packages)
 
 ### All distros
@@ -158,10 +70,6 @@ if(length(new.packages)) install.packages(new.packages)
 
 It might take a while. **Do it again if anything wrong happened.** Then:
 
-```R
-install.packages("http://cran.r-project.org/src/contrib/Archive/rNOMADS/rNOMADS_2.5.3.tar.gz",
-                 repos=NULL, method="libcurl")
-```
 
 ## Set up
 
@@ -176,6 +84,16 @@ cd gribs-analysis
 python3 -m venv ecmwf_env
 source ecmwf_env/bin/activate
 pip install ecmwf-opendata
+deactivate
+
+### For arch users only
+python3 -m venv cfgrib --system-site-packages
+source cfgrib/bin/activate
+pip install cfgrib
+python -m cfgrib selfcheck
+# Check output:
+## Found: ecCodes v2.20.0.
+## Your system is ready.
 deactivate
 ```
 
@@ -233,8 +151,8 @@ The same user who runs this program and did install R packages will edit crontab
 5 12 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "00" "0" "dl" "ecmwf"
 5 23 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "ecmwf" "12" "0" "dl" "ecmwf"
 ## GEM
-10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "00" "0" "dl" "noaa"
-10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "12" "0" "dl" "noaa"
+10 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "00" "0" "dl" "cmc"
+10 21 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "gem" "12" "0" "dl" "cmc"
 ## FNMOC
 15 9 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "fnmoc" "00" "0" "dl" "noaa"
 15 2 * * * [YOUR PATH!!]/gribs-analysis/scripts/dl/gribs_launch.sh "fnmoc" "12" "1" "dl" "noaa"
@@ -288,7 +206,7 @@ You can create two other files to fit your needs:
 
 - `[ARG4]` is either `dl` or `stats`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
 
-- `[ARG5]` is either `noaa` or `ecmwf`, and will run and/or queue noaa_dl.sh or noaa_stats.sh with their own args, see below.
+- `[ARG5]` is either `noaa`, `cmc` or `ecmwf`, and will run and/or queue noaa_dl.sh, cmc_dl.sh or noaa_stats.sh or with their own args, see below.
 
 
 **noaa_dl.sh**
@@ -301,7 +219,22 @@ You can create two other files to fit your needs:
 
 - `[MODEL_NAME]` is one of the 4 models considered previously : `gefs` `gem` `fnmoc` `cfs`.
 
-- `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. GEM and FNMOC only runs at 00Z and 12Z.
+- `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `06` `12` `18`. Leading zero is important. FNMOC only runs at 00Z and 12Z.
+
+- `[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
+
+
+**cmc_dl.sh**
+
+*For downloading runs from CMC models.*
+
+```
+./cmc_dl.sh [MODEL_NAME] [MODEL_RUN] [DATE]
+```
+
+- `[MODEL_NAME]` has one choice at the moment : `cmc`.
+
+- `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `12`. Leading zero is important. GEM only runs at 00Z and 12Z.
 
 - `[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
 
@@ -316,7 +249,7 @@ You can create two other files to fit your needs:
 
 - `[MODEL_NAME]` has one choice at the moment : `ecmwf`.
 
-- `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `12`. Leading zero is important. ECMWF runs from 06Z and 18Z aren't working with this script at the moment.
+- `[MODEL_RUN]` is the run of the model (00Z, 12Z...) : `00` `12`. Leading zero is important. ECMWF runs at 06Z and 18Z aren't working with this script at the moment.
 
 - `[DATE]` is for the date of the run. You need to put a date, either today or another day before (for catching an older run by example), in this format: `YYYYMMDD`.
 
@@ -329,7 +262,7 @@ You can create two other files to fit your needs:
 ./noaa_stats.sh [SET] [PROFILE] [DATE]
 ```
 
-- `[SET]` is either `ens` (gem+gefs+fnmoc) or `cfs`. It will cover all runs from the specificied DATE.
+- `[SET]` is either `ens` (gem+gefs+fnmoc+ecmwf) or `cfs`. It will cover all runs from the specificied DATE.
 
 - `[PROFILE]` is one of the profiles you set in ini file, by example `Profile_1`.
 
