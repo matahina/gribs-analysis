@@ -13,23 +13,23 @@
 
 ## What it does
 
-It retrieves grib files from 4 different weather prediction models from NOAA and CMC (GEFS, FNMOC, GEM and CFS).
+It retrieves grib files from different weather prediction models from NOAA, CMC and ECMWF (GEFS, AIGEFS, CFS; GEM; IFS, AIFS).
 
-GEFS, FNMOC and GEM are ensemblist models. The different scenarios are downloaded, not the deterministic nor the control ones. Data is extracted into csv files. Grib files from n-2 day are removed everyday.
+GEFS, IFS, their AI-based implementations and GEM are ensemblist models. The different scenarios are downloaded, except deterministic and control runs. Data is extracted into csv files. Then grib files are deleted.
 
-CFS is long-term model. Time grib data is downloaded. Grib files from n-10 day are removed everyday.
+CFS is long-term model. Time grib data is downloaded. Grib files from the last 5 days only kept stored.
 
-For ensemblist models, a dashboard is computed with basic time series clustering of the scenarios from the previous day forecasts (up to 200 scenarios).
+For ensemblist models, a dashboard is computed with basic time series clustering of the scenarios from the previous day forecasts (up to xxx scenarios).
 
 For long-term model, a dashboard is computed with probabilities to see above/below long-term means for different variables from the previous forecasts of the 28 last days.
 
-Only few parameters are analyzed: geopotential (z500), temperature (t850 and t2m), precipitation (ACPC or PRATE).
+Only few parameters are analyzed: geopotential (z500), temperature (t850 and t2m), precipitations (ACPC or PRATE).
 
 It also uses data from [NCEP Reanalysis](https://psl.noaa.gov/data/gridded/data.ncep.reanalysis2.html) to compare with long-term data means.
 
 Both downloads and dashboard generation are logged for error-catching purposes.
 
-When everything is set up and running, generated dashboards are available in root directory of the program. Some dashboard examples are available online :
+When everything is set up and running, generated dashboards are available in `publishery` directory. Some dashboard examples are available online :
 
 | **Ensemblists**          | **Long-Term**            |
 |---|---|
@@ -81,14 +81,13 @@ cd gribs-analysis
 ### Set up python3 virtual env
 
 ```bash
-python3 -m venv ecmwf_env
-source ecmwf_env/bin/activate
+python3 -m venv py_env --system-site-packages
+source py_env/bin/activate
 pip install ecmwf-opendata
 deactivate
 
 ### For arch users only
-python3 -m venv cfgrib --system-site-packages
-source cfgrib/bin/activate
+source py_env/bin/activate
 pip install cfgrib
 python -m cfgrib selfcheck
 # Check output:
@@ -103,21 +102,13 @@ deactivate
 mkdir publishery
 mkdir data
 cd data
+mkdir aifs
+mkdir aigefs
 mkdir cfs
-mkdir fnmoc
 mkdir gefs
 mkdir gem
+mkdir ifs
 mkdir logs
-mkdir ecmwf
-cd ../
-mkdir vault
-cd vault
-mkdir cfs
-mkdir fnmoc
-mkdir gefs
-mkdir gem
-mkdir logs
-mkdir ecmwf
 cd ../scripts/dl
 echo "FREE" > lock.txt
 ```
@@ -128,9 +119,6 @@ You can run this program for different locations. Grib files are downloaded acco
 
 Edit the file `magic_config.ini`. The original one is explicit enough to understand it. You can remove profiles, add some, or leave only one. Choose the cities you want and fill it with the appropriate values. If you set `use_it = no`, data from this location won't be downloaded nor extracted.
 
-If you have more than 2 profiles, you must set `area = yes` in *\[General\]* section. Otherwise, you can set in to `area = no`.
-
-When the setting `area = yes` in enabled, it tells the scripts to download one grib of this subset area instead of several gribs from different locations. NOAA might block your IP if you download too many grib files at the same time.
 
 ### Get NCEP reanalysis long-term data means
 

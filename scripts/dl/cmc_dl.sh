@@ -13,39 +13,23 @@ export PATH=$PATH:~/.local/bin/
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && pwd )"
 cd $DIR
 
-echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 CMC DL Start - "$2"z "$3"" >> ../../data/logs/"$3".log
-test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "CMC DL Start" "$2z $3"
+echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 CMC DL Start - "${1^^}" "$2"z "$3"" >> ../../data/logs/"$3".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "CMC DL Start" "${1^^} $2z $3"
 
 ######################################
-## GRIB2 Downloads
+## GRIB2 Download and extract
 ######################################
-python3 get_cmc.py $3 $2
 
-######################################
-## GRIB2 Extract Data
-######################################
-EXTR="No"
-
-
-if [ $2 == "12" ]
-then
-        EXTR="Yes"
-fi
-
-if [ $EXTR == "Yes" ]
-then
-    echo $EXTR
-    test -f "../../cfgrib/bin/activate" && . ../../cfgrib/bin/activate
-    python3 data_extract.py $3 $1
-    test deactivate && deactivate
-fi
+test -f "../../py_env/bin/activate" && . ../../py_env/bin/activate
+python3 get_extract_$1.py $3 $2
+test deactivate && deactivate
 
 ######################################
 ## Clear files
 ######################################
 
-echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 CMC DL Done - "$2"z "$3"" >> ../../data/logs/"$3".log
-test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "CMC DL Done" "$2z $3"
+echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 CMC DL Done - "${1^^}" "$2"z "$3"" >> ../../data/logs/"$3".log
+test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "CMC DL Done" "${1^^} $2z $3"
 echo "" >> ../../data/logs/"$3".log
 echo "" >> ../../data/logs/"$3".log
 
