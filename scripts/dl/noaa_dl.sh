@@ -17,38 +17,13 @@ echo "["`date +"%Y-%m-%d %T %z"`"]     ""Grib2 NOAA DL Start - "${1^^}" "$2"z "$
 test -f ../libs/notify_ssh.sh && ./../libs/notify_ssh.sh "NOAA DL Start" "${1^^} $2z $3"
 
 ######################################
-## GRIB2 Downloads
+## GRIB2 Download and extract
 ######################################
-python3 get.py $3 $2 $1
 
-######################################
-## GRIB2 Extract Data
-######################################
-EXTR="No"
+test -f "../../py_env/bin/activate" && . ../../py_env/bin/activate
+python3 get_extract_$1.py $3 $2
+test deactivate && deactivate
 
-if [ $2 == "18" ]
-then
-    if [ "$1" == "cfs" ] || [ "$1" == "gefs" ]
-    then
-        EXTR="Yes"
-    fi
-fi
-
-if [ $2 == "12" ]
-then
-    if [ "$1" == "fnmoc" ] || [ "$1" == "gem" ]
-    then
-        EXTR="Yes"
-    fi
-fi
-
-if [ $EXTR == "Yes" ]
-then
-    echo $EXTR
-    test -f "../../cfgrib/bin/activate" && . ../../cfgrib/bin/activate
-    python3 data_extract.py $3 $1
-    test deactivate && deactivate
-fi
 
 ######################################
 ## Clear files
