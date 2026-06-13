@@ -53,10 +53,9 @@ model_name = "aigefs"
 os.chdir("../../data/"+model_name+"/")
 
 
-n_pert = 3
+n_pert = 31
 
 ech_range = list(range(0,385,6))
-# ech_range = list(range(0,15,6))
 
 for ech in ech_range:
     print(ech, "out of",ech_range[-1])
