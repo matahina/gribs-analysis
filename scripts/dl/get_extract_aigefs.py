@@ -29,8 +29,10 @@ from pathlib import Path
 import cfgrib
 pd.options.mode.chained_assignment = None # comment to get all warnings
 
-xr.set_options(use_new_combine_kwarg_defaults=True)
-
+try:
+    xr.set_options(use_new_combine_kwarg_defaults=True)
+except:
+    pass
 
 config = configparser.ConfigParser()
 config.read('../../magic_config.ini')
@@ -52,6 +54,9 @@ model_name = "aigefs"
 
 os.chdir("../../data/"+model_name+"/")
 
+donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'tempsol': [], 'precs': []})
+
+first_try = True
 
 n_pert = 31
 
@@ -79,17 +84,8 @@ for ech in ech_range:
         thread.join()
     time.sleep(0.1)
 
-
-the_range = list(range(6,385,6))
-
-
-donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'tempsol': [], 'precs': []})
-
-first_try = True
-
-for sc in range(1, 31, 1):
-    print("sc: "+str(sc))
-    for ech in the_range:
+    for sc in range(1, n_pert):
+        print("sc: "+str(sc))
         donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'geop': [], 'tempalt': []})
         grbfile_a = "%s_%s_pres_%03d_%03d.grib2" % (
                             model_date,
@@ -170,17 +166,25 @@ for sc in range(1, 31, 1):
             except:
                 pass
 
+    liste = os.listdir(os.curdir)
+
+    for item in liste:
+        if item.endswith(".idx") or item.endswith(".grib2"):
+            os.remove(os.path.join(os.curdir, item))
+
+
+
+
+
+
+
+
 
 
 hdr = False  if os.path.isfile("%s-%s.csv" % (model_name, model_date)) else True
 
 donneesjour.to_csv("%s-%s.csv" % (model_name, model_date), index=False,header=hdr,mode='a')
 
-liste = os.listdir(os.curdir)
-
-for item in liste:
-    if item.endswith(".idx") or item.endswith(".grib2"):
-        os.remove(os.path.join(os.curdir, item))
 
 
 

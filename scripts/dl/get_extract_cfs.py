@@ -31,8 +31,10 @@ import pandas as pd
 from pathlib import Path
 import cfgrib
 pd.options.mode.chained_assignment = None # comment to get all warnings
-
-xr.set_options(use_new_combine_kwarg_defaults=True)
+try:
+    xr.set_options(use_new_combine_kwarg_defaults=True)
+except:
+    pass
 
 
 
