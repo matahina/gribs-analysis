@@ -43,6 +43,15 @@ then
   done
     echo "wait" >> "ongoing/$str2"
     chmod +x "ongoing/$str2"
+elif [[ $5 != "cmc" ]]
+then
+  sep=" " read -r -a models <<< "$1"
+
+  for n in "${models[@]}"; do
+    echo "$DIR/$5_$4.sh $1 $n $DATE & " >> "ongoing/$str2"
+  done
+    echo "wait" >> "ongoing/$str2"
+    chmod +x "ongoing/$str2"
 else
   echo "$DIR/$5_$4.sh $1 $2 $DATE" > "ongoing/$str2"
   chmod +x "ongoing/$str2"
