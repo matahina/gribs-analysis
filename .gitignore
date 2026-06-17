@@ -26,3 +26,5 @@ data/
 publishery/
 /vault
 /scripts/dl/__pycache__/common.cpython-314.pyc
+/scripts/stats/ens_dashboard_test.html
+/scripts/stats/ens_dashboard_test_old.Rmd

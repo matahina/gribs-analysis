@@ -19,7 +19,21 @@ socket.setdefaulttimeout(60*5)
 
 import requests
 
-import threading
+from threading import Thread
+
+class CustomThread(Thread):
+    def __init__(self, group=None, target=None, name=None,
+                 args=(), kwargs={}, Verbose=None):
+        Thread.__init__(self, group, target, name, args, kwargs)
+        self._return = None
+
+    def run(self):
+        if self._target is not None:
+            self._return = self._target(*self._args, **self._kwargs)
+
+    def join(self, *args):
+        Thread.join(self, *args)
+        return self._return
 
 
 import xarray as xr
@@ -54,9 +68,13 @@ model_name = "gefs"
 
 os.chdir("../../data/"+model_name+"/")
 
+donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'tempsol': [], 'precs': []})
+
+first_try = True
+
 
 n_pert = 31
-ech_range = list(range(0,193,3)) + list(range(198,385,6))
+ech_range = list(range(3,193,3)) + list(range(198,385,6))
 
 
 
@@ -77,7 +95,7 @@ for ech in ech_range:
         file_name = model_date+"_"+model_run+"_"+"{:03d}".format(sc)+"_"+"{:03d}".format(ech)+".grb2"
 
 
-        thread = threading.Thread(target=common.get_ens, args=(full_url,file_name,model_date,model_name))
+        thread = Thread(target=common.get_ens, args=(full_url,file_name,model_date,model_name))
         thread_list.append(thread)
 
     for thread in thread_list:
@@ -86,92 +104,49 @@ for ech in ech_range:
         thread.join()
     time.sleep(0.1)
 
+    dataliste = [[]] * 30
 
 
+    thread_list = []
 
-the_range = list(range(3, 193, 3)) + list(range(198, 385, 6))
+    for sc in range(1, n_pert):
+
+        thread = CustomThread(target=common.data_ens, args=(sc,ech,model_date,model_name,model_run,profiles))
+        thread_list.append(thread)
+
+    for thread in thread_list:
+        thread.start()
+    i=0
+    for thread in thread_list:
+        dataliste[i]=thread.join()
+        print(dataliste[i])
+        i+=1
+    time.sleep(0.1)
 
 
-donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'tempsol': [], 'precs': []})
+    if first_try:
+        frames = dataliste
+        first_try = False
+    else:
+        frames = [donneesjour] + dataliste
 
-first_try = True
+    try:
+        new_donneesjour = pd.concat([df for df in frames if not df.empty], ignore_index=True)
+        donneesjour = new_donneesjour
+    except:
+        pass
 
-for sc in range(1, 31, 1):
-    print("sc: "+str(sc))
-    for ech in the_range:
-        donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'tempsol': [], 'precs': []})
-        grbfile = "%s_%s_%03d_%03d.grb2" % (
-                            model_date,
-                            model_run,
-                            sc,
-                            ech)
+    print(donneesjour)
 
-        if Path(grbfile).is_file():
-            if os.path.getsize(grbfile) > 0:
-                try:
-                    ds_grib = xr.merge(cfgrib.open_datasets(grbfile), combine_attrs='override', compat='override', join='outer')
-                    for prof_name, location in profiles.items():
-                        try:
-                            var_hgt = float(ds_grib.gh.sel(longitude=location[1], latitude=location[0], isobaricInhPa=500, method='nearest').data) /10
-                        except:
-                            var_hgt = None
-                        try:
-                            var_talt = float(ds_grib.t.sel(longitude=location[1], latitude=location[0], isobaricInhPa=850, method='nearest').data) - 273.15
-                        except:
-                            var_talt = None
-                        try:
-                            var_tsol = float(ds_grib.t2m.sel(longitude=location[1], latitude=location[0], method='nearest').data) - 273.15
-                        except:
-                            var_tsol = None
-                        try:
-                            var_pp = float(ds_grib.tp.sel(longitude=location[1], latitude=location[0], method='nearest').data)
-                        except:
-                            var_pp = None
-                        try:
-                            var_date = pd.to_datetime(ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').coords['valid_time'].data, format='%Y-%m-%d %H:%M:%s')
-                        except:
-                            var_date = None
-                        try:
-                            var_run = str(pd.to_datetime(ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest').coords['time'].data, format='%Y-%m-%d %H:%M:%s'))+ " sc%02d" % (sc)
-                        except:
-                            var_run = None
+    liste = os.listdir(os.curdir)
 
-                        try:
-                            newdata = pd.DataFrame({'runs': [var_run], 'dates': [var_date], 'profile': [prof_name], 'geop': [var_hgt], 'tempalt': [var_talt], 'tempsol': [var_tsol], 'precs': [var_pp]})
-                        except:
-                            newdata = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'tempsol': [], 'precs': []})
+    for item in liste:
+        if item.endswith(".idx") or item.endswith(".grb2"):
+            os.remove(os.path.join(os.curdir, item))
 
-                        frames = [donneesrun,newdata]
-                        try:
-                            new_donneesrun = pd.concat([df for df in frames if not df.empty], ignore_index=True)
-                            donneesrun = new_donneesrun
-                        except:
-                            pass
-                except:
-                    pass
-
-        if first_try:
-            donneesjour = donneesrun
-            first_try = False
-        else:
-            frames = [donneesjour, donneesrun]
-            try:
-                new_donneesjour = pd.concat([df for df in frames if not df.empty], ignore_index=True)
-                donneesjour = new_donneesjour
-            except:
-                pass
 
 
 
 hdr = False  if os.path.isfile("%s-%s.csv" % (model_name, model_date)) else True
 
 donneesjour.to_csv("%s-%s.csv" % (model_name, model_date), index=False,header=hdr,mode='a')
-
-liste = os.listdir(os.curdir)
-
-for item in liste:
-    if item.endswith(".idx") or item.endswith(".grb2"):
-        os.remove(os.path.join(os.curdir, item))
-
-
-
