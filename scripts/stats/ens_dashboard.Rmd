@@ -1051,7 +1051,7 @@ plot_z500allwoai <-
       labels = seq(480, 620, 20)
     )
   ) + ggtitle(sprintf(
-    "Z500 _ ENS GEFS 00z06z12z18z AIGEFS 00z06z12z18z GEM 00z12z IFS 00z12z AIFS 00z12z  %s",
+    "Z500 _ ENS GEFS 00z06z12z18z GEM 00z12z IFS 00z12z  %s",
     date_var
   )) +
   geom_line(data = norms_profile [ (norms_profile$date >= the_dates [1]) & (norms_profile$date < (the_dates [1] +days(15)) )
@@ -1541,7 +1541,7 @@ plot_t850allwoai <-
                         |grepl("^GEM", plotruns$runs)
                         |grepl("^IFS", plotruns$runs)
                         ), ], aes(dates, tempalt)) + theme_linedraw() + theme(
-    plot.title = element_text(hjust = 0.5, face = "bold", size = 9),
+    plot.title = element_text(hjust = 0.5, face = "bold", size = 12),
     axis.title = element_blank(),
     legend.position = "none",
     panel.background = element_rect(
@@ -2897,7 +2897,7 @@ plot_t2mifs <-
       breaks = as.numeric(names(pp_cols)),
       labels = names(pp_cols)
     )
-  ) + ggtitle(sprintf("T2M + PP _ ENS ECMWF 00z12z  %s", date_var))
+  ) + ggtitle(sprintf("T2M + PP _ ENS IFS 00z12z  %s", date_var))
 
 idx <- 110
 for (precip in rev(c(seq(0.1, 0.9, 0.1), seq(1, 100)))) {
@@ -3101,7 +3101,7 @@ plot_t2mallifs <-
 
 ```
 
-# z500/t850 {data-navmenu="ALL w/o AI — ALL w/ AI "}
+# z500/t850 {data-navmenu="ALL woAI — ALL wAI"}
 
 
 ## GEFS - GEM - IFS
@@ -3141,7 +3141,7 @@ plot_t850allwai
 
 
 
-# t850/t2m {data-navmenu="ALL w/o AI — ALL w/ AI "}
+# t850/t2m {data-navmenu="ALL woAI — ALL wAI"}
 
 ## GEFS - GEM - IFS
 
@@ -3183,7 +3183,7 @@ plot_t2mallwai
 
 
 
-# z500/t2m {data-navmenu="ALL w/o AI — ALL w/ AI "}
+# z500/t2m {data-navmenu="ALL woAI — ALL wAI"}
 ## GEFS - GEM - IFS
 
 ### GEFS - GEM - IFS > z500
@@ -3229,7 +3229,7 @@ plot_t2mallwai
 
 
 
-# z500/t850 {data-navmenu="NOAA — ECMWF"}
+# z500/t850 {data-navmenu="NOAA-CMC — ECMWF"}
 
 
 ## GEFS - GEM
@@ -3269,7 +3269,7 @@ plot_t850ifs
 
 
 
-# t850/t2m {data-navmenu="NOAA — ECMWF"}
+# t850/t2m {data-navmenu="NOAA-CMC — ECMWF"}
 
 ## GEFS - GEM
 
@@ -3311,7 +3311,7 @@ plot_t2mifs
 
 
 
-# z500/t2m {data-navmenu="NOAA — ECMWF"}
+# z500/t2m {data-navmenu="NOAA-CMC — ECMWF"}
 ## GEFS - GEM
 
 ### GEFS - GEM > z500
@@ -3381,7 +3381,7 @@ plot_t2mifs
 
 
 
-# z500/t850 {data-navmenu="NOAA w/ AI — ECMWF w/ AI "}
+# z500/t850 {data-navmenu="NOAA-CMC wAI — ECMWF wAI"}
 
 
 ## GEFS - AIGEFS - GEM
@@ -3421,7 +3421,7 @@ plot_t850allifs
 
 
 
-# t850/t2m {data-navmenu="NOAA w/ AI — ECMWF w/ AI "}
+# t850/t2m {data-navmenu="NOAA-CMC wAI — ECMWF wAI"}
 
 ## GEFS - AIGEFS - GEM
 
@@ -3463,7 +3463,7 @@ plot_t2mallifs
 
 
 
-# z500/t2m {data-navmenu="NOAA w/ AI — ECMWF w/ AI "}
+# z500/t2m {data-navmenu="NOAA-CMC wAI — ECMWF wAI"}
 ## GEFS - AIGEFS - GEM
 
 ### GEFS - AIGEFS - GEM > z500
@@ -3802,7 +3802,7 @@ plot_t2maifs
 
 
 
-# z500/t850 {data-navmenu="GEFS-AIGEFS — IFS-AIFS"}
+# z500/t850 {data-navmenu="NOAA wAI — ECMWF wAI"}
 
 ## GEFS-AIGEFS
 
@@ -3840,7 +3840,7 @@ plot_t850allifs
 
 
 
-# t850/t2m {data-navmenu="GEFS-AIGEFS — IFS-AIFS"}
+# t850/t2m {data-navmenu="NOAA wAI — ECMWF wAI"}
 
 ## GEFS-AIGEFS
 
@@ -3882,7 +3882,7 @@ plot_t2mallifs
 
 
 
-# z500/t2m {data-navmenu="GEFS-AIGEFS — IFS-AIFS"}
+# z500/t2m  {data-navmenu="NOAA wAI — ECMWF wAI"}
 
 ## GEFS-AIGEFS
 
