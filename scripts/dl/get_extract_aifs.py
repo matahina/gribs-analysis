@@ -183,6 +183,11 @@ def pp_extract(the_df,pert,basepert):
     return (pert#-basepert
             , extract_a)
 
+def gribsel(lon,lat,numrange,the_grid):
+    the_df_a = the_grid.sel(longitude=lon, latitude=lat, method='nearest',number=numrange).to_dataframe()
+    print("sc: "+str(list(numrange)[0]))
+    return (((list(numrange)[0]-1)/10)+1,
+            the_df_a)
 
 grbfile = "%s%sdata_hgt.grib2" % (model_date, model_run)
 extract_a = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': []})
@@ -195,11 +200,21 @@ if Path(grbfile).is_file():
                 print("prof_name: "+str(prof_name))
                 thread_list = []
                 dataliste = [[]] * (50)
+                bigthread_list = []
+                new_array = [[]] * (6)
                 for pert in range(1,51,10):
-                    the_df_a = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
-                    print("sc: "+str(pert))
+                    thread = CustomThread(target=gribsel,args=(location[1], location[0], range(pert,pert+10),ds_grib.copy(deep=True)))
+                    bigthread_list.append(thread)
+                for thread in bigthread_list:
+                    thread.start()
+                for thread in bigthread_list:
+                    res = thread.join()
+
+                    new_array[int(res[0])] = res[1]
+
+                for pert in range(1,51,10):
                     for the_pert in range(pert,pert+10,1):
-                        thread = CustomThread(target=hgt_extract,args=(the_df_a,the_pert,pert))
+                        thread = CustomThread(target=hgt_extract,args=(new_array[int(((the_pert-1)/10)+1)],the_pert,pert))
                         thread_list.append(thread)
                 for thread in thread_list:
                     thread.start()
@@ -207,7 +222,7 @@ if Path(grbfile).is_file():
                     res=thread.join()
                     if not res is None:
                         if res != "":
-                            dataliste[res[0]-1] = res[1]
+                            dataliste[int(res[0])-1] = res[1]
                 time.sleep(0.1)
                 frames = [extract_a] + dataliste
                 new_extract_a = pd.concat([df for df in frames if not df.empty], ignore_index=True)
@@ -229,11 +244,21 @@ if Path(grbfile).is_file():
                 print("prof_name: "+str(prof_name))
                 thread_list = []
                 dataliste = [[]] * (50)
+                bigthread_list = []
+                new_array = [[]] * (6)
                 for pert in range(1,51,10):
-                    the_df_b = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
-                    print("sc: "+str(pert))
+                    thread = CustomThread(target=gribsel,args=(location[1], location[0], range(pert,pert+10),ds_grib.copy(deep=True)))
+                    bigthread_list.append(thread)
+                for thread in bigthread_list:
+                    thread.start()
+                for thread in bigthread_list:
+                    res = thread.join()
+
+                    new_array[int(res[0])] = res[1]
+
+                for pert in range(1,51,10):
                     for the_pert in range(pert,pert+10,1):
-                        thread = CustomThread(target=tempalt_extract,args=(the_df_b,the_pert,pert))
+                        thread = CustomThread(target=tempalt_extract,args=(new_array[int(((the_pert-1)/10)+1)],the_pert,pert))
                         thread_list.append(thread)
                 for thread in thread_list:
                     thread.start()
@@ -241,7 +266,7 @@ if Path(grbfile).is_file():
                     res=thread.join()
                     if not res is None:
                         if res != "":
-                            dataliste[res[0]-1] = res[1]
+                            dataliste[int(res[0])-1] = res[1]
                 time.sleep(0.1)
                 frames = [extract_b] + dataliste
                 new_extract_b = pd.concat([df for df in frames if not df.empty], ignore_index=True)
@@ -261,11 +286,21 @@ if Path(grbfile).is_file():
                 print("prof_name: "+str(prof_name))
                 thread_list = []
                 dataliste = [[]] * (50)
+                bigthread_list = []
+                new_array = [[]] * (6)
                 for pert in range(1,51,10):
-                    the_df_c = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
-                    print("sc: "+str(pert))
+                    thread = CustomThread(target=gribsel,args=(location[1], location[0], range(pert,pert+10),ds_grib.copy(deep=True)))
+                    bigthread_list.append(thread)
+                for thread in bigthread_list:
+                    thread.start()
+                for thread in bigthread_list:
+                    res = thread.join()
+
+                    new_array[int(res[0])] = res[1]
+
+                for pert in range(1,51,10):
                     for the_pert in range(pert,pert+10,1):
-                        thread = CustomThread(target=tempsol_extract,args=(the_df_c,the_pert,pert))
+                        thread = CustomThread(target=tempsol_extract,args=(new_array[int(((the_pert-1)/10)+1)],the_pert,pert))
                         thread_list.append(thread)
                 for thread in thread_list:
                     thread.start()
@@ -273,7 +308,7 @@ if Path(grbfile).is_file():
                     res=thread.join()
                     if not res is None:
                         if res != "":
-                            dataliste[res[0]-1] = res[1]
+                            dataliste[int(res[0])-1] = res[1]
                 time.sleep(0.1)
                 frames = [extract_c] + dataliste
                 new_extract_c = pd.concat([df for df in frames if not df.empty], ignore_index=True)
@@ -294,11 +329,21 @@ if Path(grbfile).is_file():
                 print("prof_name: "+str(prof_name))
                 thread_list = []
                 dataliste = [[]] * (50)
+                bigthread_list = []
+                new_array = [[]] * (6)
                 for pert in range(1,51,10):
-                    the_df_d = ds_grib.sel(longitude=location[1], latitude=location[0], method='nearest',number=range(pert,pert+10)).to_dataframe()
-                    print("sc: "+str(pert))
+                    thread = CustomThread(target=gribsel,args=(location[1], location[0], range(pert,pert+10),ds_grib.copy(deep=True)))
+                    bigthread_list.append(thread)
+                for thread in bigthread_list:
+                    thread.start()
+                for thread in bigthread_list:
+                    res = thread.join()
+
+                    new_array[int(res[0])] = res[1]
+
+                for pert in range(1,51,10):
                     for the_pert in range(pert,pert+10,1):
-                        thread = CustomThread(target=pp_extract,args=(the_df_d,the_pert,pert))
+                        thread = CustomThread(target=pp_extract,args=(new_array[int(((the_pert-1)/10)+1)],the_pert,pert))
                         thread_list.append(thread)
                 for thread in thread_list:
                     thread.start()
@@ -306,7 +351,7 @@ if Path(grbfile).is_file():
                     res=thread.join()
                     if not res is None:
                         if res != "":
-                            dataliste[res[0]-1] = res[1]
+                            dataliste[int(res[0])-1] = res[1]
                 time.sleep(0.1)
                 frames = [extract_d] + dataliste
                 new_extract_d = pd.concat([df for df in frames if not df.empty], ignore_index=True)
