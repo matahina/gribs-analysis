@@ -51,6 +51,7 @@ def get_ens(da_url, da_name, model_date, model_name):
                 errlog.write(model_name+"   "+file_name+" WON'T RETRY!!\n")
                 print(" WON'T RETRY!!")
             do_loop = False
+    return ""
 
 
 def get_ecmwf(the_model, the_source, model_date, model_run, the_steps, the_params, the_levels, the_target):
@@ -103,7 +104,7 @@ def west_east(lon,we):
         return str(result_east)
 
 
-def data_ens(sc,ech,model_date,model_name,model_run,profiles):
+def data_ens_ai(sc,ech,model_date,model_name,model_run,profiles):
     print("sc: "+str(sc))
     donneesrun = pd.DataFrame({'runs': [], 'dates': [], 'profile': [], 'geop': [], 'tempalt': [], 'geop': [], 'tempalt': []})
     grbfile_a = "%s_%s_pres_%03d_%03d.grib2" % (
@@ -175,7 +176,7 @@ def data_ens(sc,ech,model_date,model_name,model_run,profiles):
                         pass
             except:
                 pass
-    return donneesrun
+    return (sc,donneesrun)
 
 
 
@@ -234,4 +235,4 @@ def data_ens(sc,ech,model_date,model_name,model_run,profiles):
                         pass
             except:
                 pass
-    return donneesrun
+    return (sc,donneesrun)
