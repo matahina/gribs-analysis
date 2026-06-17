@@ -33,8 +33,23 @@ else
     str2="`echo "$str" | tail -n1`"
     let str2++
 fi
-echo "$DIR/$5_$4.sh $1 $2 $DATE" > "ongoing/$str2"
-chmod +x "ongoing/$str2"
+
+if [[ $4 == "stats" ]]
+then
+sep=" " read -r -a profiles <<< "$2"
+
+for n in "${profiles[@]}"; do
+  echo "$DIR/$5_$4.sh $1 $n $DATE &" > "ongoing/$str2"
+  let str2++
+  chmod +x "ongoing/$str2"
+done
+  echo "wait" > "ongoing/$str2"
+  chmod +x "ongoing/$str2"
+else
+    echo "$DIR/$5_$4.sh $1 $2 $DATE" > "ongoing/$str2"
+    chmod +x "ongoing/$str2"
+fi
+
 
 if [[ $(cat lock.txt) == "FREE" ]]
 then
