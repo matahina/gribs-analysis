@@ -131,7 +131,7 @@ for ech in ech_range:
     liste = os.listdir(os.curdir)
 
     for item in liste:
-        if item.endswith(".grib2"):
+        if item.endswith(".grb2"):
             if not item in names_list:
                 os.remove(os.path.join(os.curdir, item))
 
@@ -141,7 +141,7 @@ for ech in ech_range:
 liste = os.listdir(os.curdir)
 
 for item in liste:
-    if item.endswith(".idx") or item.endswith(".grib2"):
+    if item.endswith(".idx") or item.endswith(".grb2"):
         os.remove(os.path.join(os.curdir, item))
 
 
