@@ -4004,7 +4004,8 @@ dev.off()
 z500_unif <- allruns[, c(1:3)]
 z500_unif <- z500_unif[which(z500_unif$dates >= the_dates[1]), ]
 
-z500_unif <- z500_unif[-which(as.integer(format(as.POSIXct(z500_unif$dates),"%H"))  %in% seq(3,21,6)),]
+z500_unif <- z500_unif[-which(as.integer(format(as.POSIXct(z500_unif$dates,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 z500_scens <- cast(na.omit(z500_unif), runs ~ dates)
@@ -4074,7 +4075,8 @@ z500_scens <- na.omit(z500_scens[, 1:limit])
 t850_unif <- allruns[, c(1, 2, 4)]
 t850_unif <- t850_unif[which(t850_unif$dates >= the_dates[1]), ]
 
-t850_unif <- t850_unif[-which(as.integer(format(as.POSIXct(t850_unif$dates),"%H"))  %in% seq(3,21,6)),]
+t850_unif <- t850_unif[-which(as.integer(format(as.POSIXct(t850_unif$dates,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 t850_scens <- cast(na.omit(t850_unif), runs ~ dates)
 
@@ -4144,7 +4146,8 @@ t850_scens <- na.omit(t850_scens[, 1:limit])
 pp_unif <- allruns[, c(1, 2, 6)]
 pp_unif <- pp_unif[which(pp_unif$dates >= the_dates[1]), ]
 
-pp_unif <- pp_unif[-which(as.integer(format(as.POSIXct(pp_unif$dates),"%H"))  %in% seq(3,21,6)),]
+pp_unif <- pp_unif[-which(as.integer(format(as.POSIXct(pp_unif$dates,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 pp_scens <- cast(na.omit(pp_unif), runs ~ dates)
 
