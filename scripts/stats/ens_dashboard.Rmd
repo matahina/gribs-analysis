@@ -237,7 +237,8 @@ for (i in seq(1,nrow(pp_unif))){
 }
 
 pp_unif <- pp_unif[-which(#as.POSIXct(pp_unif$variable) > as.POSIXct(date_var) + hours(144) &
-                            as.integer(format(as.POSIXct(pp_unif$variable),"%H"))  %in% seq(3,21,6)),]
+                            as.integer(format(as.POSIXct(pp_unif$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -253,7 +254,9 @@ for (i in seq(1,nrow(pp_unif_gefs))){
     }
 }
 
-pp_unif_gefs <- pp_unif_gefs[-which(as.POSIXct(pp_unif_gefs$variable) > as.POSIXct(date_var) + hours(192) & as.integer(format(as.POSIXct(pp_unif_gefs$variable),"%H"))  %in% seq(3,21,6)),]
+pp_unif_gefs <- pp_unif_gefs[-which(as.POSIXct(pp_unif_gefs$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC") > as.POSIXct(date_var) + hours(192) & as.integer(format(as.POSIXct(pp_unif_gefs$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -263,13 +266,15 @@ pp_unif_gem <- pp_unif_gem[order(pp_unif_gem$runs),]
 
 for (i in seq(1,nrow(pp_unif_gem))){
     if (as.POSIXct(pp_unif_gem$variable[i]) > as.POSIXct(date_var) + hours(192)) {
-      if (as.integer(format(as.POSIXct(pp_unif_gem$variable[i]),"%H"))  %in% seq(3,21,6) ) {
+      if (as.integer(format(as.POSIXct(pp_unif_gem$variable[i],"%H")))  %in% seq(3,21,6) ) {
         pp_unif_gem$value[i-1] = pp_unif_gem$value[i-1] + pp_unif_gem$value[i] 
       }
     }
 }
 
-pp_unif_gem <- pp_unif_gem[-which(as.POSIXct(pp_unif_gem$variable) > as.POSIXct(date_var) + hours(192) & as.integer(format(as.POSIXct(pp_unif_gem$variable),"%H"))  %in% seq(3,21,6)),]
+pp_unif_gem <- pp_unif_gem[-which(as.POSIXct(pp_unif_gem$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC") > as.POSIXct(date_var) + hours(192) & as.integer(format(as.POSIXct(pp_unif_gem$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -285,7 +290,9 @@ for (i in seq(1,nrow(pp_unif_noaa))){
     }
 }
 
-pp_unif_noaa <- pp_unif_noaa[-which(as.POSIXct(pp_unif_noaa$variable) > as.POSIXct(date_var) + hours(192) & as.integer(format(as.POSIXct(pp_unif_noaa$variable),"%H"))  %in% seq(3,21,6)),]
+pp_unif_noaa <- pp_unif_noaa[-which(as.POSIXct(pp_unif_noaa$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC") > as.POSIXct(date_var) + hours(192) & as.integer(format(as.POSIXct(pp_unif_noaa$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -302,7 +309,8 @@ for (i in seq(1,nrow(pp_unif_allnoaa))){
 }
 
 pp_unif_allnoaa <- pp_unif_allnoaa[-which(#as.POSIXct(pp_unif_allnoaa$variable) > as.POSIXct(date_var) + hours(192) &
-  as.integer(format(as.POSIXct(pp_unif_allnoaa$variable),"%H"))  %in% seq(3,21,6)),]
+  as.integer(format(as.POSIXct(pp_unif_allnoaa$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -337,7 +345,8 @@ for (i in seq(1,nrow(pp_unif_allgefs))){
 }
 
 pp_unif_allgefs <- pp_unif_allgefs[-which(#as.POSIXct(pp_unif_allgefs$variable) > as.POSIXct(date_var) + hours(192) &
-                                            as.integer(format(as.POSIXct(pp_unif_allgefs$variable),"%H"))  %in% seq(3,21,6)),]
+                                            as.integer(format(as.POSIXct(pp_unif_allgefs$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -352,7 +361,9 @@ for (i in seq(1,nrow(pp_unif_ifs))){
     }
 }
 
-pp_unif_ifs <- pp_unif_ifs[-which(as.POSIXct(pp_unif_ifs$variable) > as.POSIXct(date_var) + hours(144) & as.integer(format(as.POSIXct(pp_unif_ifs$variable),"%H"))  %in% seq(3,21,6)),]
+pp_unif_ifs <- pp_unif_ifs[-which(as.POSIXct(pp_unif_ifs$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC") > as.POSIXct(date_var) + hours(144) & as.integer(format(as.POSIXct(pp_unif_ifs$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -388,7 +399,8 @@ for (i in seq(1,nrow(pp_unif_allifs))){
 }
 
 pp_unif_allifs <- pp_unif_allifs[-which(#as.POSIXct(pp_unif_allifs$variable) > as.POSIXct(date_var) + hours(144) &
-                                          as.integer(format(as.POSIXct(pp_unif_allifs$variable),"%H"))  %in% seq(3,21,6)),]
+                                          as.integer(format(as.POSIXct(pp_unif_allifs$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
@@ -404,7 +416,9 @@ for (i in seq(1,nrow(pp_unif_noai))){
     }
 }
 
-pp_unif_noai <- pp_unif_noai[-which(as.POSIXct(pp_unif_noai$variable) > as.POSIXct(date_var) + hours(144) & as.integer(format(as.POSIXct(pp_unif_noai$variable),"%H"))  %in% seq(3,21,6)),]
+pp_unif_noai <- pp_unif_noai[-which(as.POSIXct(pp_unif_noai$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC") > as.POSIXct(date_var) + hours(144) & as.integer(format(as.POSIXct(pp_unif_noai$variable,
+                                   format = "%Y-%m-%d %H:%M:%S",tz="UTC"),"%H"))  %in% seq(3,21,6)),]
 
 
 
