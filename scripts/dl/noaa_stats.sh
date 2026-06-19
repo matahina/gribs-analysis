@@ -24,7 +24,7 @@ TZ=`sed -nr "/^\["$2"\]/ { :l /^tz[ ]*=/ { s/[^=]*=[ ]*//; p; q;}; n; b l;}" ../
 ######################################
 cd ../stats
 R -e "rmarkdown::render('"$1"_dashboard.Rmd', output_file = '"$1"_dashboard_"$2".html')" --args "$LOC" "$2" "$3" "'$TZ'"  >> ../../data/logs/"$3".log
-mv '"$1"_dashboard_"$2".html' ../../publishery
+mv $1"_dashboard_"$2".html" ../../publishery
 
 ######################################
 ## Clear files
