@@ -35,6 +35,7 @@ def get_ens(da_url, da_name, model_date, model_name):
                 print(" Will retry")
                 do_loop = True
                 time.sleep(600)
+                i = i + 19
         except urllib.error.URLError as e:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
                 errlog.write(model_name+"   "+da_name+' Reason: '+ str(e.reason)+'\n')
