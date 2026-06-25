@@ -28,10 +28,10 @@ def get_ens(da_url, da_name, model_date, model_name):
         except urllib.error.HTTPError as e:
             with open('../logs/'+model_date+'.log', 'a') as errlog:
                 errlog.write(model_name+"   "+da_name+' Error code: '+str(e.code)+'\n')
-                if e.code == 302:
+                if e.code == 302 or e.code == 403 or e.code == 404:
                     errlog.write(model_name+"   "+da_name+' Will retry'+'\n')
             print('Error code: ', e.code)
-            if e.code == 302:
+            if e.code == 302 or e.code == 403 or e.code == 404:
                 print(" Will retry")
                 do_loop = True
                 time.sleep(600)
