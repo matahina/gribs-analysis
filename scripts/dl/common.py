@@ -49,7 +49,7 @@ def get_ens(da_url, da_name, model_date, model_name):
             do_loop = True
         if i > 100:
             if do_loop:
-                errlog.write(model_name+"   "+file_name+" WON'T RETRY!!\n")
+                errlog.write(model_name+"   "+da_name+" WON'T RETRY!!\n")
                 print(" WON'T RETRY!!")
             do_loop = False
     return ""
