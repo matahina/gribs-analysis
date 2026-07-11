@@ -57,7 +57,7 @@ os.chdir("../../data/"+model_name+"/")
 
 
 
-ech_range = list(list(range(0,193,3)) + list(range(198,385,6)))
+ech_range = list(list(range(3,193,3)) + list(range(198,385,6)))
 
 
 for ech in ech_range:
