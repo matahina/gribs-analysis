@@ -64,7 +64,8 @@ def get_ecmwf(the_model, the_source, model_date, model_run, the_steps, the_param
             try:
                 client = Client(
                     model=the_model,
-                    source=the_source
+                    source=the_source,
+                    maximum_retries=1
                     )
                 resume = client.retrieve(
                     date=model_date,
