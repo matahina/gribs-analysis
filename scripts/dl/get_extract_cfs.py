@@ -247,4 +247,4 @@ for junk in sfiles:
     os.remove(junk.replace("./",""))
 sfiles = glob.glob('./*.idx')
 for indi in sfiles:
-    os.remove(junk.replace("./",""))
+    os.remove(indi.replace("./",""))
