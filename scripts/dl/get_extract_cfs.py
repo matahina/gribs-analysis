@@ -234,7 +234,6 @@ donneesjour.to_csv("%s-%s.csv" % (model_name, model_date), index=False,header=hd
 
 
 sfiles = glob.glob('./*.grb2')
-sfiles = glob.glob('./*.idx')
 merge_matching = []
 for i in range(6):
     lastmonth = (date.today()- timedelta(days=i)).strftime("%Y%m%d")
@@ -245,4 +244,7 @@ for elem in anciens:
     os.remove(elem.replace("./",""))
 sfiles = glob.glob('./filter*')
 for junk in sfiles:
+    os.remove(junk.replace("./",""))
+sfiles = glob.glob('./*.idx')
+for indi in sfiles:
     os.remove(junk.replace("./",""))
